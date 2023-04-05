@@ -1,0 +1,90 @@
+.topNav,
+.copyright {
+  background: linear-gradient(330deg, rgba(255, 0, 0, 0.3), rgba(0, 0, 255, 0.3));
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-mono);
+}
+
+.copyright p {
+  height: 3rem;
+  display: flex;
+  align-items: center; 
+}
+
+.navbarContainer {
+  display: flex;
+  justify-content: space-between; /* This will move the icon to the left, and the links to the right */
+  align-items: center; /* This will center the icon and the links vertically */
+  padding: 1rem 2rem;
+  width: 80%;
+  max-width: 1000px;
+}
+
+.iconContainer {
+  display: flex;
+  position: relative; /* Make it become positioned */
+  justify-content: center;
+  align-items: center;
+  height: 64px;
+  width: 64px;
+  border-radius: var(--border-radius);
+  overflow: hidden; /* This is used to crop the rotating ::before element */
+  box-shadow: 0px 0px 8px -1px rgba(var(--foreground-rgb), 1);
+  z-index: 1;
+}
+
+.iconContainer::before,
+.iconContainer::after {
+  content: '';
+  position: absolute; /* iconContainer must become positioned */
+  z-index: -1;
+}
+
+.iconContainer::before { /* Conic Gradient Animation */
+  animation: 5s rotate linear infinite; /* Do the animation based on the provided spec. */
+  width: 150%;
+  height: 150%;
+  background: var(--tile-border);
+}
+
+.iconContainer::after { /* Inner Square */
+  inset: 0;
+  padding: 1px;
+  border-radius: var(--border-radius);
+  background: linear-gradient(
+    to bottom right,
+    rgba(var(--tile-start-rgb), 1),
+    rgba(var(--tile-end-rgb), 1)
+  );
+  background-clip: content-box;
+}
+
+@media (prefers-color-scheme: dark) {
+  .iconContainer img {
+    filter: invert(1);
+  }
+}
+
+@keyframes rotate { /* Animation for the conic gradient */
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.linksContainer {
+  display: flex;
+  align-items: center;
+}
+
+.linksContainer li { /* Remove the default list styling */
+  margin: 1rem;
+  list-style: none;
+}
+
+.active { /* emphasize the current page */
+  font-weight: bold;
+}

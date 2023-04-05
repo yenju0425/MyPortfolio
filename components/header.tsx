@@ -1,15 +1,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import utilStyles from '../styles/utils.module.css';
+import layoutStyles from '../styles/Layout.module.css';
 
 import { useRouter } from 'next/router';
 
 export default function Header() {
   const router = useRouter();
   return (
-    <header className={utilStyles.topNav}>
-      <nav className={utilStyles.navbarContainer}>
-        <div className={utilStyles.avatarContainer}>
+    <header className={layoutStyles.topNav}>
+      <nav className={layoutStyles.navbarContainer}>
+        <div className={layoutStyles.iconContainer}>
           <Image
             priority // Set to true to load the image immediately
             src="/R.svg"
@@ -18,20 +18,20 @@ export default function Header() {
             alt="Hi, I'm Rick."
           />
         </div>
-        <ul className={utilStyles.linksContainer}>
-          <li className={router.pathname === '/' ? utilStyles.active : ''}>
+        <ul className={layoutStyles.linksContainer}>
+          <li className={router.pathname === '/' ? layoutStyles.active : ''}>
             Home
           </li>
-          <li className={router.pathname === '/about' ? utilStyles.active : ''}>
+          <li className={router.pathname === '/about' ? layoutStyles.active : ''}>
             About
           </li>
-          <li className={router.pathname === '/app' ? utilStyles.active : ''}>
-            App
+          <li className={router.pathname === '/poker' ? layoutStyles.active : ''}>
+            Poker
           </li>
-          <li className={router.pathname === '/note' ? utilStyles.active : ''}>
-            Note
+          <li className={router.pathname === '/notes' ? layoutStyles.active : ''}>
+            Notes
           </li>
-          <li className={router.pathname === '/contact' ? utilStyles.active : ''}>
+          <li className={router.pathname === '/contact' ? layoutStyles.active : ''}>
             Contact
           </li>
         </ul>
