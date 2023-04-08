@@ -20,19 +20,19 @@ export default function Header() {
         </div>
         <ul className={layoutStyles.linksContainer}>
           <li className={router.pathname === '/' ? layoutStyles.active : ''}>
-            Home
+            <Link href="/">Home</Link>
           </li>
           <li className={router.pathname === '/about' ? layoutStyles.active : ''}>
-            About
+            <Link href="/about">About</Link>
           </li>
           <li className={router.pathname === '/poker' ? layoutStyles.active : ''}>
-            Poker
+            <Link href="/poker">Poker</Link>
           </li>
           <li className={router.pathname === '/notes' ? layoutStyles.active : ''}>
-            Notes
+            <Link href="/notes">Notes</Link>
           </li>
           <li className={router.pathname === '/contact' ? layoutStyles.active : ''}>
-            Contact
+            <Link href="/contact">Contact</Link>
           </li>
         </ul>
       </nav>
