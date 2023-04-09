@@ -10,8 +10,8 @@
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 255, 255, 255;
 
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
+  --background-start-rgb: 255, 250, 255;
+  --background-end-rgb: 255, 250, 255;
 
   /* --primary-glow: conic-gradient(
     from 180deg at 50% 50%,
@@ -26,31 +26,28 @@
     rgba(255, 255, 255, 0)
   ); */
 
-  --tile-start-rgb: 255, 255, 255;
-  --tile-end-rgb: 255, 255, 255;
+  --tile-start-rgb: 255, 250, 255;
+  --tile-end-rgb: 255, 250, 255;
   --tile-border: conic-gradient(
     #000000ff,
-    #00000010,
-    #00000000,
-    #00000000,
-    #00000010,
+    #ffffffff,
+    #ffffffff,
+    #ffffffff,
+    #ffffffff,
     #000000ff
   );
 
-  --callout-rgb: 238, 0, 241;
-  --callout-border-rgb: 172, 175, 176;
-  --card-rgb: 180, 0, 188;
-  --card-border-rgb: 131, 134, 135;
+  --card-rgb: linear-gradient(330deg, rgba(0, 0, 255, 0.2), rgba(255, 0, 0, 0.2));
 }
 
 /* This is used to determine the current color scheme of a user's device */
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255; /* The color of the content */
-    --background-rgb: 0, 0, 0;
+    --background-rgb: 10, 0, 10;
 
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 16, 0, 16;
+    --background-start-rgb: 10, 0, 10;
+    --background-end-rgb: 10, 0, 10;
 
     /* --primary-glow: radial-gradient(rgba(42, 12, 12, 0.2), rgba(255, 0, 255, 1));
     --secondary-glow: linear-gradient(
@@ -60,21 +57,18 @@
       rgba(1, 65, 255, 0.3)
     ); */
 
-    --tile-start-rgb: 0, 0, 0;
-    --tile-end-rgb: 16, 0, 16;
+    --tile-start-rgb: 10, 0, 10;
+    --tile-end-rgb: 10, 0, 10;
     --tile-border: conic-gradient(
       #ffffffff,
-      #ffffff10,
-      #ffffff00,
-      #ffffff00,
-      #ffffff10,
+      #000000ff,
+      #000000ff,
+      #000000ff,
+      #000000ff,
       #ffffffff
     );
 
-    --callout-rgb: 20, 20, 20;
-    --callout-border-rgb: 108, 108, 108;
-    --card-rgb: 100, 100, 100;
-    --card-border-rgb: 200, 200, 200;
+    --card-rgb: linear-gradient(330deg, rgba(0, 0, 255, 0.2), rgba(255, 0, 0, 0.2));
   }
 }
 

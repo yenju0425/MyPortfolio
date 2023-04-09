@@ -1,6 +1,13 @@
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .topNav,
 .copyright {
-  background: linear-gradient(330deg, rgba(255, 0, 0, 0.3), rgba(0, 0, 255, 0.3));
+  background: linear-gradient(330deg, rgba(255, 0, 0, 0.2), rgba(0, 0, 255, 0.2));
   display: flex;
   justify-content: center;
   font-family: var(--font-mono);
@@ -50,7 +57,7 @@
 
 .iconContainer::after { /* Inner Square */
   inset: 0;
-  padding: 1px;
+  padding: 2px;
   border-radius: var(--border-radius);
   background: linear-gradient(
     to bottom right,
