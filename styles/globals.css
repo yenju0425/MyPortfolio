@@ -7,27 +7,14 @@
     'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
     'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace; 
 
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
+  --foreground-rgb: rgb(0, 0, 0);
+  --background-rgb: rgb(255, 255, 255);
 
-  --background-start-rgb: 255, 250, 255;
-  --background-end-rgb: 255, 250, 255;
+  --background-start-rgb: rgb(255, 250, 255);
+  --background-end-rgb: rgb(255, 250, 255);
 
-  /* --primary-glow: conic-gradient(
-    from 180deg at 50% 50%,
-    #16abff33 0deg,
-    #0885ff33 55deg,
-    #54d6ff33 120deg,
-    #0071ff33 160deg,
-    transparent 360deg
-  );
-  --secondary-glow: radial-gradient(
-    rgba(255, 255, 255, 1),
-    rgba(255, 255, 255, 0)
-  ); */
+  --card-rgba: linear-gradient(330deg, rgba(0, 0, 255, 0.2), rgba(255, 0, 0, 0.2));
 
-  --tile-start-rgb: 255, 250, 255;
-  --tile-end-rgb: 255, 250, 255;
   --tile-border: conic-gradient(
     #000000ff,
     #ffffffff,
@@ -36,29 +23,19 @@
     #ffffffff,
     #000000ff
   );
-
-  --card-rgb: linear-gradient(330deg, rgba(0, 0, 255, 0.2), rgba(255, 0, 0, 0.2));
 }
 
 /* This is used to determine the current color scheme of a user's device */
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255; /* The color of the content */
-    --background-rgb: 10, 0, 10;
+    --foreground-rgb: rgb(255, 255, 255);
+    --background-rgb: rgb(10, 0, 10);
 
-    --background-start-rgb: 10, 0, 10;
-    --background-end-rgb: 10, 0, 10;
+    --background-start-rgb: rgb(10, 0, 10);
+    --background-end-rgb: rgb(10, 0, 10);
 
-    /* --primary-glow: radial-gradient(rgba(42, 12, 12, 0.2), rgba(255, 0, 255, 1));
-    --secondary-glow: linear-gradient(
-      to bottom right,
-      rgba(1, 65, 255, 1),
-      rgba(255, 65, 255, 1),
-      rgba(1, 65, 255, 0.3)
-    ); */
+    --card-rgba: linear-gradient(330deg, rgba(0, 0, 255, 0.2), rgba(255, 0, 0, 0.2));
 
-    --tile-start-rgb: 10, 0, 10;
-    --tile-end-rgb: 10, 0, 10;
     --tile-border: conic-gradient(
       #ffffffff,
       #000000ff,
@@ -67,8 +44,6 @@
       #000000ff,
       #ffffffff
     );
-
-    --card-rgb: linear-gradient(330deg, rgba(0, 0, 255, 0.2), rgba(255, 0, 0, 0.2));
   }
 }
 
@@ -85,13 +60,13 @@ body {
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  color: var(--foreground-rgb);
   background: linear-gradient(
       to bottom,
       transparent,
-      rgb(var(--background-end-rgb))
+      var(--background-end-rgb)
     )
-    rgb(var(--background-start-rgb));
+    var(--background-start-rgb);
 }
 
 a {

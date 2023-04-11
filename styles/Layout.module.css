@@ -59,11 +59,7 @@
   inset: 0;
   padding: 2px;
   border-radius: var(--border-radius);
-  background: linear-gradient(
-    to bottom right,
-    rgba(var(--tile-start-rgb), 1),
-    rgba(var(--tile-end-rgb), 1)
-  );
+  background: var(--background-rgb);
   background-clip: content-box;
 }
 

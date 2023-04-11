@@ -6,18 +6,14 @@
   grid-gap: 20px;
 }
 
+
+/* Three parts of the main section */
 /* .status {
 
 } */
 
-.contents {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.interactions {
-  position: relative;
+.contents,
+.interactions  {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -26,17 +22,12 @@
 
 .title {
   margin: 0 0 1rem;
-
-  /* the spacing between each line */
-  line-height: 1.15;
+  line-height: 1.2;
   font-size: 3rem;
-  text-align: center;
-
   font-family: var(--font-mono);
 }
 
 .description {
-  text-align: center;
   font-size: 1rem;
   font-family: var(--font-mono);
 }
@@ -51,7 +42,7 @@
 .hireMe {
   padding: 1rem 2rem;
   border-radius: var(--border-radius);
-  transition: background 2s ease;
+  /* transition: background 2s ease; This won't work on gradient colors. */
 }
 
 .leftPointer,
@@ -73,14 +64,14 @@
 @media (hover: hover) and (pointer: fine) {
   .hireMe:hover,
   .rick:hover{
-    background: var(--card-rgb);
+    background: var(--card-rgba);
   }
 
   .hireMe:hover .leftPointer {
-    transform: translateX(4px);
+    transform: translateX(5px);
   }
   .hireMe:hover .rightPointer {
-    transform: translateX(-4px);
+    transform: translateX(-5px);
   }
 }
 
@@ -119,18 +110,6 @@
 
   .description {
     font-size: 0.8rem;
-  }
-
-  .description a {
-    padding: 1rem;
-  }
-
-  .description p,
-  .description div {
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    width: 100%;
   }
 
   .description p {
