@@ -57,7 +57,7 @@
 
 .iconContainer::after { /* Inner Square */
   inset: 0;
-  padding: 2px;
+  padding: 1px;
   border-radius: var(--border-radius);
   background: var(--background-rgb);
   background-clip: content-box;

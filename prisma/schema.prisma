@@ -15,5 +15,5 @@ model User {
   username   String   @unique
   email      String   @unique
   password   String
-  permission Int
+  role_mask  Int
 }
