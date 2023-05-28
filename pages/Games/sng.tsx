@@ -1,7 +1,7 @@
 import pokerSyles from '../styles/Poker.module.css'
 import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import { socketEvent } from "../server/events";
+import { socketEvent } from "../../games/sng/events";
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
@@ -9,8 +9,8 @@ let socket: Socket;
 export default function Poker() {
   const [num, setNumber] = useState<number>(0);
   
-  // let socket = io(); // Not good practice to create socket in render, since every render will create a new socket
-  // socket.emit(socketEvent.update_server_number, 0); // This will cause infinite loop.
+  // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
+  // socket.emit(socketEvent.update_server_number, 0); <- This will cause infinite loop.
 
   useEffect(() => {
     // Create socket in useEffect, so that it is only created once.
@@ -34,6 +34,9 @@ export default function Poker() {
     return () => {
       if (socket) {
         console.log("Socket disconnected.");
+
+        // notify server that client is disconnecting
+        // socket.emit(socketEvent.disconnect);
         // socket.disconnect();
       }
     }
