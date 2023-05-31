@@ -37,6 +37,10 @@ export class SngPlayer extends Player {
     return this.isStillInRound() && !this.currentChips;
   }
 
+  isAllIn(): boolean {
+    return this.isStillInRound() && this.currentChips === 0;
+  }
+
   startSng(initialChips: number): void {
     this.play();
     this.currentChips = initialChips;
@@ -55,7 +59,7 @@ export class SngPlayer extends Player {
   }
 
   placeBet(amount: number) {
-    this.currentBetSize = amount;
+    this.currentBetSize += amount;
     this.currentPotContribution += amount;
   }
 
