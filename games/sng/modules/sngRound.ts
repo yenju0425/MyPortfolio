@@ -1,11 +1,8 @@
-import { Streets } from './terms';
+import { Streets, Suits, Ranks, HandRankings } from './terms';
 import { Card, Deck } from './deck';
 import { Pot } from './pots';
 import { Round } from '../../base/round';
 import { SngPlayer } from './sngPlayer';
-import { Suits, Ranks, HandRankings } from './terms';
-
-// 管理每一 round 產生的資料
 
 export class SngRound extends Round {
   private readonly endRoundCallback: () => void;
