@@ -55,7 +55,7 @@ export class SngRound extends Round {
     const suitCounter: Map<Suits, number> = new Map();
     const rankCounter: Map<Ranks, number> = new Map();
     for (const card of cards) {
-      suitBins[card.suit] &= (1 << card.rank);
+      suitBins[card.suit] |= (1 << card.rank);
       suitCounter.set(card.suit, (suitCounter.get(card.suit) || 0) + 1);
       rankCounter.set(card.rank, (rankCounter.get(card.rank) || 0) + 1);
     }
@@ -64,7 +64,6 @@ export class SngRound extends Round {
     let straightFilter = 0b1000000001111100000000;
     //                              ^^^^^
     //                              AKQJT = royal flush
-
     // 1. Royal Flush
     for (let suit of suitBins) {
       const filter = straightFilter & 0b1111111111111; // Only consider the last  13 bits.
@@ -72,7 +71,6 @@ export class SngRound extends Round {
         return parseInt((HandRankings.ROYAL_FLUSH.toString(16) + "00000"), 16); // The first digit is the hand ranking, and the rest are priority identifiers (PID).
       }
     }
-
     // 2. Straight Flush
     for (let i = 1; i <= 9; i++) {
       const filter = (straightFilter >> i) & 0b1111111111111; // Only consider the last 13 bits.
@@ -82,20 +80,16 @@ export class SngRound extends Round {
         }
       }
     }
-
     const sortedSuitCounter = Array.from(suitCounter.entries()).sort((a, b) => b[1] - a[1]);
     const sortedRankCounter = Array.from(rankCounter.entries()).sort((a, b) => a[1] !== b[1] ? b[1] - a[1] : b[0] - a[0]);
-
     // 3. Four of a Kind
     if (sortedRankCounter[0][1] === 4) {
       return parseInt((HandRankings.FOUR_OF_A_KIND.toString(16) + sortedRankCounter[0][0].toString(16).padStart(5, "0")), 16);
     }
-
     // 4. Full House
     if (sortedRankCounter[0][1] === 3 && sortedRankCounter[1][1] >= 2) {
       return parseInt((HandRankings.FULL_HOUSE.toString(16) + sortedRankCounter[0][0].toString(16).padStart(5, "0")), 16);
     }
-
     // 5. Flush
     if (sortedSuitCounter[0][1] >= 5) {
       let PID = "";
@@ -106,33 +100,28 @@ export class SngRound extends Round {
       }
       return parseInt((HandRankings.FLUSH.toString(16) + PID.padStart(5, "0")), 16);
     }
-
     // 6. Straight
     const bin = suitBins.reduce((a, b) => a | b, 0);
-    for (let i = 1; i <= 9; i++) {
+    for (let i = 0; i <= 9; i++) {
       const filter = (straightFilter >> i) & 0b1111111111111; // Only consider the last 13 bits.
       if ((bin & filter) === filter) {
         return parseInt((HandRankings.STRAIGHT.toString(16) + (14 - i).toString(16).padStart(5, "0")), 16); // e.g. When i = 9, this straight will be 5432A, and the PID will be set to 5 (14 - 9).
       }
     }
-
     // 7. Three of a Kind
     if (sortedRankCounter[0][1] === 3) {
       return parseInt((HandRankings.THREE_OF_A_KIND.toString(16) + sortedRankCounter[0][0].toString(16).padStart(5, "0")), 16);
     }
-
     // 8. Two Pair
     if (sortedRankCounter[0][1] === 2 && sortedRankCounter[1][1] === 2) {
       const kicker = Array.from(rankCounter.keys()).filter(rank => rank !== sortedRankCounter[0][0] && rank !== sortedRankCounter[1][0]).sort((a, b) => b - a)[0];
       return parseInt((HandRankings.TWO_PAIR.toString(16) + (sortedRankCounter[0][0].toString(16) + sortedRankCounter[1][0].toString(16) + kicker.toString(16)).padStart(5, "0")), 16);
     }
-
     // 9. One Pair
     if (sortedRankCounter[0][1] === 2) {
       const kickers = Array.from(rankCounter.keys()).filter(rank => rank !== sortedRankCounter[0][0]).sort((a, b) => b - a);
       return parseInt((HandRankings.PAIR.toString(16) + (sortedRankCounter[0][0].toString(16) + kickers[0].toString(16) + kickers[1].toString(16) + kickers[2].toString(16)).padStart(5, "0")), 16);
     }
-
     // 10. High Card
     let PID = "";
     for (let i = 0; i < 5; i++) {
@@ -140,7 +129,6 @@ export class SngRound extends Round {
     }
     return parseInt((HandRankings.HIGH_CARD.toString(16) + PID.padStart(5, "0")), 16);
   }
-  
 
   calculatePlayersHandRanking(): void {
     for (let player of this.players) {
