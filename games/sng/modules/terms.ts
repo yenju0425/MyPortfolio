@@ -7,7 +7,6 @@ export enum Streets {
 }
 
 export enum Suits {
-  NONE,
   SPADES,
   HEARTS,
   DIAMONDS,
@@ -15,8 +14,6 @@ export enum Suits {
 }
 
 export enum Ranks {
-  NONE,
-  ACE,
   TWO,
   THREE,
   FOUR,
@@ -29,6 +26,7 @@ export enum Ranks {
   JACK,
   QUEEN,
   KING,
+  ACE,
 }
 
 export enum HandRankings {

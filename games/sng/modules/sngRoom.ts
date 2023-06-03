@@ -52,14 +52,6 @@ export class SngRoom extends Room {
     return this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
   }
 
-  isAllPlayersActed(): boolean {
-    return this.players.filter(player => player !== null).every(player => player?.getIsActed());
-  }
-
-  isBetConsensusReached(): boolean {
-    return this.players.filter(player => player !== null && player?.isStillInStreet()).every(player => player?.getCurrentBetSize() === this.getCurrentRound().getCurrentBetSize() || player?.isAllIn());
-  }
-
   roundElimination(): void {
     this.players.forEach(player => {
       if (!player?.getCurrentChips()) {
@@ -70,14 +62,6 @@ export class SngRoom extends Room {
 
   getNumOfPlayersStillInSng(): number {
     return this.players.filter(player => player?.isStillInSng()).length;
-  }
-
-  getNumOfPlayersStillInRound(): number {
-    return this.players.filter(player => player?.isStillInRound()).length;
-  }
-
-  getNumOfPlayersStillInStreet(): number {
-    return this.players.filter(player => player?.isStillInStreet()).length;
   }
 
   // totalNumSngs
@@ -115,12 +99,8 @@ export class SngRoom extends Room {
     this.players[seatid] = null;
   }
 
-  getPlayer(arg: Socket | number): SngPlayer | null {
-    if (typeof arg === 'number') {
-      return this.players[arg];
-    } else {
-      return this.players.find(player => player?.getSocket() === arg) || null;
-    }
+  getPlayer(socket: Socket): SngPlayer | null {
+    return this.players.find(player => player?.getSocket() === socket) || null;
   }
 
   getPlayerSeatid(socket: Socket): number {
@@ -161,7 +141,7 @@ export class SngRoom extends Room {
 
   // currentRound
   initCurrentRound(): void {
-    this.currentRound = new SngRound(this.players, this.getCurrentDealerId(), this.getCurrentBigBlind());
+    this.currentRound = new SngRound(this.endRound, this.players, this.getCurrentDealerId(), this.getCurrentBigBlind());
   }
 
   getCurrentRound(): SngRound {
@@ -216,7 +196,7 @@ export class SngRoom extends Room {
 
 
 
-  // player actions
+  // player functions
   playerSignUp(email: string, name: string, seatid: number, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       // Response to client, "The game is started, you cannot sign up"
@@ -343,74 +323,15 @@ export class SngRoom extends Room {
     this.getCurrentRound().updateCurrentBetSize(amount);
   }
 
-  playerCall(index: number): void {
-    const player = this.getPlayer(index);
+  //playerCall(index: number): void {
 
-    if (player === null) {
-      // Response to client, "failed"
-      return;
-    }
+  //playerCheck(index: number): void {
 
-    console.log('playerCall');
+  //playerRaise(index: number, amount: number): void {
 
-    // place bet
-    player.placeBet(this.getCurrentRound().getCurrentBetSize() - player.getCurrentBetSize());
-    player.act();
+  //playerAllIn(index: number): void {
 
-    // update round info
-  }
-
-  playerCheck(index: number): void {
-    const player = this.getPlayer(index);
-
-    if (player === null) {
-      // Response to client, "failed"
-      return;
-    }
-
-    console.log('playerCheck');
-
-    // place bet
-    player.act();
-  }
-
-  playerRaise(index: number, amount: number): void {
-    const player = this.getPlayer(index);
-
-    if (player === null) {
-      // Response to client, "failed"
-      return;
-    }
-
-    console.log('playerRaise', amount);
-
-    // place bet
-    player.placeBet(amount);
-    player.act();
-
-    // update round info
-    this.getCurrentRound().updateCurrentBetSize(amount);
-  }
-
-  playerAllIn(index: number): void {
-    const player = this.getPlayer(index);
-
-    if (player === null) {
-      // Response to client, "failed"
-      return;
-    }
-
-    console.log('playerAllIn');
-
-    // place bet
-    player.placeBet(player.getCurrentChips());
-    player.act();
-
-    // update round info
-    this.getCurrentRound().updateCurrentBetSize(player.getCurrentChips());
-  }
-
-  // game actions
+  // room functions
   startSng(): void {
     // Set the current status to PLAYING.
     this.play();
@@ -448,70 +369,7 @@ export class SngRoom extends Room {
     this.getCurrentRound().initRoundPlayers();
 
     // Start the first street.
-    this.startStreet();
-  }
-
-  startStreet(): void {
-    // Initialize players in the street.
-    this.getCurrentRound().initStreetPlayers();
-  
-    // Start the first action.
-    this.startAction();
-  }
-
-  startAction(): void {
-    // Update current player id.
-    this.getCurrentRound().updateCurrentPlayerId();
-
-    // Get current player.
-    const currentPlayer = this.getPlayer(this.getCurrentRound().getCurrentPlayerId());
-
-    // Automatically place bet for small blind and big blind.
-    if (this.getCurrentRound().getCurrentStreet() === Streets.PREFLOP) {
-      if (currentPlayer?.getCurrentPosition() === 1) { // small blind
-        console.log('player: ' + currentPlayer?.getName() + ' is small blind');
-        currentPlayer.placeBet(this.blindStructure[this.currentBlindLevel].bigBlind / 2);
-        this.endAction();
-        return;
-      } else if (currentPlayer?.getCurrentPosition() === 2) { // big blind
-        console.log('player: ' + currentPlayer?.getName() + ' is big blind');
-        currentPlayer.placeBet(this.blindStructure[this.currentBlindLevel].bigBlind);
-        this.endAction();
-        return;
-      }
-    }
-    // TODO: Send message to the client to ask for action.
-  }
-
-  endAction(): void {
-    if (this.getNumOfPlayersStillInStreet() < 2) {
-      this.endStreet();
-    } else if (this.isAllPlayersActed() && this.isBetConsensusReached()) {
-      this.endStreet();
-    } else {
-      this.startAction();
-    }
-  }
-
-  endStreet(): void {
-    this.getCurrentRound().updatePot();
-
-    // TODO: return the overbet chips to the player
-
-    if (this.getNumOfPlayersStillInRound() < 2) {
-      // RICKTODO: calculate the winner
-      this.getCurrentRound().rewardPots(); // <--------------------------
-      this.endRound();
-
-    } else if (this.getCurrentRound().getCurrentStreet() === Streets.RIVER) {
-      // RICKTODO: Showdown
-      // this.showdown(); <-----
-      this.getCurrentRound().showdown(); // <-----------------------  就剩這裡
-      this.getCurrentRound().rewardPots(); // <--------------------------
-      this.endRound();
-    } else {
-      this.startStreet();
-    }
+    this.getCurrentRound().startStreet();
   }
 
   endRound(): void {
