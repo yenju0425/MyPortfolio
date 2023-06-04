@@ -1,10 +1,10 @@
-# My "Poker" Portfolio
+# My "Poker" Portfolio ♠️ ♥️ ♦️ ♣️
 
 I'm very excited to share my portfolio with you! I've been working on it for a while now, and I'm proud of the results. I hope you enjoy it as much as I do!
 
 This project is built using Next.js and Socket.io, offering an immersive gaming experience through a real-time online poker game. While the backend logic is almost done, the frontend part is still a work in progress. I'll be updating it as soon as I finish it.
 
-## Roadmap
+## Roadmap 🗺
 
 - [x] Feb. Project formulation:
     - What I want to include in my portfolio:
@@ -18,7 +18,7 @@ This project is built using Next.js and Socket.io, offering an immersive gaming 
         - TypeScript
         - Socket.io
 
-- [x] Mar. Designing phase:
+- [x] Mar. Designing phase: [Design](https://www.figma.com/file/9usTFZapvmAlZDlqWjWqkz/Taxes-Hold'em-(State)?type=whiteboard&node-id=0%3A1&t=g0gFFLPsrJ8NQiXV-1)
     - Designing the visual layout of my portfolio.
     - Creating the logic diagram for the poker game (the most crucial part of the project, which was quite challenging).
         - Studying the rules of poker, such as determining the winner and handling ties.
@@ -30,7 +30,7 @@ This project is built using Next.js and Socket.io, offering an immersive gaming 
     - Learning how to use TypeScript.
     - Completing the framework of the portfolio.
 
-- [x] May. Coding the backend part of the poker game:
+- [x] May. Coding the backend part of the poker game: [Hand Ranking Algorithm](https://github.com/yenju0425/MyPortfolio/blob/main/games/sng/modules/sngRound.ts#L50)
     - Learning how to use Socket.io.
     - Implementing the framework of the poker game, including the game cycle.
     - Implementing the basic algorithms of the poker game, such as determining the winner and handling ties.
@@ -58,13 +58,14 @@ This project is built using Next.js and Socket.io, offering an immersive gaming 
     - Learning how to use blockchain.
     - Implementing the blockchain component of the poker game.
 
-- [ ] Dec. Playing poker with dogecoin!!!
+- [ ] Dec. Playing poker with DogeCoin: 🐶 🚀 🌙
     - Completing the project.
     - Writing comprehensive notes and documentation.
     - Releasing a YouTube video to introduce my portfolio.
 
-## Demonstrations
+## Demonstrations 🎥
 
 Here are some video demonstrations of my portfolio:
 
-- [Overview](https://drive.google.com/file/d/1NS8G51meG1dVflRY5iTvM7z-LAN5_OqQ/view?usp=share_link)
+- [Overview](https://drive.google.com/file/d/1EKI7pFWxGnEXF5HApOq_5y5GNHzaw1Ti/view?usp=sharing)
+- [How Socket.IO Works](https://drive.google.com/file/d/1yFudj6SczE8lS4g6uH8elyVnzWP0Si_k/view?usp=sharing)
