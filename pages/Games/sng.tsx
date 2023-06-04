@@ -10,7 +10,19 @@ let socket: Socket;
 export default function Poker() {
   // RICKTODO: 到時候這裡應該會對應好幾組數字
   const [num, setNumber] = useState<number>(0);
-  
+
+
+  const playerName = 'John Doe';
+  const playerCurrentChip = 500;
+  const playerBetSize = 50;
+
+
+
+
+
+
+
+
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
@@ -60,20 +72,65 @@ export default function Poker() {
     <>
       <div className={styles.main}>
         <div className={styles.first_row}>
-          <button>1</button>
-          <button>1</button>
-          <button>1</button>
-          <button>1</button>
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
         </div>
         <div className={styles.second_row}>
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
           <button>1</button>
-          <button>1</button>
-          <button>1</button>
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
         </div>
         <div className={styles.third_row}>
-          <button>1</button>
-          <button>1</button>
-          <button>1</button>
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
+          <PlayerInfoCard
+            id={0}
+            name={playerName}
+            currentChip={playerCurrentChip}
+            betSize={playerBetSize}
+          />
         </div>
       </div>
     </>

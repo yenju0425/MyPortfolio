@@ -7,7 +7,7 @@ interface PlayerInfo {
   betSize: number;
 }
 
-const PlayerInfoCard = ({ name, currentChip, betSize }: PlayerInfo) => {
+const PlayerInfoCard = ({id, name, currentChip, betSize }: PlayerInfo) => {
   return (
     <div>
       <h2>{name}</h2>
