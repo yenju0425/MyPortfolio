@@ -1,7 +1,7 @@
-import pokerSyles from '../styles/Poker.module.css'
+import sngStyles from '../../styles/Sng.module.css';
 import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import { socketEvent } from "../../games/sng/events";
+import { ServerEvents, ClientEvents } from "../../games/sng/events";
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
@@ -17,15 +17,18 @@ export default function Poker() {
     socket = io();
 
     // Add event listeners before attempting to connect.
-    socket.on(socketEvent.connect, () => {
-      console.log(socketEvent.connect);
-      socket.emit(socketEvent.update_server_number, 0);
+    socket.on(ServerEvents.connect, () => {
+      console.log(ServerEvents.connect);
+
+      // RICKTODO: 告訴 server 有人連過來了; fetch all current data from server ()
+      // socket.emit(ServerEvents.update_server_number, 0);
     });
-    
-    socket.on(socketEvent.update_client_number, (new_number: number) => {
-      console.log(`${ socketEvent.update_client_number }: ${ new_number }`);
-      setNumber(new_number);
-    });
+
+    // RICKTODO: 註冊各種事件
+    // socket.on(socketEvent.update_client_number, (new_number: number) => {
+    //   console.log(`${ socketEvent.update_client_number }: ${ new_number }`);
+    //   setNumber(new_number);
+    // });
 
     fetch("./api/socket/socket").finally(() => {
       console.log("Socket connected.");
@@ -35,24 +38,25 @@ export default function Poker() {
       if (socket) {
         console.log("Socket disconnected.");
 
-        // notify server that client is disconnecting
-        // socket.emit(socketEvent.disconnect);
+        // RICKTODO: 告訴 server 我要走了
+        // socket.emit(ServerEvents.update_server_number, 0);
         // socket.disconnect();
       }
     }
   }, []);
 
+  // RICKTODO: 把我要做的動作包裝在這裡，然後下面的畫面要呼叫這個 function
   const myFunction = async (event: React.FormEvent) => {
     event.preventDefault();
     const form = event.target as HTMLFormElement; // Cast event.target to HTMLFormElement
     const input = form.elements.namedItem('number') as HTMLInputElement;
 
-    socket.emit(socketEvent.update_server_number, Number(input.value));
+    // socket.emit(socketEvent.update_server_number, Number(input.value));
   }
 
   return (
     <>
-      <div className={ pokerSyles.table }>
+      <div className={ sngStyles.table }>
         <p>Current number: <span id="current-number"> { num } </span></p>
       </div>
 

@@ -25,8 +25,8 @@ export default function Header() {
           <li className={router.pathname === '/about' ? layoutStyles.active : ''}>
             <Link href="/about">About</Link>
           </li>
-          <li className={router.pathname === '/poker' ? layoutStyles.active : ''}>
-            <Link href="/poker">Poker</Link>
+          <li className={router.pathname === '/Games/sng' ? layoutStyles.active : ''}>
+            <Link href="/Games/sng">SNG</Link>
           </li>
           <li className={router.pathname === '/notes' ? layoutStyles.active : ''}>
             <Link href="/notes">Notes</Link>
