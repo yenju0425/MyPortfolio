@@ -2,6 +2,7 @@ import styles from '../../styles/Sng.module.css';
 import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { ServerEvents, ClientEvents } from "../../games/sng/events";
+import PlayerInfoCard from '@/components/playerInfoCard';
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
@@ -57,21 +58,24 @@ export default function Poker() {
 
   return (
     <>
-      {/* <div className={ sngStyles.table }>
-        <p>Current number: <span id="current-number"> { num } </span></p>
+      <div className={styles.main}>
+        <div className={styles.first_row}>
+          <button>1</button>
+          <button>1</button>
+          <button>1</button>
+          <button>1</button>
+        </div>
+        <div className={styles.second_row}>
+          <button>1</button>
+          <button>1</button>
+          <button>1</button>
+        </div>
+        <div className={styles.third_row}>
+          <button>1</button>
+          <button>1</button>
+          <button>1</button>
+        </div>
       </div>
-
-      <form onSubmit={ myFunction }>
-        <input type="number" id="number-input" name="number"></input>
-        <button type="submit">Add</button>
-      </form> */}
-
-      <div className={ styles.main }>
-
-
-      </div>
-
-
     </>
   )
 }

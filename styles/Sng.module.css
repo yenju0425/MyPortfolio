@@ -1,9 +1,29 @@
 .main {
   height: 70vh;
+  width: 90vw;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  margin: auto; /* Add this line */
+}
+
+.first_row {
+  display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-around;
 }
 
+.second_row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
 
+.third_row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly
+}
