@@ -1,11 +1,10 @@
-/* The main section is 640px height (200 x 3 + 2 x 20) */
 .main {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(3, 200px);
-  grid-gap: 20px;
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
 }
-
 
 /* Three parts of the main section */
 /* .status {
@@ -23,6 +22,7 @@
 .title {
   margin: 0 0 1rem;
   line-height: 1.2;
+  padding: 0 0 0 2rem;
   font-size: 3rem;
   font-family: var(--font-mono);
 }

@@ -1,4 +1,4 @@
-import sngStyles from '../../styles/Sng.module.css';
+import styles from '../../styles/Sng.module.css';
 import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { ServerEvents, ClientEvents } from "../../games/sng/events";
@@ -41,7 +41,7 @@ export default function Poker() {
     return () => {
       if (socket) {
         console.log(socket.id + " disconnected.");
-        socket.emit(ClientEvents.disconnect);
+        // socket.emit(ClientEvents.disconnect); This event is automatically emitted by socket.io
       }
     }
   }, []);
@@ -57,14 +57,21 @@ export default function Poker() {
 
   return (
     <>
-      <div className={ sngStyles.table }>
+      {/* <div className={ sngStyles.table }>
         <p>Current number: <span id="current-number"> { num } </span></p>
       </div>
 
       <form onSubmit={ myFunction }>
         <input type="number" id="number-input" name="number"></input>
         <button type="submit">Add</button>
-      </form>
+      </form> */}
+
+      <div className={ styles.main }>
+
+
+      </div>
+
+
     </>
   )
 }

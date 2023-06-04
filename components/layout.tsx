@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <main className={styles.main}>
       <Header />
         <div>
-          {children}
+          { children }
         </div>
       <Footer />
     </main>
