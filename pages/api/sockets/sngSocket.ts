@@ -2,7 +2,9 @@ import type { NextApiRequest } from 'next'
 import type { NextApiResponseWithSocketIO } from '../../../types/socketServer' // custom response
 import { SngRoom } from '../../../games/sng/modules/sngRoom';
 import { Server } from "socket.io";
+import { ServerEvents, ClientEvents } from "../../../games/sng/events";
 import registerSocketEvents from '../../../games/sng/socketHandler';
+
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponseWithSocketIO
@@ -17,10 +19,14 @@ export default function handler(
     const sngRoom = new SngRoom();
 
     // Add event listeners to client when client connects
-    io.on("connection", (socket) => {
-      console.log(`Client: ${ socket.id } connect to the server. Adding socket listeners.`);
-      // RICKTODO: 用 helper 來幫這個來自客戶端的 socket 註冊各種事件
-      // registerSocketEvents(io, socket, game);
+    io.on(ClientEvents.connect, (socket) => {
+      console.log(socket.id + " connected.");
+
+      // register all socket events
+      registerSocketEvents(io, socket, sngRoom);
+
+      // load sng room
+      socket.emit(ServerEvents.update_sng_room, sngRoom);
     });
 
     // Save socket.io server to res.socket.server.io

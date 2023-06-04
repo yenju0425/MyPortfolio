@@ -7,10 +7,11 @@ import { ServerEvents, ClientEvents } from "../../games/sng/events";
 let socket: Socket;
 
 export default function Poker() {
+  // RICKTODO: 到時候這裡應該會對應好幾組數字
   const [num, setNumber] = useState<number>(0);
   
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
-  // socket.emit(socketEvent.update_server_number, 0); <- This will cause infinite loop.
+  // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
   useEffect(() => {
     // Create socket in useEffect, so that it is only created once.
@@ -18,17 +19,20 @@ export default function Poker() {
 
     // Add event listeners before attempting to connect.
     socket.on(ServerEvents.connect, () => {
-      console.log(ServerEvents.connect);
-
-      // RICKTODO: 告訴 server 有人連過來了; fetch all current data from server ()
-      // socket.emit(ServerEvents.update_server_number, 0);
+      console.log(socket.id + " connected.");
     });
 
-    // RICKTODO: 註冊各種事件
-    // socket.on(socketEvent.update_client_number, (new_number: number) => {
-    //   console.log(`${ socketEvent.update_client_number }: ${ new_number }`);
-    //   setNumber(new_number);
-    // });
+    socket.on(ServerEvents.update_sng_room, (data: number) => { // RICKTODO: datattype 要改成我們要的
+      console.log("Current number: " + data);
+      setNumber(data);
+    });
+
+
+
+
+
+
+
 
     fetch("./api/socket/socket").finally(() => {
       console.log("Socket connected.");
@@ -36,11 +40,8 @@ export default function Poker() {
   
     return () => {
       if (socket) {
-        console.log("Socket disconnected.");
-
-        // RICKTODO: 告訴 server 我要走了
-        // socket.emit(ServerEvents.update_server_number, 0);
-        // socket.disconnect();
+        console.log(socket.id + " disconnected.");
+        socket.emit(ClientEvents.disconnect);
       }
     }
   }, []);

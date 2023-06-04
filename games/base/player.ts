@@ -2,12 +2,14 @@ import { PlayerStatus } from './terms';
 import { Socket } from 'socket.io';
 
 export abstract class Player {
+  private readonly id: number;
   private readonly name: string;
   private readonly email: string;
   protected socket: Socket;
   protected currentStatus: PlayerStatus;
 
-  constructor(name: string, email: string, socket: Socket) {
+  constructor(id: number, name: string, email: string, socket: Socket) {
+    this.id = id;
     this.name = name;
     this.email = email;
     this.socket = socket;

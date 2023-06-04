@@ -14,13 +14,13 @@ export class SngPlayer extends Player {
   private currentBetSize: number;
   private isActed: boolean; // whether the player has acted in the current street, small blind & big blind are not considered as acted
 
-  constructor(name: string, email: string, socket: Socket) {
-    super(name, email, socket);
-    this.currentChips = 0; //
-    this.currentPosition = null; //
-    this.holeCards = []; //
+  constructor(id: number, name: string, email: string, socket: Socket) {
+    super(id, name, email, socket);
+    this.currentChips = 0;
+    this.currentPosition = null;
+    this.holeCards = [];
     this.currentPotContribution = 0;
-    this.isFold = false; //
+    this.isFold = false;
     this.handRanking = 0;
     this.currentBetSize = 0;
     this.isActed = false;

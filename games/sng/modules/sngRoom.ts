@@ -91,27 +91,27 @@ export class SngRoom extends Room {
     this.players = new Array<SngPlayer | null>(this.numPlayers).fill(null);
   }
 
-  setPlayer(player: SngPlayer, seatid: number): void {
-    this.players[seatid] = player;
+  setPlayer(player: SngPlayer, id: number): void {
+    this.players[id] = player;
   }
 
-  resetPlayer(seatid: number): void { //TODO: might need to do some safety check
-    this.players[seatid] = null;
+  resetPlayer(id: number): void { //TODO: might need to do some safety check
+    this.players[id] = null;
   }
 
   getPlayer(socket: Socket): SngPlayer | null {
     return this.players.find(player => player?.getSocket() === socket) || null;
   }
 
-  getPlayerSeatid(socket: Socket): number {
+  getPlayerId(socket: Socket): number {
     return this.players.findIndex(player => player?.getSocket() === socket);
   }
 
   // currentDealerId
   getNextDealerId(): number {
     if (!this.currentDealerId) {
-      const nonNullSeatids = this.players.map((player, seatid) => player !== null ? seatid : -1).filter(seatid => seatid !== -1);
-      return nonNullSeatids[Math.floor(Math.random() * nonNullSeatids.length)];
+      const nonNullIds = this.players.map((player, id) => player !== null ? id : -1).filter(id => id !== -1);
+      return nonNullIds[Math.floor(Math.random() * nonNullIds.length)];
     } else {
       let nextDealer = (this.currentDealerId + 1) % this.numPlayers;
       while (this.players[nextDealer] === null) {
@@ -197,19 +197,19 @@ export class SngRoom extends Room {
 
 
   // player functions
-  playerSignUp(email: string, name: string, seatid: number, socket: Socket): void {
+  playerSignUp(email: string, name: string, id: number, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       // Response to client, "The game is started, you cannot sign up"
       return;
     }
 
-    if (this.players[seatid] !== null) {
+    if (this.players[id] !== null) {
       // Response to client, "The seat is occupied, you cannot sign up"
       return;
     }
 
-    const player = new SngPlayer(email, name, socket);
-    this.setPlayer(player, seatid);
+    const player = new SngPlayer(id, email, name, socket);
+    this.setPlayer(player, id);
 
     // Response to client, "success"
   }
@@ -220,13 +220,13 @@ export class SngRoom extends Room {
       return;
     }
 
-    const seatid = this.getPlayerSeatid(socket);
-    if (seatid === -1) {
+    const id = this.getPlayerId(socket);
+    if (id === -1) {
       // Response to client, "failed"
       return;
     }
 
-    this.resetPlayer(seatid);
+    this.resetPlayer(id);
 
     // Response to client, "success"
   }
