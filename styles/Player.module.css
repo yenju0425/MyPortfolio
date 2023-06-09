@@ -1,0 +1,29 @@
+.player_info_card {
+    width: 15vw;
+    max-width: 150px;
+  }
+  
+  .fold {
+    display: none;
+  }
+  
+  .check {
+    display: none;
+  }
+  
+  .call {
+    display: none;
+  }
+  
+  .bet {
+    display: none;
+  }
+  
+  .raise {
+    display: none;
+  }
+  
+  .all_in {
+    display: none;
+  }
+  

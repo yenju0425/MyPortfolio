@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { ServerEvents, ClientEvents } from "../../games/sng/events";
 import PlayerInfoCard from '@/components/playerInfoCard';
+import { PlayerStatus } from '../../games/base/terms';
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
@@ -77,21 +78,22 @@ export default function Poker() {
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
+            status={PlayerStatus.NONE}
           />
           <PlayerInfoCard
-            id={0}
+            id={1}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
           />
           <PlayerInfoCard
-            id={0}
+            id={2}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
           />
           <PlayerInfoCard
-            id={0}
+            id={3}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
@@ -99,14 +101,14 @@ export default function Poker() {
         </div>
         <div className={styles.second_row}>
           <PlayerInfoCard
-            id={0}
+            id={8}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
           />
           <button>1</button>
           <PlayerInfoCard
-            id={0}
+            id={4}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
@@ -114,19 +116,19 @@ export default function Poker() {
         </div>
         <div className={styles.third_row}>
           <PlayerInfoCard
-            id={0}
+            id={7}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
           />
           <PlayerInfoCard
-            id={0}
+            id={4}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
           />
           <PlayerInfoCard
-            id={0}
+            id={5}
             name={playerName}
             currentChip={playerCurrentChip}
             betSize={playerBetSize}
