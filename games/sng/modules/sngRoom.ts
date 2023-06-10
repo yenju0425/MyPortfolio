@@ -1,15 +1,18 @@
+import { Server, Socket } from 'socket.io';
 import { SngPlayer } from "./sngPlayer";
 import { Room } from "../../base/room";
 import { configs } from "./configs";
 import { Card, Deck } from './deck';
 import { RoomStatus } from '../../base/terms';
-import { Socket } from 'socket.io';
 import { PlayerStatus } from '../../base/terms';
 import { SngRound } from "./sngRound";
 import { get } from "http";
 import { Streets } from './terms';
 import { Pot } from './pots';
 import { Round } from '../../base/round';
+import { ServerEvents, ClientEvents } from '../socketEvents';
+
+import * as Msg from "../../../types/messages";
 
 export class SngRoom extends Room {
   private readonly numPlayers: number;
@@ -28,8 +31,8 @@ export class SngRoom extends Room {
   private currentRound: SngRound | null;
   private currentPlayerId: number | null; // an index of players
 
-  constructor() {
-    super();
+  constructor(io: Server) {
+    super(io);
     this.numPlayers = configs.numPlayers;
     this.playerActionTime = configs.playerActionTime;
     this.initChips = configs.initChips;
@@ -195,23 +198,31 @@ export class SngRoom extends Room {
   }
 
 
-
   // player functions
-  playerSignUp(email: string, name: string, id: number, socket: Socket): void {
+  playerSignUp(msg: Msg.SignupRequest, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       // Response to client, "The game is started, you cannot sign up"
       return;
     }
 
-    if (this.players[id] !== null) {
+    if (this.players[msg.id] !== null) {
       // Response to client, "The seat is occupied, you cannot sign up"
       return;
     }
 
-    const player = new SngPlayer(id, email, name, socket);
-    this.setPlayer(player, id);
+    const player = new SngPlayer(msg.id, msg.name, msg.email, socket);
+    this.setPlayer(player, msg.id);
 
-    // Response to client, "success"
+    // Signup success, broadcast to all clients.
+    this.io.emit(ServerEvents.player_signup, { id: msg.id, name: msg.name });
+
+    // Swith the socket to the players room
+    socket.leave("spectators");
+    socket.join("players");
+
+    // Get the number of sockets in the room
+    console.log("Number of spectators: " + this.io.sockets.adapter.rooms.get('spectators')?.size);
+    console.log("Number of players: " + this.io.sockets.adapter.rooms.get('players')?.size);
   }
 
   playerCancelSignUp(socket: Socket): void {

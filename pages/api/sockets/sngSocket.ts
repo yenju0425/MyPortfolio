@@ -2,8 +2,8 @@ import type { NextApiRequest } from 'next'
 import type { NextApiResponseWithSocketIO } from '../../../types/socketServer' // custom response
 import { SngRoom } from '../../../games/sng/modules/sngRoom';
 import { Server } from "socket.io";
-import { ServerEvents, ClientEvents } from "../../../games/sng/events";
-import registerSocketEvents from '../../../games/sng/socketHandler';
+import { ServerEvents, ClientEvents } from "../../../games/sng/socketEvents";
+import registerSngSocketEvents from '../../../games/sng/socketHandler';
 
 export default function handler(
   req: NextApiRequest,
@@ -16,14 +16,15 @@ export default function handler(
     const io = new Server(res.socket.server);
 
     // Init game data
-    const sngRoom = new SngRoom();
+    const sngRoom = new SngRoom(io);
 
     // Add event listeners to client when client connects
     io.on(ClientEvents.connect, (socket) => {
       console.log(socket.id + " connected.");
+      socket.join("spectators");
 
       // register all socket events
-      registerSocketEvents(io, socket, sngRoom);
+      registerSngSocketEvents(socket, sngRoom);
 
       // load sng room
       socket.emit(ServerEvents.update_sng_room, sngRoom);

@@ -1,12 +1,13 @@
 import type { Server, Socket } from 'socket.io';
-import { ServerEvents, ClientEvents } from './events';
+import { ServerEvents, ClientEvents } from './socketEvents';
 import { SngRoom } from './modules/sngRoom';
+import * as Msg from "../../types/messages";
 
 type gameData = {
   num: number;
 };
 
-export default function registerSocketEvents(io: Server, socket: Socket, sngRoom: SngRoom) {
+export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom) {
   // Initializing
   console.log("Adding socket listeners.");
 
@@ -38,4 +39,7 @@ export default function registerSocketEvents(io: Server, socket: Socket, sngRoom
   // RICKTODO: 寫個 function 來處理各種事件
   // RICKTODO: socket.on('join_room', (data: { roomName: string }) => {
 
+  socket.on(ClientEvents.signup, (msg: Msg.SignupRequest) => {
+    sngRoom.playerSignUp(msg, socket);
+  });
 };

@@ -5,6 +5,7 @@ export enum RoomStatus {
 
 export enum PlayerStatus {
   NONE,
+  SIT, // has signed up
   READY,
   PLAYING,
   ELIMINATED,
