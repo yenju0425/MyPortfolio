@@ -8,6 +8,10 @@ export type SignupRequest = {
     email: string
 }
 
+export type SignupResponse = {
+    id: number
+}
+
 export type SignupBroadcast = {
     id: number,
     name: string

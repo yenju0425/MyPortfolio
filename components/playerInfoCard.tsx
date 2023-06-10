@@ -1,32 +1,30 @@
 import React, { useState } from 'react';
 import styles from '../styles/Player.module.css';
 import { RoomStatus, PlayerStatus } from '../games/base/terms';
-import io, { Socket } from "socket.io-client";
-import { ServerEvents, ClientEvents } from "../games/sng/socketEvents";
+import { Socket } from "socket.io-client";
 import * as Msg from "../types/messages";
 
 interface PlayerInfoCardProps {
   socket: Socket;
-  id: number;
+  seatId: number;
   name: string;
   currentChip: number;
   currentBetSize: number;
   currentPlayerStatus: PlayerStatus;
   currentRoomStatus: RoomStatus;
-  playerSeatId: number;
+  playerId: number;
 }
 
-const PlayerInfoCard = ({socket, id, name, currentChip, currentBetSize, currentPlayerStatus, currentRoomStatus, playerSeatId}: PlayerInfoCardProps) => {
+const PlayerInfoCard = (props: PlayerInfoCardProps) => {
 
   // show control
-  const isShowControl = currentRoomStatus === RoomStatus.NONE && (playerSeatId === -1 || playerSeatId === id);
+  const isShowControl = props.currentRoomStatus === RoomStatus.NONE && (props.playerId === -1 || props.playerId === props.seatId);
 
   // control button text
-  const [controlButtonText, setControlButtonText] = useState('Sign Up');
   const getControlButtonText = (): string => {
-    if (currentPlayerStatus === PlayerStatus.NONE) {
+    if (props.currentPlayerStatus === PlayerStatus.NONE) {
       return 'Sign Up';
-    } else if (currentPlayerStatus === PlayerStatus.SIT) {
+    } else if (props.currentPlayerStatus === PlayerStatus.SIT) {
       return 'Ready';
     } else {
       return 'Leave';
@@ -45,10 +43,14 @@ const PlayerInfoCard = ({socket, id, name, currentChip, currentBetSize, currentP
 
   // Client events:
   const signUp = (event: React.FormEvent<HTMLFormElement>) => {
+
+
     event.preventDefault();
 
-    const signUpReq: Msg.SignupRequest = { id: id, name: formName, email: formEmail };
-    socket.emit(ClientEvents.signup, signUpReq);
+    const request: Msg.SignupRequest = { id: props.seatId, name: formName, email: formEmail };
+    // log socket id
+    console.log(props.socket.id);
+    props.socket.emit("SignupRequest", request);
   };
 
   return (
@@ -57,7 +59,7 @@ const PlayerInfoCard = ({socket, id, name, currentChip, currentBetSize, currentP
         <div>
           {!isShowForm && (
             <button className={styles.Control} onClick={toggleForm}>
-              {controlButtonText}
+              {getControlButtonText()}
             </button>
           )}
           {isShowForm && (
@@ -71,11 +73,11 @@ const PlayerInfoCard = ({socket, id, name, currentChip, currentBetSize, currentP
         </div>
       )}
       
-      {currentPlayerStatus !== PlayerStatus.NONE && currentPlayerStatus !== PlayerStatus.ELIMINATED && (
+      {props.currentPlayerStatus !== PlayerStatus.NONE && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && (
         <div>
-          <h2>{name}</h2>
-          <p>Current Chip: {currentChip}</p>
-          <p>Bet Size: {currentBetSize}</p>
+          <h2>{props.name}</h2>
+          <p>Current Chip: {props.currentChip}</p>
+          <p>Bet Size: {props.currentBetSize}</p>
           <div>
             <button className={styles.fold}>Fold</button>
             <button className={styles.check}>Check</button>

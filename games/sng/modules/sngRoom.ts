@@ -10,7 +10,6 @@ import { get } from "http";
 import { Streets } from './terms';
 import { Pot } from './pots';
 import { Round } from '../../base/round';
-import { ServerEvents, ClientEvents } from '../socketEvents';
 
 import * as Msg from "../../../types/messages";
 
@@ -94,7 +93,7 @@ export class SngRoom extends Room {
     this.players = new Array<SngPlayer | null>(this.numPlayers).fill(null);
   }
 
-  setPlayer(player: SngPlayer, id: number): void {
+  setPlayer(id: number, player: SngPlayer): void {
     this.players[id] = player;
   }
 
@@ -199,22 +198,32 @@ export class SngRoom extends Room {
 
 
   // player functions
-  playerSignUp(msg: Msg.SignupRequest, socket: Socket): void {
+  playerSignUp(request: Msg.SignupRequest, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       // Response to client, "The game is started, you cannot sign up"
       return;
     }
 
-    if (this.players[msg.id] !== null) {
+    if (this.players[request.id] !== null) {
       // Response to client, "The seat is occupied, you cannot sign up"
       return;
     }
 
-    const player = new SngPlayer(msg.id, msg.name, msg.email, socket);
-    this.setPlayer(player, msg.id);
+    const player = new SngPlayer(request.id, request.name, request.email, socket);
+    this.setPlayer(request.id, player);
 
     // Signup success, broadcast to all clients.
-    this.io.emit(ServerEvents.player_signup, { id: msg.id, name: msg.name });
+    const broadcast: Msg.SignupBroadcast = {
+      id: request.id,
+      name: request.name
+    };
+    this.io.emit("signupBroadcast", broadcast);
+
+    // Response to client, "success"
+    const response: Msg.SignupResponse = {
+      id: request.id,
+    };
+    socket.emit("signupResponse", response);
 
     // Swith the socket to the players room
     socket.leave("spectators");

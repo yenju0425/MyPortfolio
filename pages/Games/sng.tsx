@@ -1,7 +1,6 @@
 import styles from '../../styles/Sng.module.css';
 import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import { ServerEvents, ClientEvents } from "../../games/sng/socketEvents";
 import PlayerInfoCard from '@/components/playerInfoCard';
 import { RoomStatus, PlayerStatus } from '../../games/base/terms';
 
@@ -11,7 +10,7 @@ import * as Msg from "../../types/messages";
 let socket: Socket;
 
 export default function Poker() {
-  const [playerSeatId, setPlayerSeatId] = useState(-1);
+  const [playerId, setPlayerId] = useState(-1);
   const [currentRoomStatus, setCurrentRoomStatus] = useState(RoomStatus.NONE);
 
   // players' name
@@ -50,27 +49,42 @@ export default function Poker() {
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
   useEffect(() => {
-    // Create socket in useEffect, so that it is only created once.
-    socket = io();
+    console.log("Connecting to socket...");
+    fetch("../api/sockets/sngSocket").finally(() => {
+      if (socket) {
+        console.log("Socket already exists.");
+        return;
+      }
 
-    // Add event listeners before attempting to connect.
-    socket.on(ServerEvents.connect, () => {
-      console.log(socket.id + " connected.");
-    });
+      // Create socket in useEffect, so that it is only created once.
+      socket = io();
+      console.log("Socket created.");
 
-    // socket.on(ServerEvents.update_sng_room, (data: number) => { // RICKTODO: datattype 要改成我們要的
-    //   console.log("Current number: " + data);
-    //   setNumber(data);
-    // });
 
-    // RICKTODO: register all events from server here:
-    socket.on(ServerEvents.player_signup, (msg: Msg.SignupBroadcast) => {
-      console.log("Player " +  msg.name + " signed up at seat " + msg.id + ".");
-      setName(msg.id, msg.name);
-    });
+      // Add event listeners before attempting to connect.
+      socket.on("connect", () => {
+        console.log(socket.id + " connected.");
+      });
 
-    fetch("./api/socket/socket").finally(() => {
-      console.log("Socket connected.");
+      // socket.on(ServerEvents.update_sng_room, (data: number) => { // RICKTODO: datattype 要改成我們要的
+      //   console.log("Current number: " + data);
+      //   setNumber(data);
+      // });
+
+      // RICKTODO: register all events from server here:
+      socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
+        console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
+        setName(broadcast.id, broadcast.name);
+      });
+
+      socket.on("SignupResponse", (response: Msg.SignupResponse) => {
+        console.log("Successfully signed up at seat " + response.id + ".");
+        setPlayerId(response.id);
+      });
+
+
+
+
     });
   
     return () => {
@@ -95,98 +109,98 @@ export default function Poker() {
         <div className={styles.first_row}>
           <PlayerInfoCard
             socket={socket}
-            id={0}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={0}
             name={names[0]}
             currentChip={currentChips[0]}
             currentBetSize={currentBetSizes[0]}
             currentPlayerStatus={currentPlayerStatuses[0]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
           <PlayerInfoCard
             socket={socket}
-            id={1}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={1}
             name={names[1]}
             currentChip={currentChips[1]}
             currentBetSize={currentBetSizes[1]}
             currentPlayerStatus={currentPlayerStatuses[1]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
           <PlayerInfoCard
             socket={socket}
-            id={2}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={2}
             name={names[2]}
             currentChip={currentChips[2]}
             currentBetSize={currentBetSizes[2]}
             currentPlayerStatus={currentPlayerStatuses[2]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
           <PlayerInfoCard
             socket={socket}
-            id={3}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={3}
             name={names[3]}
             currentChip={currentChips[3]}
             currentBetSize={currentBetSizes[3]}
             currentPlayerStatus={currentPlayerStatuses[3]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
         </div>
         <div className={styles.second_row}>
           <PlayerInfoCard
             socket={socket}
-            id={8}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={8}
             name={names[8]}
             currentChip={currentChips[8]}
             currentBetSize={currentBetSizes[8]}
             currentPlayerStatus={currentPlayerStatuses[8]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
           <button>1</button>
           <PlayerInfoCard
             socket={socket}
-            id={4}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={4}
             name={names[4]}
             currentChip={currentChips[4]}
             currentBetSize={currentBetSizes[4]}
             currentPlayerStatus={currentPlayerStatuses[4]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
         </div>
         <div className={styles.third_row}>
           <PlayerInfoCard
             socket={socket}
-            id={7}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={7}
             name={names[7]}
             currentChip={currentChips[7]}
             currentBetSize={currentBetSizes[7]}
             currentPlayerStatus={currentPlayerStatuses[7]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
           <PlayerInfoCard
             socket={socket}
-            id={4}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={4}
             name={names[4]}
             currentChip={currentChips[4]}
             currentBetSize={currentBetSizes[4]}
             currentPlayerStatus={currentPlayerStatuses[4]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
           <PlayerInfoCard
             socket={socket}
-            id={5}
-            playerSeatId={playerSeatId}
-            currentRoomStatus={currentRoomStatus}
+            seatId={5}
             name={names[5]}
             currentChip={currentChips[5]}
             currentBetSize={currentBetSizes[5]}
             currentPlayerStatus={currentPlayerStatuses[5]}
+            currentRoomStatus={currentRoomStatus}
+            playerId={playerId}
           />
         </div>
       </div>
