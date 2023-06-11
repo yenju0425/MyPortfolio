@@ -18,61 +18,67 @@ export default function Poker() {
 
   // players' name
   const [names, setNames] = useState(Array(9).fill(''));
-  const setName = useCallback((id: number, newName: string) => {
+  const updateName = useCallback((id: number, newName: string) => {
+    console.log('updateName', id, newName);
     setNames((prevNames) => {
       return prevNames.map((name, index) => {
-        if (index === id) {
-          return newName;
-        } else {
-          return name;
-        }
+        return index === id ? newName : name;
+      });
+    });
+  }, []);
+  // set new names
+  const updateNames = useCallback((newNames: string[]) => {
+    setNames((prevNames) => {
+      return prevNames.map((name, index) => {
+        return "Really?";
       });
     });
   }, []);
 
   // players' current chip
   const [currentChips, setCurrentChips] = useState(Array(9).fill(0));
-  const setCurrentChip = useCallback((id: number, currentChip: number) => {
+  const updateCurrentChip = useCallback((id: number, newCurrentChip: number) => {
     setCurrentChips((prevCurrentChips) => {
-      const newCurrentChips = [...prevCurrentChips];
-      newCurrentChips[id] = currentChip;
-      return newCurrentChips;
+      return prevCurrentChips.map((currentChip, index) => {
+        return index === id ? newCurrentChip : currentChip;
+      });
     });
   }, []);
+
 
   // players' current bet size
   const [currentBetSizes, setCurrentBetSizes] = useState(Array(9).fill(0));
-  const setCurrentBetSize = useCallback((id: number, currentBetSize: number) => {
+  const updateCurrentBetSize = useCallback((id: number, newCurrentBetSize: number) => {
     setCurrentBetSizes((prevCurrentBetSizes) => {
-      const newCurrentBetSizes = [...prevCurrentBetSizes];
-      newCurrentBetSizes[id] = currentBetSize;
-      return newCurrentBetSizes;
+      return prevCurrentBetSizes.map((currentBetSize, index) => {
+        return index === id ? newCurrentBetSize : currentBetSize;
+      });
     });
   }, []);
+
 
   // players' current status
   const [currentPlayerStatuses, setCurrentPlayerStatuses] = useState(Array(9).fill(null));
-  const setCurrentPlayerStatus = useCallback((id: number, currentPlayerStatus: PlayerStatus | null) => {
+  const updateCurrentPlayerStatus = useCallback((id: number, newCurrentPlayerStatus: PlayerStatus | null) => {
     setCurrentPlayerStatuses((prevCurrentPlayerStatuses) => {
-      const newCurrentPlayerStatuses = [...prevCurrentPlayerStatuses];
-      newCurrentPlayerStatuses[id] = currentPlayerStatus;
-      return newCurrentPlayerStatuses;
+      return prevCurrentPlayerStatuses.map((currentPlayerStatus, index) => {
+        return index === id ? newCurrentPlayerStatus : currentPlayerStatus;
+      });
     });
   }, []);
 
+
   const resetPlayerInfo = (id: number) => {
-    setName(id, '');
-    setCurrentChip(id, 0);
-    setCurrentBetSize(id, 0);
-    setCurrentPlayerStatus(id, null);
+    updateName(id, '');
+    updateCurrentChip(id, 0);
+    updateCurrentBetSize(id, 0);
+    updateCurrentPlayerStatus(id, null);
   }
 
   const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
+    console.log("Loading room info. Curret room status.");
+    updateName(0, "aa");
     setCurrentRoomStatus(info.currentRoomStatus);
-    setNames(info.names);
-    setCurrentChips(info.currentChips);
-    setCurrentBetSizes(info.currentBetSizes);
-    setCurrentPlayerStatuses(info.currentPlayerStatuses);
   }
 
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
@@ -109,8 +115,8 @@ export default function Poker() {
 
         socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
           console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
-          setName(broadcast.id, broadcast.name);
-          setCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
+          updateName(broadcast.id, broadcast.name);
+          updateCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
         });
       }
 
