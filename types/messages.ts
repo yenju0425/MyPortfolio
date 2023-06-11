@@ -1,18 +1,22 @@
 export type ServerMessageBroadcast = {
-    text: string
+  text: string
+}
+
+export type StandupBroadcast = { // when a player cancels signup, quit, eliminated, or disconnected
+  id: number
 }
 
 export type SignupRequest = {
-    id: number,
-    name: string,
-    email: string
+  id: number,
+  name: string,
+  email: string
 }
 
 export type SignupResponse = {
-    id: number
+  id: number
 }
 
 export type SignupBroadcast = {
-    id: number,
-    name: string
+  id: number,
+  name: string
 }

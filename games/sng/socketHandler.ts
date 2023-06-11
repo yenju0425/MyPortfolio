@@ -39,6 +39,12 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
   // RICKTODO: socket.on('join_room', (data: { roomName: string }) => {
 
   socket.on("SignupRequest", (request: Msg.SignupRequest) => {
-    sngRoom.playerSignUp(request, socket);
+    console.log("SignupRequest from " + socket.id + ": " + JSON.stringify(request));
+    sngRoom.signup(request, socket);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log("disconnect from " + socket.id + ": " + reason);
+    sngRoom.disconnect(socket);
   });
 };

@@ -1,10 +1,10 @@
 import styles from '../../styles/Sng.module.css';
-import { useEffect, useState } from "react";
-import io, { Socket } from "socket.io-client";
+import { useEffect, useState, useCallback, use } from 'react';
+import io, { Socket } from 'socket.io-client';
 import PlayerInfoCard from '@/components/playerInfoCard';
 import { RoomStatus, PlayerStatus } from '../../games/base/terms';
 
-import * as Msg from "../../types/messages";
+import * as Msg from '../../types/messages';
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
@@ -13,36 +13,53 @@ export default function Poker() {
   const [playerId, setPlayerId] = useState(-1);
   const [currentRoomStatus, setCurrentRoomStatus] = useState(RoomStatus.NONE);
 
+  // For more details on how to use useState with arrays, see: https://react.dev/learn/updating-arrays-in-state
+
   // players' name
   const [names, setNames] = useState(Array(9).fill(''));
-  const setName = (index: number, name: string) => {
-    const newNames = [...names];
-    newNames[index] = name;
-    setNames(newNames);
-  }
+  const setName = useCallback((id: number, newName: string) => {
+    setNames((prevNames) => {
+      const newNames = [...prevNames];
+      newNames[id] = newName;
+      return newNames;
+    });
+  }, []);
 
   // players' current chip
   const [currentChips, setCurrentChips] = useState(Array(9).fill(0));
-  const setCurrentChip = (index: number, currentChip: number) => {
-    const newCurrentChips = [...currentChips];
-    newCurrentChips[index] = currentChip;
-    setCurrentChips(newCurrentChips);
-  }
+  const setCurrentChip = useCallback((id: number, currentChip: number) => {
+    setCurrentChips((prevCurrentChips) => {
+      const newCurrentChips = [...prevCurrentChips];
+      newCurrentChips[id] = currentChip;
+      return newCurrentChips;
+    });
+  }, []);
 
   // players' current bet size
   const [currentBetSizes, setCurrentBetSizes] = useState(Array(9).fill(0));
-  const setCurrentBetSize = (index: number, currentBetSize: number) => {
-    const newCurrentBetSizes = [...currentBetSizes];
-    newCurrentBetSizes[index] = currentBetSize;
-    setCurrentBetSizes(newCurrentBetSizes);
-  }
+  const setCurrentBetSize = useCallback((id: number, currentBetSize: number) => {
+    setCurrentBetSizes((prevCurrentBetSizes) => {
+      const newCurrentBetSizes = [...prevCurrentBetSizes];
+      newCurrentBetSizes[id] = currentBetSize;
+      return newCurrentBetSizes;
+    });
+  }, []);
 
   // players' current status
-  const [currentPlayerStatuses, setCurrentPlayerStatuses] = useState(Array(9).fill(PlayerStatus.NONE));
-  const setCurrentPlayerStatus = (index: number, currentPlayerStatus: PlayerStatus) => {
-    const newCurrentPlayerStatuses = [...currentPlayerStatuses];
-    newCurrentPlayerStatuses[index] = currentPlayerStatus;
-    setCurrentPlayerStatuses(newCurrentPlayerStatuses);
+  const [currentPlayerStatuses, setCurrentPlayerStatuses] = useState(Array(9).fill(null));
+  const setCurrentPlayerStatus = useCallback((id: number, currentPlayerStatus: PlayerStatus | null) => {
+    setCurrentPlayerStatuses((prevCurrentPlayerStatuses) => {
+      const newCurrentPlayerStatuses = [...prevCurrentPlayerStatuses];
+      newCurrentPlayerStatuses[id] = currentPlayerStatus;
+      return newCurrentPlayerStatuses;
+    });
+  }, []);
+
+  const resetPlayerInfo = (id: number) => {
+    setName(id, '');
+    setCurrentChip(id, 0);
+    setCurrentBetSize(id, 0);
+    setCurrentPlayerStatus(id, null);
   }
 
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
@@ -72,9 +89,9 @@ export default function Poker() {
       // });
 
       // RICKTODO: register all events from server here:
-      socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
-        console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
-        setName(broadcast.id, broadcast.name);
+      socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
+        console.log(broadcast.id + " stood up.");
+        resetPlayerInfo(broadcast.id);
       });
 
       socket.on("SignupResponse", (response: Msg.SignupResponse) => {
@@ -82,15 +99,17 @@ export default function Poker() {
         setPlayerId(response.id);
       });
 
-
-
-
+      socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
+        console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
+        setName(broadcast.id, broadcast.name);
+        setCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
+      });
     });
   
     return () => {
       if (socket) {
         console.log(socket.id + " disconnected.");
-        // socket.emit(ClientEvents.disconnect); This event is automatically emitted by socket.io
+        socket.emit("DisconnectRequest");
       }
     }
   }, []);
@@ -103,12 +122,17 @@ export default function Poker() {
   //   socket.emit(socketEvent.update_server_number, Number(input.value));
   // }
 
+  // The socket is created in useEffect, which is called after the first render.
+  const getSockets = (): Socket => {
+    return socket;
+  }
+
   return (
     <>
       <div className={styles.main}>
         <div className={styles.first_row}>
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={0}
             name={names[0]}
             currentChip={currentChips[0]}
@@ -118,7 +142,7 @@ export default function Poker() {
             playerId={playerId}
           />
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={1}
             name={names[1]}
             currentChip={currentChips[1]}
@@ -128,7 +152,7 @@ export default function Poker() {
             playerId={playerId}
           />
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={2}
             name={names[2]}
             currentChip={currentChips[2]}
@@ -138,7 +162,7 @@ export default function Poker() {
             playerId={playerId}
           />
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={3}
             name={names[3]}
             currentChip={currentChips[3]}
@@ -150,7 +174,7 @@ export default function Poker() {
         </div>
         <div className={styles.second_row}>
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={8}
             name={names[8]}
             currentChip={currentChips[8]}
@@ -161,7 +185,7 @@ export default function Poker() {
           />
           <button>1</button>
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={4}
             name={names[4]}
             currentChip={currentChips[4]}
@@ -173,7 +197,7 @@ export default function Poker() {
         </div>
         <div className={styles.third_row}>
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={7}
             name={names[7]}
             currentChip={currentChips[7]}
@@ -183,7 +207,7 @@ export default function Poker() {
             playerId={playerId}
           />
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={4}
             name={names[4]}
             currentChip={currentChips[4]}
@@ -193,7 +217,7 @@ export default function Poker() {
             playerId={playerId}
           />
           <PlayerInfoCard
-            socket={socket}
+            socket={getSockets}
             seatId={5}
             name={names[5]}
             currentChip={currentChips[5]}

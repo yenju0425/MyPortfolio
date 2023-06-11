@@ -197,8 +197,28 @@ export class SngRoom extends Room {
   }
 
 
-  // player functions
-  playerSignUp(request: Msg.SignupRequest, socket: Socket): void {
+  // client actions
+  disconnect(socket: Socket): void {
+    const player = this.getPlayer(socket);
+
+    if (player === null) {
+      console.log("Specator disconnected. socket.id: " + socket.id);
+      return;
+    }
+
+    if (this.currentStatus === RoomStatus.NONE) {
+      console.log("[RICKDEBUG] cancelSignUp. socket.id: " + socket.id);
+      this.cancelSignUp(socket);
+    } else if (this.currentStatus === RoomStatus.PLAYING) {
+      console.log("[RICKDEBUG] playerQuit. socket.id: " + socket.id);
+      this.playerQuit(socket);
+    } else {
+      console.error("Unexpected room status: " + this.currentStatus);
+      // TODO: Shut down the room...
+    }
+  }
+
+  signup(request: Msg.SignupRequest, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       // Response to client, "The game is started, you cannot sign up"
       return;
@@ -217,13 +237,13 @@ export class SngRoom extends Room {
       id: request.id,
       name: request.name
     };
-    this.io.emit("signupBroadcast", broadcast);
+    this.io.emit("SignupBroadcast", broadcast);
 
     // Response to client, "success"
     const response: Msg.SignupResponse = {
       id: request.id,
     };
-    socket.emit("signupResponse", response);
+    socket.emit("SignupResponse", response);
 
     // Swith the socket to the players room
     socket.leave("spectators");
@@ -234,7 +254,7 @@ export class SngRoom extends Room {
     console.log("Number of players: " + this.io.sockets.adapter.rooms.get('players')?.size);
   }
 
-  playerCancelSignUp(socket: Socket): void {
+  cancelSignUp(socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       // Response to client, "The game is started, you cannot cancel sign up"
       return;
@@ -247,11 +267,14 @@ export class SngRoom extends Room {
     }
 
     this.resetPlayer(id);
-
-    // Response to client, "success"
+    console.log("[RICKDEBUG] cancelSignUp. id: " + id);
+    const broadcast: Msg.StandupBroadcast = {
+      id: id,
+    };
+    this.io.emit("StandupBroadcast", broadcast);
   }
 
-  playerReady(socket: Socket): void {
+  ready(socket: Socket): void {
     if (this.currentStatus !== RoomStatus.NONE) {
       // Response to client, "failed"
       return;
@@ -273,7 +296,7 @@ export class SngRoom extends Room {
     }
   }
 
-  playerUnready(socket: Socket): void {
+  unready(socket: Socket): void {
     if (this.currentStatus !== RoomStatus.NONE) {
       // Response to client, "failed"
       return;
@@ -288,39 +311,6 @@ export class SngRoom extends Room {
     }
 
     player.unready();
-  }
-
-  playerQuit(socket: Socket): void {
-    if (this.currentStatus === RoomStatus.NONE) {
-      // Response to client, "The game is not started, you cannot quit"
-      return;
-    }
-
-    const player = this.getPlayer(socket);
-    if (player === null) {
-      // Response to client, "failed"
-      return;
-    }
-
-    player.quit();
-  }
-
-  playerDisconnect(socket: Socket): void { // TODO: 要確定是 Player 才送來，一般觀眾不會送來
-    const player = this.getPlayer(socket);
-
-    if (player === null) {
-      // Response to client, "failed"
-      return;
-    }
-
-    if (this.currentStatus === RoomStatus.NONE) { //perform playerCancelSignUp
-      this.playerCancelSignUp(socket);
-    } else if (this.currentStatus === RoomStatus.PLAYING) { //perform playerQuit
-      this.playerQuit(socket);
-    } else {
-      console.log('unknown status');
-      // TODO: Shut down the room...
-    }
   }
 
   playerBet(socket: Socket, amount: number): void {
@@ -350,6 +340,21 @@ export class SngRoom extends Room {
   //playerRaise(index: number, amount: number): void {
 
   //playerAllIn(index: number): void {
+
+  playerQuit(socket: Socket): void {
+    if (this.currentStatus === RoomStatus.NONE) {
+      // Response to client, "The game is not started, you cannot quit"
+      return;
+    }
+
+    const player = this.getPlayer(socket);
+    if (player === null) {
+      // Response to client, "failed"
+      return;
+    }
+
+    player.quit();
+  }
 
   // room functions
   startSng(): void {

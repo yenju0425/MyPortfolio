@@ -12,7 +12,14 @@
 
 } */
 
-.contents,
+.contents {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-left: 2rem;
+}
+
 .interactions  {
   display: flex;
   flex-direction: column;

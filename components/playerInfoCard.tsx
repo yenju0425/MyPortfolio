@@ -5,12 +5,12 @@ import { Socket } from "socket.io-client";
 import * as Msg from "../types/messages";
 
 interface PlayerInfoCardProps {
-  socket: Socket;
+  socket: () => Socket;
   seatId: number;
   name: string;
   currentChip: number;
   currentBetSize: number;
-  currentPlayerStatus: PlayerStatus;
+  currentPlayerStatus: PlayerStatus | null;
   currentRoomStatus: RoomStatus;
   playerId: number;
 }
@@ -18,13 +18,16 @@ interface PlayerInfoCardProps {
 const PlayerInfoCard = (props: PlayerInfoCardProps) => {
 
   // show control
-  const isShowControl = props.currentRoomStatus === RoomStatus.NONE && (props.playerId === -1 || props.playerId === props.seatId);
+  const isShowControl = props.currentRoomStatus === RoomStatus.NONE && (props.playerId === props.seatId || (props.playerId === -1 && props.currentPlayerStatus === null));
+
+  // show info
+  const isShowInfo = props.currentPlayerStatus !== null && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && props.currentPlayerStatus !== PlayerStatus.QUIT;
 
   // control button text
   const getControlButtonText = (): string => {
-    if (props.currentPlayerStatus === PlayerStatus.NONE) {
+    if (props.currentPlayerStatus === null) {
       return 'Sign Up';
-    } else if (props.currentPlayerStatus === PlayerStatus.SIT) {
+    } else if (props.currentPlayerStatus === PlayerStatus.NONE) {
       return 'Ready';
     } else {
       return 'Leave';
@@ -43,14 +46,12 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
 
   // Client events:
   const signUp = (event: React.FormEvent<HTMLFormElement>) => {
-
-
     event.preventDefault();
 
     const request: Msg.SignupRequest = { id: props.seatId, name: formName, email: formEmail };
-    // log socket id
-    console.log(props.socket.id);
-    props.socket.emit("SignupRequest", request);
+    props.socket().emit("SignupRequest", request);
+
+    toggleForm();
   };
 
   return (
@@ -73,7 +74,7 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
         </div>
       )}
       
-      {props.currentPlayerStatus !== PlayerStatus.NONE && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && (
+      {isShowInfo && (
         <div>
           <h2>{props.name}</h2>
           <p>Current Chip: {props.currentChip}</p>

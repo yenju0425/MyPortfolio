@@ -13,11 +13,10 @@ export default function Home() {
         <link rel="icon" href="/R.svg" type="image/svg+xml" />
       </Head>
       <main className={styles.main}>
-        {/* 狀態顯示的部分 */}
+
         <div className={styles.status}>
         </div>
 
-        {/* 主要內容 */}
         <div className={styles.contents}>
           <h1 className={styles.title}>
             Hi, I'm<Link href="/about" className={styles.rick}>R!ck Ye110w.</Link>
@@ -27,7 +26,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* 其他連結與互動 */}
         <div className={styles.interactions}>
           <Link href="/contact" className={styles.hireMe}>
             <span className={styles.leftPointer}>👉🏼</span>
