@@ -19,16 +19,13 @@ export default function Poker() {
   // players' name
   const [names, setNames] = useState(Array(9).fill(''));
   const updateName = useCallback((id: number, newName: string) => {
-    console.log('updateName', id, newName);
     setNames((prevNames) => {
-      console.log('prevNames', prevNames);
       return prevNames.map((name, index) => {
         return index === id ? newName : name;
       });
     });
   }, []);
   const updateNames = useCallback((newNames: string[]) => {
-    console.log('updateNames', newNames);
     setNames((prevNames) => {
       return prevNames.map((name, index) => {
         return newNames[index];
@@ -95,7 +92,6 @@ export default function Poker() {
   };
 
   const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
-    console.log("Loading room info. Curret room status.");
     updateNames(info.names);
     updateCurrentChips(info.currentChips);
     updateCurrentBetSizes(info.currentBetSizes);
@@ -113,7 +109,6 @@ export default function Poker() {
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
   useEffect(() => {
-    console.log("Connecting to socket...");
     fetch("../api/sockets/sngSocket").finally(() => {
       if (socket) {
         console.log("Socket exists. Socket id: " + socket.id);
@@ -128,7 +123,7 @@ export default function Poker() {
       });
 
       socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
-        console.log("Loading room info. Curret room status: " + JSON.stringify(response));
+        console.log("Room info loaded.");
         loadRoomInfo(response);
       });
 
@@ -149,7 +144,6 @@ export default function Poker() {
       });
 
       // load room info every time the component mounts
-      console.log("Loading room info...");
       socket.emit("LoadRoomInfoRequest");
     });
   

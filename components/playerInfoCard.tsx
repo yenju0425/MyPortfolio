@@ -21,7 +21,7 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
   const isShowControl = props.currentRoomStatus === RoomStatus.NONE && (props.playerId === props.id || (props.playerId === -1 && props.currentPlayerStatus === null));
 
   // show info
-  const isShowInfo = 1; //props.currentPlayerStatus !== null && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && props.currentPlayerStatus !== PlayerStatus.QUIT;
+  const isShowInfo = props.currentPlayerStatus !== null && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && props.currentPlayerStatus !== PlayerStatus.QUIT;
 
   // control button text
   const getControlButtonText = (): string => {

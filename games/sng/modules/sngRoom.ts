@@ -110,25 +110,20 @@ export class SngRoom extends Room {
   };
 
   getPlayersName(): string[] {
-    return this.players.map(player => player?.getName() || "");
+    return this.players.map(player => player ? player.getName() : '');
   };
 
   getPlayersCurrentChip(): number[] {
-    return this.players.map(player => player?.getCurrentChips() || 0);
+    return this.players.map(player => player ? player.getCurrentChips() : 0);
   };
 
   getPlayersCurrentBetSize(): number[] {
-    return this.players.map(player => player?.getCurrentBetSize() || 0);
+    return this.players.map(player => player ? player.getCurrentBetSize() : 0);
   };
 
   getPlayersStatus(): (PlayerStatus | null)[] {
-    return this.players.map(player => {
-      if (player === null) {
-        return null;
-      } else {
-        return player.getStatus();
-      }
-    });
+    // return this.players.map(player => player?.getStatus() || null); <- The `||` returns the first operand if it is truthy and the second operand otherwise.
+    return this.players.map(player => player ? player.getStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
   };
 
   // currentDealerId
@@ -230,9 +225,6 @@ export class SngRoom extends Room {
       currentRoomStatus: this.getStatus(),
       playerId: this.getPlayerId(socket),
     };
-    console.log("[RICKDEBUG] playerStatuses: ", this.getPlayersStatus());
-    console.log("[RICKDEBUG] playernMes: ", this.players);
-    console.log("[RICKDEBUG] response: " + JSON.stringify(response));
     socket.emit("LoadRoomInfoResponse", response);
   };
 
@@ -245,10 +237,8 @@ export class SngRoom extends Room {
     }
 
     if (this.currentStatus === RoomStatus.NONE) {
-      console.log("[RICKDEBUG] cancelSignUp. socket.id: " + socket.id);
       this.cancelSignUp(socket);
     } else if (this.currentStatus === RoomStatus.PLAYING) {
-      console.log("[RICKDEBUG] playerQuit. socket.id: " + socket.id);
       this.playerQuit(socket);
     } else {
       console.error("Unexpected room status: " + this.currentStatus);
@@ -307,7 +297,7 @@ export class SngRoom extends Room {
     }
 
     this.resetPlayer(id);
-    console.log("[RICKDEBUG] cancelSignUp. id: " + id);
+
     const broadcast: Msg.StandupBroadcast = {
       id: id,
     };
@@ -362,7 +352,6 @@ export class SngRoom extends Room {
     }
 
     // TODO: check if the amount is valid, if tht action is valid
-
     console.log('playerBet', amount);
 
     // place bet
