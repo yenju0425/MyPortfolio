@@ -47,12 +47,12 @@ export class SngRoom extends Room {
     this.currentBlindUpdateTimer = undefined;
     this.currentRound = null;
     this.currentPlayerId = null;
-  }
+  };
 
   // utility functions
   isAllPlayersReady(): boolean {
     return this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
-  }
+  };
 
   roundElimination(): void {
     this.players.forEach(player => {
@@ -60,70 +60,76 @@ export class SngRoom extends Room {
         player?.eliminate();
       }
     });
-  }
+  };
 
   getNumOfPlayersStillInSng(): number {
     return this.players.filter(player => player?.isStillInSng()).length;
-  }
+  };
 
   // totalNumSngs
   updateTotalNumSngs(): void {
     this.totalNumSngs++;
-  }
+  };
 
   getTotalNumSngs(): number {
     return this.totalNumSngs;
-  }
+  };
 
   // totalNumRounds
   udateTotalNumRounds(): void {
     this.totalNumRounds++;
-  }
+  };
 
   getTotalNumRounds(): number {
     return this.totalNumRounds;
-  }
+  };
 
   // players
   initSngPlayers(): void {
     this.players.forEach(player => player?.startSng(this.initChips));
-  }
+  };
 
   resetPlayers(): void {
     this.players = new Array<SngPlayer | null>(this.numPlayers).fill(null);
-  }
+  };
 
   setPlayer(id: number, player: SngPlayer): void {
     this.players[id] = player;
-  }
+  };
 
   resetPlayer(id: number): void { //TODO: might need to do some safety check
     this.players[id] = null;
-  }
+  };
 
   getPlayer(socket: Socket): SngPlayer | null {
     return this.players.find(player => player?.getSocket() === socket) || null;
-  }
+  };
 
   getPlayerId(socket: Socket): number {
     return this.players.findIndex(player => player?.getSocket() === socket);
-  }
+  };
 
   getPlayersName(): string[] {
     return this.players.map(player => player?.getName() || "");
-  }
+  };
 
   getPlayersCurrentChip(): number[] {
     return this.players.map(player => player?.getCurrentChips() || 0);
-  }
+  };
 
   getPlayersCurrentBetSize(): number[] {
     return this.players.map(player => player?.getCurrentBetSize() || 0);
-  }
+  };
 
   getPlayersStatus(): (PlayerStatus | null)[] {
-    return this.players.map(player => player?.getStatus() || null);
-  }
+    return this.players.map(player => {
+      if (player === null) {
+        return null;
+      } else {
+        return player.getStatus();
+      }
+    });
+  };
 
   // currentDealerId
   getNextDealerId(): number {
@@ -141,11 +147,11 @@ export class SngRoom extends Room {
 
   updateCurrentDealerId(): void {
     this.currentDealerId = this.getNextDealerId();
-  }
+  };
 
   resetCurrentDealerId(): void {
     this.currentDealerId = null;
-  }
+  };
 
   getCurrentDealerId(): number {
     if (this.currentDealerId === null) {
@@ -160,7 +166,7 @@ export class SngRoom extends Room {
   // currentRound
   initCurrentRound(): void {
     this.currentRound = new SngRound(this.endRound, this.players, this.getCurrentDealerId(), this.getCurrentBigBlind());
-  }
+  };
 
   getCurrentRound(): SngRound {
     if (!this.currentRound) {
@@ -176,12 +182,12 @@ export class SngRoom extends Room {
   updateCurrentBlindLevel(): void {
     this.currentBlindLevel++;
     this.lastBlindUpdateTime = Date.now();
-  }
+  };
 
   resetCurrentBlindLevel(): void {
     this.currentBlindLevel = 0;
     this.lastBlindUpdateTime = null;
-  }
+  };
 
   getCurrentBigBlind(): number {
     if (this.currentBlindLevel === 0) {
@@ -189,17 +195,17 @@ export class SngRoom extends Room {
       this.updateCurrentBlindLevel();
     }
     return this.blindStructure[this.currentBlindLevel].bigBlind;
-  }
+  };
 
   startBlindUp(): void {
     this.updateCurrentBlindLevel();
     this.setBlinUpTimer();
-  }
+  };
 
   endBlindUp(): void {
     clearTimeout(this.currentBlindUpdateTimer);
     this.resetCurrentBlindLevel();
-  }
+  };
 
   setBlinUpTimer(): void {
     const blindLevelTime = this.blindStructure[this.currentBlindLevel]?.duration * 60 * 1000;
@@ -210,7 +216,7 @@ export class SngRoom extends Room {
       this.updateCurrentBlindLevel();
       this.setBlinUpTimer();
     }, blindLevelTime);
-  }
+  };
 
 
   // client actions
@@ -224,9 +230,11 @@ export class SngRoom extends Room {
       currentRoomStatus: this.getStatus(),
       playerId: this.getPlayerId(socket),
     };
-
+    console.log("[RICKDEBUG] playerStatuses: ", this.getPlayersStatus());
+    console.log("[RICKDEBUG] playernMes: ", this.players);
+    console.log("[RICKDEBUG] response: " + JSON.stringify(response));
     socket.emit("LoadRoomInfoResponse", response);
-  }
+  };
 
   disconnect(socket: Socket): void {
     const player = this.getPlayer(socket);
@@ -284,7 +292,7 @@ export class SngRoom extends Room {
     // Get the number of sockets in the room
     console.log("Number of spectators: " + this.io.sockets.adapter.rooms.get('spectators')?.size);
     console.log("Number of players: " + this.io.sockets.adapter.rooms.get('players')?.size);
-  }
+  };
 
   cancelSignUp(socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
@@ -304,7 +312,7 @@ export class SngRoom extends Room {
       id: id,
     };
     this.io.emit("StandupBroadcast", broadcast);
-  }
+  };
 
   ready(socket: Socket): void {
     if (this.currentStatus !== RoomStatus.NONE) {
@@ -343,7 +351,7 @@ export class SngRoom extends Room {
     }
 
     player.unready();
-  }
+  };
 
   playerBet(socket: Socket, amount: number): void {
     const player = this.getPlayer(socket);
@@ -363,7 +371,7 @@ export class SngRoom extends Room {
 
     // update round info
     this.getCurrentRound().updateCurrentBetSize(amount);
-  }
+  };
 
   //playerCall(index: number): void {
 
@@ -386,7 +394,7 @@ export class SngRoom extends Room {
     }
 
     player.quit();
-  }
+  };
 
   // room functions
   startSng(): void {
@@ -410,7 +418,7 @@ export class SngRoom extends Room {
 
     // Start the first round
     this.startRound();
-  }
+  };
 
   startRound(): void {
     // Update totalNumRounds.
@@ -427,7 +435,7 @@ export class SngRoom extends Room {
 
     // Start the first street.
     this.getCurrentRound().startStreet();
-  }
+  };
 
   endRound(): void {
     // Reset current round.

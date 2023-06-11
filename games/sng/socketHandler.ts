@@ -38,7 +38,7 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
   // RICKTODO: 寫個 function 來處理各種事件
   // RICKTODO: socket.on('join_room', (data: { roomName: string }) => {
 
-  socket.on("loadRoomInfoRequest", () => {
+  socket.on("LoadRoomInfoRequest", () => {
     console.log("loadRoomInfoRequest from " + socket.id);
     sngRoom.loadRoomInfo(socket);
   });

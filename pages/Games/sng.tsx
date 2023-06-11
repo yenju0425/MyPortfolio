@@ -104,6 +104,11 @@ export default function Poker() {
     setPlayerId(info.playerId);
   };
 
+  // utility functions
+  const getSockets = (): Socket => { // The socket is created in useEffect, which is called after the first render.
+    return socket;
+  };
+
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
@@ -144,26 +149,13 @@ export default function Poker() {
       });
 
       // load room info every time the component mounts
+      console.log("Loading room info...");
       socket.emit("LoadRoomInfoRequest");
     });
   
     return () => {
-      // do something when component unmounts
-    }
+    };
   }, []);
-
-  // const myFunction = async (event: React.FormEvent) => {
-  //   event.preventDefault();
-  //   const form = event.target as HTMLFormElement; // Cast event.target to HTMLFormElement
-  //   const input = form.elements.namedItem('number') as HTMLInputElement;
-
-  //   socket.emit(socketEvent.update_server_number, Number(input.value));
-  // }
-
-  // The socket is created in useEffect, which is called after the first render.
-  const getSockets = (): Socket => {
-    return socket;
-  };
 
   return (
     <>
