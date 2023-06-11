@@ -21,16 +21,17 @@ export default function Poker() {
   const updateName = useCallback((id: number, newName: string) => {
     console.log('updateName', id, newName);
     setNames((prevNames) => {
+      console.log('prevNames', prevNames);
       return prevNames.map((name, index) => {
         return index === id ? newName : name;
       });
     });
   }, []);
-  // set new names
   const updateNames = useCallback((newNames: string[]) => {
+    console.log('updateNames', newNames);
     setNames((prevNames) => {
       return prevNames.map((name, index) => {
-        return "Really?";
+        return newNames[index];
       });
     });
   }, []);
@@ -44,7 +45,13 @@ export default function Poker() {
       });
     });
   }, []);
-
+  const updateCurrentChips = useCallback((newCurrentChips: number[]) => {
+    setCurrentChips((prevCurrentChips) => {
+      return prevCurrentChips.map((currentChip, index) => {
+        return newCurrentChips[index];
+      });
+    });
+  }, []);
 
   // players' current bet size
   const [currentBetSizes, setCurrentBetSizes] = useState(Array(9).fill(0));
@@ -55,7 +62,13 @@ export default function Poker() {
       });
     });
   }, []);
-
+  const updateCurrentBetSizes = useCallback((newCurrentBetSizes: number[]) => {
+    setCurrentBetSizes((prevCurrentBetSizes) => {
+      return prevCurrentBetSizes.map((currentBetSize, index) => {
+        return newCurrentBetSizes[index];
+      });
+    });
+  }, []);
 
   // players' current status
   const [currentPlayerStatuses, setCurrentPlayerStatuses] = useState(Array(9).fill(null));
@@ -66,20 +79,30 @@ export default function Poker() {
       });
     });
   }, []);
-
+  const updateCurrentPlayerStatuses = useCallback((newCurrentPlayerStatuses: (PlayerStatus | null)[]) => {
+    setCurrentPlayerStatuses((prevCurrentPlayerStatuses) => {
+      return prevCurrentPlayerStatuses.map((currentPlayerStatus, index) => {
+        return newCurrentPlayerStatuses[index];
+      });
+    });
+  }, []);
 
   const resetPlayerInfo = (id: number) => {
     updateName(id, '');
     updateCurrentChip(id, 0);
     updateCurrentBetSize(id, 0);
     updateCurrentPlayerStatus(id, null);
-  }
+  };
 
   const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
     console.log("Loading room info. Curret room status.");
-    updateName(0, "aa");
+    updateNames(info.names);
+    updateCurrentChips(info.currentChips);
+    updateCurrentBetSizes(info.currentBetSizes);
+    updateCurrentPlayerStatuses(info.currentPlayerStatuses);
     setCurrentRoomStatus(info.currentRoomStatus);
-  }
+    setPlayerId(info.playerId);
+  };
 
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
@@ -92,36 +115,36 @@ export default function Poker() {
       } else {
         socket = io();
         console.log("Socket created. Socket id: " + socket.id);
-
-        // Add event listeners before attempting to connect.
-        socket.on("connect", () => { // default connect event
-          console.log(socket.id + " connected.");
-        });
-
-        socket.on("loadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
-          console.log("Loading room info. Curret room status: " + JSON.stringify(response));
-          loadRoomInfo(response);
-        });
-
-        socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
-          console.log(broadcast.id + " stood up.");
-          resetPlayerInfo(broadcast.id);
-        });
-
-        socket.on("SignupResponse", (response: Msg.SignupResponse) => {
-          console.log("Successfully signed up at seat " + response.id + ".");
-          setPlayerId(response.id);
-        });
-
-        socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
-          console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
-          updateName(broadcast.id, broadcast.name);
-          updateCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
-        });
       }
 
+      // Add event listeners before attempting to connect, no matter whether the socket is new or not.
+      socket.on("connect", () => { // default connect event
+        console.log(socket.id + " connected.");
+      });
+
+      socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
+        console.log("Loading room info. Curret room status: " + JSON.stringify(response));
+        loadRoomInfo(response);
+      });
+
+      socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
+        console.log(broadcast.id + " stood up.");
+        resetPlayerInfo(broadcast.id);
+      });
+
+      socket.on("SignupResponse", (response: Msg.SignupResponse) => {
+        console.log("Successfully signed up at seat " + response.id + ".");
+        setPlayerId(response.id);
+      });
+
+      socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
+        console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
+        updateName(broadcast.id, broadcast.name);
+        updateCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
+      });
+
       // load room info every time the component mounts
-      socket.emit("loadRoomInfoRequest");
+      socket.emit("LoadRoomInfoRequest");
     });
   
     return () => {
@@ -140,7 +163,7 @@ export default function Poker() {
   // The socket is created in useEffect, which is called after the first render.
   const getSockets = (): Socket => {
     return socket;
-  }
+  };
 
   return (
     <>
@@ -198,7 +221,7 @@ export default function Poker() {
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
-          <button>1</button>
+          <button>DEALER</button>
           <PlayerInfoCard
             socket={getSockets}
             id={4}
@@ -245,4 +268,4 @@ export default function Poker() {
       </div>
     </>
   )
-}
+};

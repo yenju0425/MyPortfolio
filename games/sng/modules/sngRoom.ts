@@ -225,7 +225,7 @@ export class SngRoom extends Room {
       playerId: this.getPlayerId(socket),
     };
 
-    socket.emit("loadRoomInfoResponse", response);
+    socket.emit("LoadRoomInfoResponse", response);
   }
 
   disconnect(socket: Socket): void {
