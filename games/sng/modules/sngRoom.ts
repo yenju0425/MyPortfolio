@@ -109,6 +109,22 @@ export class SngRoom extends Room {
     return this.players.findIndex(player => player?.getSocket() === socket);
   }
 
+  getPlayersName(): string[] {
+    return this.players.map(player => player?.getName() || "");
+  }
+
+  getPlayersCurrentChip(): number[] {
+    return this.players.map(player => player?.getCurrentChips() || 0);
+  }
+
+  getPlayersCurrentBetSize(): number[] {
+    return this.players.map(player => player?.getCurrentBetSize() || 0);
+  }
+
+  getPlayersStatus(): (PlayerStatus | null)[] {
+    return this.players.map(player => player?.getStatus() || null);
+  }
+
   // currentDealerId
   getNextDealerId(): number {
     if (!this.currentDealerId) {
@@ -198,6 +214,20 @@ export class SngRoom extends Room {
 
 
   // client actions
+
+  loadRoomInfo(socket: Socket): void {
+    const response: Msg.LoadRoomInfoResponse = {
+      names: this.getPlayersName(),
+      currentChips: this.getPlayersCurrentChip(),
+      currentBetSizes: this.getPlayersCurrentBetSize(),
+      currentPlayerStatuses: this.getPlayersStatus(),
+      currentRoomStatus: this.getStatus(),
+      playerId: this.getPlayerId(socket),
+    };
+
+    socket.emit("loadRoomInfoResponse", response);
+  }
+
   disconnect(socket: Socket): void {
     const player = this.getPlayer(socket);
 
@@ -221,11 +251,13 @@ export class SngRoom extends Room {
   signup(request: Msg.SignupRequest, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       // Response to client, "The game is started, you cannot sign up"
+      console.log("The game is started, you cannot sign up");
       return;
     }
 
     if (this.players[request.id] !== null) {
       // Response to client, "The seat is occupied, you cannot sign up"
+      console.log("The seat is occupied, you cannot sign up");
       return;
     }
 

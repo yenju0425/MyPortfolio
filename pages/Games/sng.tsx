@@ -5,6 +5,7 @@ import PlayerInfoCard from '@/components/playerInfoCard';
 import { RoomStatus, PlayerStatus } from '../../games/base/terms';
 
 import * as Msg from '../../types/messages';
+import { info } from 'console';
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
@@ -19,9 +20,13 @@ export default function Poker() {
   const [names, setNames] = useState(Array(9).fill(''));
   const setName = useCallback((id: number, newName: string) => {
     setNames((prevNames) => {
-      const newNames = [...prevNames];
-      newNames[id] = newName;
-      return newNames;
+      return prevNames.map((name, index) => {
+        if (index === id) {
+          return newName;
+        } else {
+          return name;
+        }
+      });
     });
   }, []);
 
@@ -62,6 +67,14 @@ export default function Poker() {
     setCurrentPlayerStatus(id, null);
   }
 
+  const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
+    setCurrentRoomStatus(info.currentRoomStatus);
+    setNames(info.names);
+    setCurrentChips(info.currentChips);
+    setCurrentBetSizes(info.currentBetSizes);
+    setCurrentPlayerStatuses(info.currentPlayerStatuses);
+  }
+
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
@@ -69,48 +82,44 @@ export default function Poker() {
     console.log("Connecting to socket...");
     fetch("../api/sockets/sngSocket").finally(() => {
       if (socket) {
-        console.log("Socket already exists.");
-        return;
+        console.log("Socket exists. Socket id: " + socket.id);
+      } else {
+        socket = io();
+        console.log("Socket created. Socket id: " + socket.id);
+
+        // Add event listeners before attempting to connect.
+        socket.on("connect", () => { // default connect event
+          console.log(socket.id + " connected.");
+        });
+
+        socket.on("loadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
+          console.log("Loading room info. Curret room status: " + JSON.stringify(response));
+          loadRoomInfo(response);
+        });
+
+        socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
+          console.log(broadcast.id + " stood up.");
+          resetPlayerInfo(broadcast.id);
+        });
+
+        socket.on("SignupResponse", (response: Msg.SignupResponse) => {
+          console.log("Successfully signed up at seat " + response.id + ".");
+          setPlayerId(response.id);
+        });
+
+        socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
+          console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
+          setName(broadcast.id, broadcast.name);
+          setCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
+        });
       }
 
-      // Create socket in useEffect, so that it is only created once.
-      socket = io();
-      console.log("Socket created.");
-
-
-      // Add event listeners before attempting to connect.
-      socket.on("connect", () => {
-        console.log(socket.id + " connected.");
-      });
-
-      // socket.on(ServerEvents.update_sng_room, (data: number) => { // RICKTODO: datattype 要改成我們要的
-      //   console.log("Current number: " + data);
-      //   setNumber(data);
-      // });
-
-      // RICKTODO: register all events from server here:
-      socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
-        console.log(broadcast.id + " stood up.");
-        resetPlayerInfo(broadcast.id);
-      });
-
-      socket.on("SignupResponse", (response: Msg.SignupResponse) => {
-        console.log("Successfully signed up at seat " + response.id + ".");
-        setPlayerId(response.id);
-      });
-
-      socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
-        console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
-        setName(broadcast.id, broadcast.name);
-        setCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
-      });
+      // load room info every time the component mounts
+      socket.emit("loadRoomInfoRequest");
     });
   
     return () => {
-      if (socket) {
-        console.log(socket.id + " disconnected.");
-        socket.emit("DisconnectRequest");
-      }
+      // do something when component unmounts
     }
   }, []);
 
@@ -133,7 +142,7 @@ export default function Poker() {
         <div className={styles.first_row}>
           <PlayerInfoCard
             socket={getSockets}
-            seatId={0}
+            id={0}
             name={names[0]}
             currentChip={currentChips[0]}
             currentBetSize={currentBetSizes[0]}
@@ -143,7 +152,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            seatId={1}
+            id={1}
             name={names[1]}
             currentChip={currentChips[1]}
             currentBetSize={currentBetSizes[1]}
@@ -153,7 +162,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            seatId={2}
+            id={2}
             name={names[2]}
             currentChip={currentChips[2]}
             currentBetSize={currentBetSizes[2]}
@@ -163,7 +172,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            seatId={3}
+            id={3}
             name={names[3]}
             currentChip={currentChips[3]}
             currentBetSize={currentBetSizes[3]}
@@ -175,7 +184,7 @@ export default function Poker() {
         <div className={styles.second_row}>
           <PlayerInfoCard
             socket={getSockets}
-            seatId={8}
+            id={8}
             name={names[8]}
             currentChip={currentChips[8]}
             currentBetSize={currentBetSizes[8]}
@@ -186,7 +195,7 @@ export default function Poker() {
           <button>1</button>
           <PlayerInfoCard
             socket={getSockets}
-            seatId={4}
+            id={4}
             name={names[4]}
             currentChip={currentChips[4]}
             currentBetSize={currentBetSizes[4]}
@@ -198,7 +207,7 @@ export default function Poker() {
         <div className={styles.third_row}>
           <PlayerInfoCard
             socket={getSockets}
-            seatId={7}
+            id={7}
             name={names[7]}
             currentChip={currentChips[7]}
             currentBetSize={currentBetSizes[7]}
@@ -208,17 +217,17 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            seatId={4}
-            name={names[4]}
-            currentChip={currentChips[4]}
-            currentBetSize={currentBetSizes[4]}
-            currentPlayerStatus={currentPlayerStatuses[4]}
+            id={6}
+            name={names[6]}
+            currentChip={currentChips[6]}
+            currentBetSize={currentBetSizes[6]}
+            currentPlayerStatus={currentPlayerStatuses[6]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
           <PlayerInfoCard
             socket={getSockets}
-            seatId={5}
+            id={5}
             name={names[5]}
             currentChip={currentChips[5]}
             currentBetSize={currentBetSizes[5]}

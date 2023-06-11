@@ -38,6 +38,11 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
   // RICKTODO: 寫個 function 來處理各種事件
   // RICKTODO: socket.on('join_room', (data: { roomName: string }) => {
 
+  socket.on("loadRoomInfoRequest", () => {
+    console.log("loadRoomInfoRequest from " + socket.id);
+    sngRoom.loadRoomInfo(socket);
+  });
+
   socket.on("SignupRequest", (request: Msg.SignupRequest) => {
     console.log("SignupRequest from " + socket.id + ": " + JSON.stringify(request));
     sngRoom.signup(request, socket);
