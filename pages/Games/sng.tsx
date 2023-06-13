@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, use } from 'react';
 import io, { Socket } from 'socket.io-client';
 import PlayerInfoCard from '@/components/playerInfoCard';
 import { RoomStatus, PlayerStatus } from '../../games/base/terms';
+import { Card, Deck } from '../../games/sng/modules/deck';
 
 import * as Msg from '../../types/messages';
 import { info } from 'console';
@@ -80,6 +81,23 @@ export default function Poker() {
     setCurrentPlayerStatuses((prevCurrentPlayerStatuses) => {
       return prevCurrentPlayerStatuses.map((currentPlayerStatus, index) => {
         return newCurrentPlayerStatuses[index];
+      });
+    });
+  }, []);
+
+  // players' hole cards
+  const [playersHoleCards, setPlayersHoleCards] = useState(Array(9).fill(Array(2).fill(null)));
+  const updatePlayerHoleCards = useCallback((id: number, newPlayerHoleCards: Card[]) => {
+    setPlayersHoleCards((prevPlayersHoleCards) => {
+      return prevPlayersHoleCards.map((playersHoleCard, index) => {
+        return index === id ? newPlayerHoleCards : playersHoleCard;
+      });
+    });
+  }, []);
+  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: Card[][]) => {
+    setPlayersHoleCards((prevPlayersHoleCards) => {
+      return prevPlayersHoleCards.map((playersHoleCard, index) => {
+        return newPlayersHoleCards[index];
       });
     });
   }, []);
@@ -171,6 +189,7 @@ export default function Poker() {
             currentChip={currentChips[0]}
             currentBetSize={currentBetSizes[0]}
             currentPlayerStatus={currentPlayerStatuses[0]}
+            holeCards={playersHoleCards[0]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -181,6 +200,7 @@ export default function Poker() {
             currentChip={currentChips[1]}
             currentBetSize={currentBetSizes[1]}
             currentPlayerStatus={currentPlayerStatuses[1]}
+            holeCards={playersHoleCards[1]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -191,6 +211,7 @@ export default function Poker() {
             currentChip={currentChips[2]}
             currentBetSize={currentBetSizes[2]}
             currentPlayerStatus={currentPlayerStatuses[2]}
+            holeCards={playersHoleCards[2]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -201,6 +222,7 @@ export default function Poker() {
             currentChip={currentChips[3]}
             currentBetSize={currentBetSizes[3]}
             currentPlayerStatus={currentPlayerStatuses[3]}
+            holeCards={playersHoleCards[3]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -213,6 +235,7 @@ export default function Poker() {
             currentChip={currentChips[8]}
             currentBetSize={currentBetSizes[8]}
             currentPlayerStatus={currentPlayerStatuses[8]}
+            holeCards={playersHoleCards[8]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -224,6 +247,7 @@ export default function Poker() {
             currentChip={currentChips[4]}
             currentBetSize={currentBetSizes[4]}
             currentPlayerStatus={currentPlayerStatuses[4]}
+            holeCards={playersHoleCards[4]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -236,6 +260,7 @@ export default function Poker() {
             currentChip={currentChips[7]}
             currentBetSize={currentBetSizes[7]}
             currentPlayerStatus={currentPlayerStatuses[7]}
+            holeCards={playersHoleCards[7]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -246,6 +271,7 @@ export default function Poker() {
             currentChip={currentChips[6]}
             currentBetSize={currentBetSizes[6]}
             currentPlayerStatus={currentPlayerStatuses[6]}
+            holeCards={playersHoleCards[6]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />
@@ -256,6 +282,7 @@ export default function Poker() {
             currentChip={currentChips[5]}
             currentBetSize={currentBetSizes[5]}
             currentPlayerStatus={currentPlayerStatuses[5]}
+            holeCards={playersHoleCards[5]}
             currentRoomStatus={currentRoomStatus}
             playerId={playerId}
           />

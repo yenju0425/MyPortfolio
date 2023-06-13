@@ -21,6 +21,11 @@
   font-weight: bold;
 }
 
+.holeCards {
+  display: flex;
+  justify-content: space-between;
+}
+
 .fold {
   display: none;
 }

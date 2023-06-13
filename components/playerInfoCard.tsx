@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from '../styles/Player.module.css';
 import { RoomStatus, PlayerStatus } from '../games/base/terms';
 import { Socket } from "socket.io-client";
+import { Card, Deck } from '../games/sng/modules/deck';
 import * as Msg from "../types/messages";
 
 interface PlayerInfoCardProps {
@@ -11,6 +12,7 @@ interface PlayerInfoCardProps {
   currentChip: number;
   currentBetSize: number;
   currentPlayerStatus: PlayerStatus | null;
+  holeCards: Card[];
   currentRoomStatus: RoomStatus;
   playerId: number;
 }
@@ -105,6 +107,14 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
           </div>
           <p>Current Chip: {props.currentChip}</p>
           <p>Bet Size: {props.currentBetSize}</p>
+          <div className={styles.holeCards}>
+            <div>
+              {JSON.stringify(props.holeCards[0])}
+            </div>
+            <div>
+              {JSON.stringify(props.holeCards[1])}
+            </div>
+          </div>
           <div>
             <button className={styles.fold}>Fold</button>
             <button className={styles.check}>Check</button>
