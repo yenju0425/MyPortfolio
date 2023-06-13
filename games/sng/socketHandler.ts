@@ -38,18 +38,23 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
   // RICKTODO: 寫個 function 來處理各種事件
   // RICKTODO: socket.on('join_room', (data: { roomName: string }) => {
 
+  socket.on("disconnect", (reason) => {
+    console.log("socket: " + socket.id + " disconnected. Reason: " + reason + ".");
+    sngRoom.disconnect(socket);
+  });
+
   socket.on("LoadRoomInfoRequest", () => {
-    console.log("loadRoomInfoRequest from " + socket.id);
+    console.log("socket: " + socket.id + " LoadRoomInfoRequest.");
     sngRoom.loadRoomInfo(socket);
   });
 
   socket.on("SignupRequest", (request: Msg.SignupRequest) => {
-    console.log("SignupRequest from " + socket.id + ": " + JSON.stringify(request));
+    console.log("socket: " + socket.id + " SignupRequest: " + JSON.stringify(request));
     sngRoom.signup(request, socket);
   });
 
-  socket.on("disconnect", (reason) => {
-    console.log("disconnect from " + socket.id + ": " + reason);
-    sngRoom.disconnect(socket);
+  socket.on("ReadyRequest", () => {
+    console.log("socket: " + socket.id + " ReadyRequest.");
+    sngRoom.ready(socket);
   });
 };

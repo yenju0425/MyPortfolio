@@ -1,29 +1,46 @@
 .player_info_card {
-    width: 15vw;
-    max-width: 150px;
-  }
-  
-  .fold {
-    display: none;
-  }
-  
-  .check {
-    display: none;
-  }
-  
-  .call {
-    display: none;
-  }
-  
-  .bet {
-    display: none;
-  }
-  
-  .raise {
-    display: none;
-  }
-  
-  .all_in {
-    display: none;
-  }
-  
+  display: flex;
+  width: 15vw;
+  height: 20vh;
+  max-width: 150px;
+  max-height: 120px;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.controlContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.name {
+  display: flex;
+  text-align: center;
+  justify-content: space-between;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.fold {
+  display: none;
+}
+
+.check {
+  display: none;
+}
+
+.call {
+  display: none;
+}
+
+.bet {
+  display: none;
+}
+
+.raise {
+  display: none;
+}
+
+.all_in {
+  display: none;
+}

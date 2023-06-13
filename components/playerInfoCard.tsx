@@ -23,6 +23,32 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
   // show info
   const isShowInfo = props.currentPlayerStatus !== null && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && props.currentPlayerStatus !== PlayerStatus.QUIT;
 
+  // show form
+  const [isShowForm, setShowForm] = useState(false);
+  const toggleForm = () => {
+    setShowForm(!isShowForm);
+  };
+
+  const isReady = props.currentPlayerStatus === PlayerStatus.READY;
+
+  // form fields
+  const [formName, setFormName] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+
+  // client events:
+  const signUp = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const request: Msg.SignupRequest = { id: props.id, name: formName, email: formEmail };
+    props.socket().emit("SignupRequest", request);
+
+    toggleForm();
+  };
+
+  const ready = () => {
+    props.socket().emit("ReadyRequest");
+  };
+
   // control button text
   const getControlButtonText = (): string => {
     if (props.currentPlayerStatus === null) {
@@ -34,24 +60,15 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
     }
   };
 
-  // show form
-  const [isShowForm, setShowForm] = useState(false);
-  const toggleForm = () => {
-    setShowForm(!isShowForm);
-  };
-
-  // form fields
-  const [formName, setFormName] = useState('');
-  const [formEmail, setFormEmail] = useState('');
-
-  // Client events:
-  const signUp = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const request: Msg.SignupRequest = { id: props.id, name: formName, email: formEmail };
-    props.socket().emit("SignupRequest", request);
-
-    toggleForm();
+  // contorl button event
+  const controlButtonEvent = () => {
+    if (props.currentPlayerStatus === null) {
+      toggleForm();
+    } else if (props.currentPlayerStatus === PlayerStatus.NONE) {
+      ready();
+    } else {
+      console.log('Invalid operation');
+    }
   };
 
   return (
@@ -59,9 +76,11 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
       {isShowControl && (
         <div>
           {!isShowForm && (
-            <button className={styles.Control} onClick={toggleForm}>
-              {getControlButtonText()}
-            </button>
+            <div className={styles.controlContainer}>
+              <button onClick={controlButtonEvent}>
+                {getControlButtonText()}
+              </button>
+            </div>
           )}
           {isShowForm && (
             <form onSubmit={signUp}>
@@ -76,7 +95,14 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
       
       {isShowInfo && (
         <div>
-          <h2>{props.name}</h2>
+          <div className={styles.name}>
+            <div>
+              {props.name} 
+            </div>
+            {isReady && (
+              <div>✅</div>
+            )}
+          </div>
           <p>Current Chip: {props.currentChip}</p>
           <p>Bet Size: {props.currentBetSize}</p>
           <div>

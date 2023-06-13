@@ -248,28 +248,27 @@ export class SngRoom extends Room {
 
   signup(request: Msg.SignupRequest, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
-      // Response to client, "The game is started, you cannot sign up"
-      console.log("The game is started, you cannot sign up");
+      console.log(socket.id + " signup failed: Cannot signup when the game is started.");
       return;
     }
 
     if (this.players[request.id] !== null) {
-      // Response to client, "The seat is occupied, you cannot sign up"
-      console.log("The seat is occupied, you cannot sign up");
+      console.log(socket.id + " signup failed: The seat is occupied.");
       return;
     }
 
     const player = new SngPlayer(request.id, request.name, request.email, socket);
     this.setPlayer(request.id, player);
 
-    // Signup success, broadcast to all clients.
+    // Signup success.
+    console.log(socket.id + " signup success.");
+
     const broadcast: Msg.SignupBroadcast = {
       id: request.id,
       name: request.name
     };
     this.io.emit("SignupBroadcast", broadcast);
 
-    // Response to client, "success"
     const response: Msg.SignupResponse = {
       id: request.id,
     };
@@ -279,9 +278,8 @@ export class SngRoom extends Room {
     socket.leave("spectators");
     socket.join("players");
 
-    // Get the number of sockets in the room
-    console.log("Number of spectators: " + this.io.sockets.adapter.rooms.get('spectators')?.size);
-    console.log("Number of players: " + this.io.sockets.adapter.rooms.get('players')?.size);
+    console.log("Number of Spectators: " + this.io.sockets.adapter.rooms.get('spectators')?.size || 0);
+    console.log("Number of Players: " + this.io.sockets.adapter.rooms.get('players')?.size || 0);
   };
 
   cancelSignUp(socket: Socket): void {
@@ -306,19 +304,27 @@ export class SngRoom extends Room {
 
   ready(socket: Socket): void {
     if (this.currentStatus !== RoomStatus.NONE) {
-      // Response to client, "failed"
+      console.log(socket.id + " ready failed: The game is started.");
       return;
     }
 
-    // if the seat is empty, the player cannot ready
     const player = this.getPlayer(socket);
-
     if (player === null) {
-      // Response to client, "failed"
+      console.log(socket.id + " ready failed: Not signed up.");
       return;
     }
 
     player.ready();
+
+    // Ready success.
+    console.log(socket.id + " is ready.");
+
+    const broadcast: Msg.ReadyBroadcast = {
+      id: this.getPlayerId(socket),
+    };
+    this.io.emit("ReadyBroadcast", broadcast);
+
+    socket.emit("ReadyResponse");
 
     // check if all players are ready
     if (this.isAllPlayersReady()) {

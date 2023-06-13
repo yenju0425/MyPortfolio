@@ -119,28 +119,37 @@ export default function Poker() {
 
       // Add event listeners before attempting to connect, no matter whether the socket is new or not.
       socket.on("connect", () => { // default connect event
-        console.log(socket.id + " connected.");
-      });
-
-      socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
-        console.log("Room info loaded.");
-        loadRoomInfo(response);
+        console.log("Connected to server.");
       });
 
       socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
-        console.log(broadcast.id + " stood up.");
+        console.log("StandupBroadcast: " + JSON.stringify(broadcast));
         resetPlayerInfo(broadcast.id);
       });
 
+      socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
+        console.log("LoadRoomInfoResponse: " + JSON.stringify(response));
+        loadRoomInfo(response);
+      });
+
       socket.on("SignupResponse", (response: Msg.SignupResponse) => {
-        console.log("Successfully signed up at seat " + response.id + ".");
+        console.log("SignupResponse: " + JSON.stringify(response));
         setPlayerId(response.id);
       });
 
       socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
-        console.log("Player " +  broadcast.name + " signed up at seat " + broadcast.id + ".");
+        console.log("SignupBroadcast: " + JSON.stringify(broadcast));
         updateName(broadcast.id, broadcast.name);
         updateCurrentPlayerStatus(broadcast.id, PlayerStatus.NONE);
+      });
+
+      socket.on("ReadyResponse", (response: Msg.ReadyResponse) => {
+        console.log("SignupResponse: " + JSON.stringify(response));
+      });
+
+      socket.on("ReadyBroadcast", (broadcast: Msg.ReadyBroadcast) => {
+        console.log("ReadyBroadcast: " + JSON.stringify(broadcast));
+        updateCurrentPlayerStatus(broadcast.id, PlayerStatus.READY);
       });
 
       // load room info every time the component mounts
