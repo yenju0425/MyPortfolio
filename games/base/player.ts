@@ -16,6 +16,10 @@ export abstract class Player {
     this.currentStatus = PlayerStatus.NONE;
   }
 
+  getId(): number {
+    return this.id;
+  }
+
   getName(): string {
     return this.name;
   }
@@ -42,6 +46,10 @@ export abstract class Player {
 
   play(): void {
     this.currentStatus = PlayerStatus.PLAYING;
+
+    // BroadCast to all players to update
+    this.socket.emit('PlayerPlayBroadcast', { id: this.id }); // to the player himself
+    this.socket.broadcast.emit('PlayerPlayBroadcast', { id: this.id }); // to other players
   }
 
   reset(): void {

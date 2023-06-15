@@ -28,7 +28,7 @@ export class SngPlayer extends Player {
 
   // utility functions
   isStillInSng(): boolean {
-    return this.currentStatus === PlayerStatus.PLAYING;
+    return this.getStatus() === PlayerStatus.PLAYING;
   }
 
   isStillInRound(): boolean {
@@ -36,7 +36,7 @@ export class SngPlayer extends Player {
   }
 
   isStillInStreet(): boolean {
-    return this.isStillInRound() && !this.currentChips;
+    return this.isStillInRound() && this.currentChips > 0;
   }
 
   isAllIn(): boolean {
@@ -46,6 +46,22 @@ export class SngPlayer extends Player {
   // currentChips
   getCurrentChips(): number {
     return this.currentChips;
+  }
+
+  setCurrentChips(currentChips: number): void {
+    this.currentChips = currentChips;
+
+    // BroadCast to all players to update
+    this.socket.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to the player himself
+    this.socket.broadcast.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to other players
+  }
+
+  updateCurrentChips(chips: number): void {
+    this.currentChips += chips;
+
+    // BroadCast to all players to update
+    this.socket.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to the player himself
+    this.socket.broadcast.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to other players
   }
 
   // currentPosition
@@ -90,6 +106,22 @@ export class SngPlayer extends Player {
     return this.currentBetSize;
   }
 
+  setCurrentBetSize(chips: number): void {
+    this.currentBetSize = chips;
+
+    // BroadCast to all players to update
+    this.socket.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to the player himself
+    this.socket.broadcast.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to other players
+  }
+
+  updateCurrentBetSize(chips: number): void {
+    this.currentBetSize += chips;
+
+    // BroadCast to all players to update
+    this.socket.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to the player himself
+    this.socket.broadcast.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to other players
+  }
+
   // isActed
   act(): void { // act() is called when the player acts in the current street, e.g. call, raise, all-in, etc.
     this.isActed = true;
@@ -106,9 +138,9 @@ export class SngPlayer extends Player {
   // player functions
   startSng(initialChips: number): void {
     this.play();
-    this.currentChips = initialChips;
+    this.setCurrentChips(initialChips);
 
-    // RICKTODO: notify the player that he/she has started the game
+    console.log(this.socket.id + ' started the game, status: ' + this.currentStatus + ', chips: ' + this.currentChips);
   }
 
   startRound(position: number, deck: Deck): void {
@@ -118,13 +150,13 @@ export class SngPlayer extends Player {
     this.isFold = false;
     this.isActed = false;
 
-    // RICKTODO: notify the player that he/she has started the round
+    // RICKTODO: 最好還是用 datadriven 的寫法，傳給前端的協議表示資料有異動
+    this.socket.emit('PlayerHoleCardsResponse', { id: this.getId(), holeCards: this.getHoleCards() }); // to the player himself
+
   }
 
   startStreet(): void {
-    this.currentBetSize = 0;
-
-    // RICKTODO: notify the player that he/she has started the street
+    this.setCurrentBetSize(0);
   }
 
   startAct(): void {
@@ -132,14 +164,16 @@ export class SngPlayer extends Player {
   }
 
   placeBet(amount: number) { // placeBet() is called when the player places a bet, e.g. small blind, big blind, call, raise, all-in ,etc.
-    this.currentBetSize += amount;
+    this.updateCurrentChips(-amount);   
+    this.updateCurrentBetSize(amount);
     this.currentPotContribution += amount;
 
-    // RICKTODO: notify the player that he/she has placed a bet
+    // RICKTODO: notify the player that he/she has placed a bet [RICKTODO]:
   }
 
   receivePotReward(amount: number): void {
-    this.currentChips += amount;
+    console.log(this.socket.id + ' received pot reward: ' + amount);
+    this.updateCurrentChips(amount);
 
     // RICKTODO: notify the player that he/she has received the pot reward
   }

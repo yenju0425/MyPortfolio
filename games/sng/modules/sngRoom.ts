@@ -51,7 +51,7 @@ export class SngRoom extends Room {
 
   // utility functions
   isAllPlayersReady(): boolean {
-    return this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
+    return this.getNumOfPlayers() >= 2 && this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
   };
 
   roundElimination(): void {
@@ -64,6 +64,10 @@ export class SngRoom extends Room {
 
   getNumOfPlayersStillInSng(): number {
     return this.players.filter(player => player?.isStillInSng()).length;
+  };
+
+  getNumOfPlayers(): number {
+    return this.players.filter(player => player !== null).length;
   };
 
   // totalNumSngs
@@ -160,6 +164,7 @@ export class SngRoom extends Room {
 
   // currentRound
   initCurrentRound(): void {
+    console.log("this.getCurrentBigBlind()");
     this.currentRound = new SngRound(this.endRound, this.players, this.getCurrentDealerId(), this.getCurrentBigBlind());
   };
 
@@ -177,6 +182,8 @@ export class SngRoom extends Room {
   updateCurrentBlindLevel(): void {
     this.currentBlindLevel++;
     this.lastBlindUpdateTime = Date.now();
+
+    console.log("Current big blind: " + this.getCurrentBigBlind());
   };
 
   resetCurrentBlindLevel(): void {
@@ -213,9 +220,7 @@ export class SngRoom extends Room {
     }, blindLevelTime);
   };
 
-
   // client actions
-
   loadRoomInfo(socket: Socket): void {
     const response: Msg.LoadRoomInfoResponse = {
       names: this.getPlayersName(),
@@ -317,14 +322,18 @@ export class SngRoom extends Room {
     player.ready();
 
     // Ready success.
+    const playerId = this.getPlayerId(socket);
     console.log(socket.id + " is ready.");
 
     const broadcast: Msg.ReadyBroadcast = {
-      id: this.getPlayerId(socket),
+      id: playerId
     };
     this.io.emit("ReadyBroadcast", broadcast);
 
-    socket.emit("ReadyResponse");
+    const response: Msg.ReadyResponse = {
+      id: playerId
+    };
+    socket.emit("ReadyResponse", response);
 
     // check if all players are ready
     if (this.isAllPlayersReady()) {
@@ -393,8 +402,10 @@ export class SngRoom extends Room {
 
   // room functions
   startSng(): void {
+    console.log("[RICKDEBUG] startSng");
+
     // Set the current status to PLAYING.
-    this.play();
+    this.play(); // [RICKTODO]: 通知前端
 
     // Update the total number of SNGs.
     this.updateTotalNumSngs();
@@ -416,6 +427,8 @@ export class SngRoom extends Room {
   };
 
   startRound(): void {
+    console.log("[RICKDEBUG] startRound");
+
     // Update totalNumRounds.
     this.udateTotalNumRounds();
 

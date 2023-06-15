@@ -47,7 +47,7 @@ export class SngRound extends Round {
     return this.players.filter(player => player?.isStillInStreet()).length;
   }
 
-  calculateHandRanking(cards: Card[]): number {
+  calculateHandRanking(cards: Card[]): number { // RICKTODO: This should move to a Deck class.
     const suitBins: number[] = [0, 0, 0, 0]; // e.g. If there is a 3 of spades, then suitBin[Suits.SPADES] &= 0b0000000000100.
     const suitCounter: Map<Suits, number> = new Map();
     const rankCounter: Map<Ranks, number> = new Map();
@@ -209,6 +209,10 @@ export class SngRound extends Round {
     return this.currentStreet;
   }
 
+  updateCurrentStreet(): void {
+    this.currentStreet = this.currentStreet + 1;
+  }
+
   // currentBetSize
   updateCurrentBetSize(amount: number): void {
     // get the max of currentBetSize and amount
@@ -248,6 +252,11 @@ export class SngRound extends Round {
 
   // round functions
   startStreet(): void {
+    console.log('[RICKDEBUG] startStreet');
+
+    // this.get [RICKTODO]: next street
+    this.updateCurrentStreet();
+
     // Initialize players in the street.
     this.initStreetPlayers();
   
@@ -256,8 +265,12 @@ export class SngRound extends Round {
   }
 
   startAction(): void {
+
     // Update current player id.
     this.updateCurrentPlayerId();
+
+
+    console.log('[RICKDEBUG] startAction', this.getCurrentPlayerId());
 
     // Get current player.
     const currentPlayer = this.getPlayer();

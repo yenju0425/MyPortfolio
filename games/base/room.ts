@@ -18,6 +18,7 @@ export abstract class Room {
 
   play(): void {
     this.currentStatus = RoomStatus.PLAYING;
+    this.io.emit('RoomPlayBroadcast');
   }
 
   reset(): void {
