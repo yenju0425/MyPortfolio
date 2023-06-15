@@ -23,7 +23,7 @@ export class SngRoom extends Room {
   private players: (SngPlayer | null)[];
   private currentSngStartTime: number | null;
   private currentNumSngRounds: number;
-  private currentDealerId: number | null; // an index of players
+  private currentBmallBlindId: number | null; // an index of players
   private currentBlindLevel: number;
   private lastBlindUpdateTime: number | null;
   private currentBlindUpdateTimer: NodeJS.Timeout | undefined;
@@ -41,7 +41,7 @@ export class SngRoom extends Room {
     this.players = new Array<SngPlayer | null>(this.numPlayers).fill(null);
     this.currentSngStartTime = null;
     this.currentNumSngRounds = 0;
-    this.currentDealerId = null;
+    this.currentBmallBlindId = null;
     this.currentBlindLevel = 0;
     this.lastBlindUpdateTime = null;
     this.currentBlindUpdateTimer = undefined;
@@ -130,42 +130,42 @@ export class SngRoom extends Room {
     return this.players.map(player => player ? player.getStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
   };
 
-  // currentDealerId
-  getNextDealerId(): number {
-    if (!this.currentDealerId) {
+  // currentBmallBlindId
+  getNextBmallBlindId(): number {
+    if (!this.currentBmallBlindId) {
       const nonNullIds = this.players.map((player, id) => player !== null ? id : -1).filter(id => id !== -1);
       return nonNullIds[Math.floor(Math.random() * nonNullIds.length)];
     } else {
-      let nextDealer = (this.currentDealerId + 1) % this.numPlayers;
-      while (this.players[nextDealer] === null) {
-        nextDealer = (nextDealer + 1) % this.numPlayers;
+      let nextBmallBlind = (this.currentBmallBlindId + 1) % this.numPlayers;
+      while (this.players[nextBmallBlind] === null) {
+        nextBmallBlind = (nextBmallBlind + 1) % this.numPlayers;
       }
-      return nextDealer;
+      return nextBmallBlind;
     }
   }
 
-  updateCurrentDealerId(): void {
-    this.currentDealerId = this.getNextDealerId();
+  updateCurrentBmallBlindId(): void {
+    this.currentBmallBlindId = this.getNextBmallBlindId();
   };
 
-  resetCurrentDealerId(): void {
-    this.currentDealerId = null;
+  resetCurrentBmallBlindId(): void {
+    this.currentBmallBlindId = null;
   };
 
-  getCurrentDealerId(): number {
-    if (this.currentDealerId === null) {
-      console.log("currentDealerId is null, update it automatically.");
-      this.updateCurrentDealerId();
-      return this.getCurrentDealerId();
+  getCurrentBmallBlindId(): number {
+    if (this.currentBmallBlindId === null) {
+      console.log("currentBmallBlindId is null, update it automatically.");
+      this.updateCurrentBmallBlindId();
+      return this.getCurrentBmallBlindId();
     } else {
-      return this.currentDealerId;
+      return this.currentBmallBlindId;
     }
   }
 
   // currentRound
   initCurrentRound(): void {
     console.log("this.getCurrentBigBlind()");
-    this.currentRound = new SngRound(this.endRound, this.players, this.getCurrentDealerId(), this.getCurrentBigBlind());
+    this.currentRound = new SngRound(this.endRound, this.players, this.getCurrentBmallBlindId(), this.getCurrentBigBlind());
   };
 
   getCurrentRound(): SngRound {
@@ -432,8 +432,8 @@ export class SngRoom extends Room {
     // Update totalNumRounds.
     this.udateTotalNumRounds();
 
-    // Update current dealer id.
-    this.updateCurrentDealerId();
+    // Update current bmallBlind id.
+    this.updateCurrentBmallBlindId();
 
     // Create a new round.
     this.initCurrentRound();
@@ -473,8 +473,8 @@ export class SngRoom extends Room {
     // Reset the number of rounds of the current SNG.
     this.currentNumSngRounds = 0;
   
-    // Reset the current dealer.
-    this.resetCurrentDealerId();
+    // Reset the current bmallBlind.
+    this.resetCurrentBmallBlindId();
 
     // Reset the currentBlindLevel, lastBlindUpdateTime, and clear thte timer.
     this.endBlindUp();

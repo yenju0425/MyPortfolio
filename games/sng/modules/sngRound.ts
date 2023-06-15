@@ -6,7 +6,7 @@ import { SngPlayer } from './sngPlayer';
 
 export class SngRound extends Round {
   private readonly endRoundCallback: () => void;
-  private readonly dealerId: number;
+  private readonly bmallBlindId: number;
   private readonly bigBlind: number;
   private readonly players: (SngPlayer | null)[];
   private communityCards: Card[];
@@ -16,17 +16,17 @@ export class SngRound extends Round {
   private currentPlayerId: number;
   private currentBetSize: number;
 
-  constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], dealerId: number, bigBlind: number) {
+  constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], bmallBlindId: number, bigBlind: number) {
     super();
     this.endRoundCallback = endRoundCallback;
-    this.dealerId = dealerId;
+    this.bmallBlindId = bmallBlindId;
     this.bigBlind = bigBlind;
     this.players = players;
     this.communityCards = [];
     this.deck = new Deck(); // The deck needs to be shuffled after created.
     this.pots = [];
     this.currentStreet = Streets.NONE;
-    this.currentPlayerId = dealerId; // Initialize the current player as the dealer.
+    this.currentPlayerId = bmallBlindId; // Initialize the current player as the bmallBlind.
     this.currentBetSize = 0;
   }
 
@@ -169,12 +169,12 @@ export class SngRound extends Round {
 
   // players
   initRoundPlayers(): void {
-    let position = 0;
+    let position = 2; // 0: dealer, 1: small blind, 2: big blind
     for (let i = 0; i < this.players.length; i++) {
-      let index = (this.dealerId + i) % this.players.length;
+      let index = (this.bmallBlindId - i) % this.players.length;
       this.players[index]?.startRound(position, this.deck);
       if (this.players[index]) {
-        position++;
+        position = (position - 1 + this.players.length) % this.players.length; // If there are 2 players, small blind will be the dealer.
       }
     }
   }
@@ -237,7 +237,7 @@ export class SngRound extends Round {
   }
 
   resetCurrentPlayerId(): void {
-    this.currentPlayerId = this.dealerId;
+    this.currentPlayerId = this.bmallBlindId;
   }
 
   getCurrentPlayerId(): number {
@@ -282,12 +282,12 @@ export class SngRound extends Round {
 
     // Automatically place bet for small blind and big blind.
     if (this.getCurrentStreet() === Streets.PREFLOP) {
-      if (currentPlayer?.getCurrentPosition() === 1) { // small blind
+      if (currentPlayer?.getCurrentPosition() === 1 && !currentPlayer.getCurrentBetSize()) { // small blind
         console.log('player: ' + currentPlayer?.getName() + ' is small blind');
         currentPlayer.placeBet(this.bigBlind / 2);
         this.endAction();
         return;
-      } else if (currentPlayer?.getCurrentPosition() === 2) { // big blind
+      } else if (currentPlayer?.getCurrentPosition() === 2 && !currentPlayer.getCurrentBetSize()) { // big blind
         console.log('player: ' + currentPlayer?.getName() + ' is big blind');
         currentPlayer.placeBet(this.bigBlind);
         this.endAction();
