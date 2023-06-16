@@ -194,6 +194,11 @@ export class SngRound extends Round {
     return this.communityCards;
   }
 
+  // deck
+  getDeck(): Deck {
+    return this.deck;
+  }
+
   // Pots
   updatePot(): void {
     let potContribations = this.players.map((player, index) => [index, player ? player.getCurrentPotContribution() : 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
