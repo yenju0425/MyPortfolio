@@ -174,7 +174,7 @@ export class SngRound extends Round {
       let index = (this.bigBlindSeatId - i + this.players.length) % this.players.length;
 
       console.log(index, position);
-      this.players[index]?.startRound(position, this.deck); // RICKTODO: directly give two cards.
+      this.players[index]?.startRound(position, [this.getDeck().deal(), this.getDeck().deal()]);
       if (this.players[index]) {
         position = (position - 1 + this.players.length) % this.players.length; // If there are 2 players, small blind will be the dealer.
       }

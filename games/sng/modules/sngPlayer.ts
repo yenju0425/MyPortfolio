@@ -143,9 +143,9 @@ export class SngPlayer extends Player {
     console.log(this.socket.id + ' started the game, status: ' + this.currentStatus + ', chips: ' + this.currentChips);
   }
 
-  startRound(position: number, deck: Deck): void {
+  startRound(position: number, cards: Card[]): void {
     this.currentPosition = position;
-    this.holeCards = [deck.deal(), deck.deal()];
+    this.holeCards = cards;
     this.currentPotContribution = 0;
     this.isFold = false;
     this.isActed = false;
