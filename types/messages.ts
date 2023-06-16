@@ -1,6 +1,10 @@
 import { Card } from '@/games/sng/modules/deck';
 import { RoomStatus, PlayerStatus } from '@/games/base/terms';
 
+// Request: to ask the server to do something (e.g. signup, make a bet)
+// Response: to respond to the client of the request (e.g. success/ fail)
+// Update: to refresh some display related data (e.g. The bet size of a player has changed)
+
 export type ServerMessage = { // This can be used for both response and broadcast
   text: string;
 };
@@ -13,11 +17,11 @@ export type StandupBroadcast = {
 // }
 
 export type LoadRoomInfoResponse = {
-  names: string[];
-  currentChips: number[];
-  currentBetSizes: number[];
-  currentPlayerStatuses: (PlayerStatus | null)[];
-  currentRoomStatus: RoomStatus;
+  playersNames: string[];
+  playersCurrentChips: number[];
+  playersCurrentBetSizes: number[];
+  playersCurrentStatuses: (PlayerStatus | null)[];
+  roomCurrentStatus: RoomStatus;
   clientSeatId: number;
 };
 
@@ -49,7 +53,7 @@ export type ReadyBroadcast = {
 
 export type PlayerCurrentChipsBroadcast = {
   id: number;
-  currentChips: number;
+  playersCurrentChips: number;
 };
 
 export type PlayerCurrentBetSizeBroadcast = {

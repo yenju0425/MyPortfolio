@@ -223,11 +223,11 @@ export class SngRoom extends Room {
   // client actions
   loadRoomInfo(socket: Socket): void {
     const response: Msg.LoadRoomInfoResponse = {
-      names: this.getPlayersName(),
-      currentChips: this.getPlayersCurrentChip(),
-      currentBetSizes: this.getPlayersCurrentBetSize(),
-      currentPlayerStatuses: this.getPlayersStatus(),
-      currentRoomStatus: this.getStatus(),
+      playersNames: this.getPlayersName(),
+      playersCurrentChips: this.getPlayersCurrentChip(),
+      playersCurrentBetSizes: this.getPlayersCurrentBetSize(),
+      playersCurrentStatuses: this.getPlayersStatus(),
+      roomCurrentStatus: this.getStatus(),
       clientSeatId: this.getPlayerId(socket),
     };
     socket.emit("LoadRoomInfoResponse", response);

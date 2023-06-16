@@ -5,23 +5,29 @@ import { PlayerStatus } from '../../base/terms';
 import { Deck } from './deck';
 
 export class SngPlayer extends Player {
-  private currentChips: number;
+  // sng
+  private currentChips: number; // displayed in the frontend
+  // round
   private currentPosition: number | null;
-  private holeCards: Card[];
+  private holeCards: Card[]; // displayed in the frontend
   private currentPotContribution: number;
   private isFold: boolean;
-  private handRanking: number; // hexadecimal, e.g. AA335 -> 0x['3' + '00E35'] 
-  private currentBetSize: number;
+  private handRanking: number; // hexadecimal, e.g. AA335 -> 0x['3' + '00E35']
+  // street
+  private currentBetSize: number; // displayed in the frontend
   private isActed: boolean; // whether the player has acted in the current street, small blind & big blind are not considered as acted
 
   constructor(id: number, name: string, email: string, socket: Socket) {
     super(id, name, email, socket);
+    // sng
     this.currentChips = 0;
+    // round
     this.currentPosition = null;
     this.holeCards = [];
     this.currentPotContribution = 0;
     this.isFold = false;
     this.handRanking = 0;
+    // street
     this.currentBetSize = 0;
     this.isActed = false;
   }
