@@ -151,7 +151,7 @@ export class SngPlayer extends Player {
     this.isActed = false;
 
     // RICKTODO: 最好還是用 datadriven 的寫法，傳給前端的協議表示資料有異動
-    this.socket.emit('PlayerHoleCardsResponse', { id: this.getId(), holeCards: this.getHoleCards() }); // to the player himself
+    this.socket.emit('PlayerHoleCardsBroadcast', { id: this.getId(), holeCards: this.getHoleCards() }); // to the player himself
 
   }
 

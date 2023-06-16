@@ -140,12 +140,16 @@ export default function Poker() {
         console.log("Connected to server.");
       });
 
-      socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
+      socket.on("ServerMessage", (message: Msg.ServerMessage) => {
+        // RICKTODO
+      });
+
+      socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => { // player leave the seat
         console.log("StandupBroadcast: " + JSON.stringify(broadcast));
         resetPlayerInfo(broadcast.id);
       });
 
-      socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
+      socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => { // player join the room
         console.log("LoadRoomInfoResponse: " + JSON.stringify(response));
         loadRoomInfo(response);
       });
@@ -170,6 +174,21 @@ export default function Poker() {
         updateCurrentPlayerStatus(broadcast.id, PlayerStatus.READY);
       });
 
+      socket.on("PlayerCurrentChipsBroadcast", (broadcast: Msg.PlayerCurrentChipsBroadcast) => {
+        console.log("PlayerCurrentChipsBroadcast: " + JSON.stringify(broadcast)); // RICKTODO: The naming should change.
+        updateCurrentChip(broadcast.id, broadcast.currentChips);
+      });
+
+      socket.on("PlayerCurrentBetSizeBroadcast", (broadcast: Msg.PlayerCurrentBetSizeBroadcast) => {
+        console.log("PlayerCurrentBetSizeBroadcast: " + JSON.stringify(broadcast)); // RICKTODO: The naming should change.
+        updateCurrentBetSize(broadcast.id, broadcast.currentBetSize);
+      });
+
+      socket.on("PlayerHoleCardsBroadcast", (broadcast: Msg.PlayerHoleCardsBroadcast) => {
+        console.log("PlayerHoleCardsBroadcast: " + JSON.stringify(broadcast));
+        updatePlayerHoleCards(broadcast.id, broadcast.holeCards);
+      });
+
       socket.on("RoomPlayBroadcast", () => {
         console.log("RoomPlayBroadcast.");
         setCurrentRoomStatus(RoomStatus.PLAYING);
@@ -179,22 +198,6 @@ export default function Poker() {
         console.log("PlayerPlayBroadcast: " + JSON.stringify(broadcast));
         updateCurrentPlayerStatus(broadcast.id, PlayerStatus.PLAYING);
       });
-
-      socket.on("PlayerCurrentChipsBroadcast", (broadcast: Msg.PlayerCurrentChipsBroadcast) => {
-        console.log("PlayerCurrentChipsBroadcast: " + JSON.stringify(broadcast)); // RICKTODO: The naming should change.
-        updateCurrentChip(broadcast.id, broadcast.currentChips);
-      });
-
-      socket.on("PlayerCurrentBetSizeBroadcast", (response: Msg.PlayerCurrentBetSizeBroadcast) => {
-        console.log("PlayerCurrentBetSizeBroadcast: " + JSON.stringify(response)); // RICKTODO: The naming should change.
-        updateCurrentBetSize(response.id, response.currentBetSize);
-      });
-
-      socket.on("PlayerHoleCardsResponse", (broadcast: Msg.PlayerHoleCardsResponse) => {
-        console.log("PlayerHoleCardsResponse: " + JSON.stringify(broadcast));
-        updatePlayerHoleCards(broadcast.id, broadcast.holeCards);
-      });
-
 
       // load room info every time the component mounts
       socket.emit("LoadRoomInfoRequest");

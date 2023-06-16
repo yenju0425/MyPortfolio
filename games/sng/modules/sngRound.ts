@@ -269,9 +269,6 @@ export class SngRound extends Round {
     // Update current player id.
     this.updateCurrentPlayerId();
 
-
-    console.log('[RICKDEBUG] startAction', this.getCurrentPlayerId());
-
     // Get current player.
     const currentPlayer = this.getPlayer();
     if (!currentPlayer) {
@@ -280,6 +277,8 @@ export class SngRound extends Round {
       return;
     }
 
+    console.log('[RICKDEBUG] startAction', this.getCurrentPlayerId(), currentPlayer.getCurrentPosition());
+    
     // Automatically place bet for small blind and big blind.
     if (this.getCurrentStreet() === Streets.PREFLOP) {
       if (currentPlayer?.getCurrentPosition() === 1 && !currentPlayer.getCurrentBetSize()) { // small blind
