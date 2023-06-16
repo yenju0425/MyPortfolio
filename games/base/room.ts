@@ -6,7 +6,7 @@ import * as Msg from "../../types/messages";
 export abstract class Room {
   private readonly startTime: number;
   protected io: Server;
-  protected currentStatus: RoomStatus;
+  protected currentStatus: RoomStatus; // displayed in the frontend
 
   constructor(io: Server) {
     this.startTime = Date.now();
@@ -24,7 +24,7 @@ export abstract class Room {
     return this.io;
   }
 
-  // currentStatus
+  // currentStatus, displayed in the frontend
   broadcastCurrentStatus(): void {
     const broadcast: Msg.RoomCurrentStatusUpdateBroadcast = {
       roomCurrentStatus: this.getStatus()

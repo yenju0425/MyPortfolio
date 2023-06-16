@@ -49,27 +49,6 @@ export class SngRoom extends Room {
     this.currentPlayerId = null;
   };
 
-  // utility functions
-  isAllPlayersReady(): boolean {
-    return this.getNumOfPlayers() >= 2 && this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
-  };
-
-  roundElimination(): void {
-    this.players.forEach(player => {
-      if (!player?.getCurrentChips()) {
-        player?.eliminate();
-      }
-    });
-  };
-
-  getNumOfPlayersStillInSng(): number {
-    return this.players.filter(player => player?.isStillInSng()).length;
-  };
-
-  getNumOfPlayers(): number {
-    return this.players.filter(player => player !== null).length;
-  };
-
   // totalNumSngs
   updateTotalNumSngs(): void {
     this.totalNumSngs++;
@@ -100,14 +79,14 @@ export class SngRoom extends Room {
   setPlayer(id: number, player: SngPlayer): void {
     this.players[id] = player;
 
-    // broadcast signup
+    // Broadcast to clients to init player info. And then every data change will automatically reflect on the frontend by every `set` function.
     const broadcast: Msg.SignupBroadcast = {
       id: id,
       name: player.getName(),
     };
     this.io.emit("SignupBroadcast", broadcast);
   
-    // send signup response
+    // Send signup response.
     const response: Msg.SignupResponse = {
       id: id,
     };
@@ -478,4 +457,25 @@ export class SngRoom extends Room {
 
     // RICKTODO: 通知前端
   }
+
+  // utility functions
+  isAllPlayersReady(): boolean {
+    return this.getNumOfPlayers() >= 2 && this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
+  };
+
+  roundElimination(): void {
+    this.players.forEach(player => {
+      if (!player?.getCurrentChips()) {
+        player?.eliminate();
+      }
+    });
+  };
+
+  getNumOfPlayersStillInSng(): number {
+    return this.players.filter(player => player?.isStillInSng()).length;
+  };
+
+  getNumOfPlayers(): number {
+    return this.players.filter(player => player !== null).length;
+  };
 }

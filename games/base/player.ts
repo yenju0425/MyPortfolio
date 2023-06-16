@@ -8,7 +8,7 @@ export abstract class Player {
   private readonly email: string;
   protected socket: Socket;
   protected io: Server;
-  protected currentStatus: PlayerStatus;
+  protected currentStatus: PlayerStatus; // displayed in the frontend
 
   constructor(id: number, name: string, email: string, socket: Socket, io: Server) {
     this.id = id;
@@ -44,7 +44,7 @@ export abstract class Player {
     return this.io;
   }
 
-  // currentStatus
+  // currentStatus, displayed in the frontend
   broadcastCurrentStatus(): void {
     const broadcast: Msg.PlayerCurrentStatusUpdateBroadcast = {
       seatId: this.getId(),
