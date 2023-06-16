@@ -1,5 +1,6 @@
 import { PlayerStatus } from './terms';
 import { Server, Socket } from 'socket.io';
+import * as Msg from "../../types/messages"; // RICKTODO: 拆分出去，基本會用的 proto (base.message 之類的)
 
 export abstract class Player {
   private readonly id: number;
@@ -18,51 +19,71 @@ export abstract class Player {
     this.currentStatus = PlayerStatus.NONE;
   }
 
+  // id
   getId(): number {
     return this.id;
   }
 
+  // name
   getName(): string {
     return this.name;
   }
 
+  // email
   getEmail(): string {
     return this.email;
   }
 
+  // socket
   getSocket(): Socket {
     return this.socket;
+  }
+
+  // io
+  getIo(): Server {
+    return this.io;
+  }
+
+  // currentStatus
+  broadcastCurrentStatus(): void {
+    const broadcast: Msg.PlayerCurrentStatusUpdateBroadcast = {
+      seatId: this.getId(),
+      playerCurrentStatus: this.getStatus()
+    };
+    this.io.emit('PlayerCurrentStatusUpdateBroadcast', broadcast);
   }
 
   getStatus(): PlayerStatus {
     return this.currentStatus;
   }
 
+  setStatus(status: PlayerStatus): void {
+    this.currentStatus = status;
+    this.broadcastCurrentStatus();
+  }
+
+  // utility functions
   ready(): void {
-    this.currentStatus = PlayerStatus.READY;
+    this.setStatus(PlayerStatus.READY);
   }
 
   unready(): void {
-    this.currentStatus = PlayerStatus.NONE;
+    this.setStatus(PlayerStatus.NONE);
   }
 
   play(): void {
-    this.currentStatus = PlayerStatus.PLAYING;
-
-    // BroadCast to all players to update
-    this.socket.emit('PlayerPlayBroadcast', { id: this.id }); // to the player himself
-    this.socket.broadcast.emit('PlayerPlayBroadcast', { id: this.id }); // to other players
+    this.setStatus(PlayerStatus.PLAYING);
   }
 
   reset(): void {
-    this.currentStatus = PlayerStatus.NONE;
+    this.setStatus(PlayerStatus.NONE);
   }
 
   eliminate(): void {
-    this.currentStatus = PlayerStatus.ELIMINATED;
+    this.setStatus(PlayerStatus.ELIMINATED);
   }
 
   quit(): void {
-    this.currentStatus = PlayerStatus.QUIT;
+    this.setStatus(PlayerStatus.QUIT);
   }
 };

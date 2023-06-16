@@ -51,11 +51,11 @@ export class SngPlayer extends Player {
 
   // currentChips
   broadcastCurrentChips(): void {
-    const broadcast: Msg.PlayerCurrentChipsUpdateBraodcast = {
+    const broadcast: Msg.PlayerCurrentChipsUpdateBroadcast = {
       seatId: this.getId(),
       playerCurrentChips: this.getCurrentChips()
     };
-    this.io.emit('PlayerCurrentChipsUpdateBraodcast', broadcast);
+    this.io.emit('PlayerCurrentChipsUpdateBroadcast', broadcast);
   }
 
   getCurrentChips(): number {

@@ -5,7 +5,7 @@ import { RoomStatus, PlayerStatus } from '@/games/base/terms';
 // Response: to respond to the client of the request (e.g. success/ fail)
 // Update: to refresh some display related data (e.g. The bet size of a player has changed)
 
-export type ServerMessageBraodcast = { // log some server message, e.g. error message
+export type ServerMessageBroadcast = { // log some server message, e.g. error message
   text: string;
 };
 
@@ -47,14 +47,9 @@ export type ReadyResponse = {
   id: number;
 };
 
-export type ReadyBroadcast = {
-  id: number;
-};
-
-export type PlayerCurrentChipsBroadcast = {
-  id: number;
-  playersCurrentChips: number;
-};
+// export type ReadyBroadcast = {
+//   id: number;
+// };
 
 export type PlayerCurrentBetSizeBroadcast = {
   id: number;
@@ -74,27 +69,27 @@ export type PlayerPlayBroadcast = {
 };
 
 // updates
-export type PlayerNameUpdateBraodcast = {
+export type PlayerNameUpdateBroadcast = {
   seatId: number;
   playerName: string;
 };
 
-export type PlayerCurrentChipsUpdateBraodcast = {
+export type PlayerCurrentChipsUpdateBroadcast = {
   seatId: number;
   playerCurrentChips: number;
 };
 
-export type PlayerCurrentBetSizeUpdateBraodcast = {
+export type PlayerCurrentBetSizeUpdateBroadcast = {
   seatId: number;
   playerCurrentBetSize: number;
 };
 
-export type PlayerCurrentStatusUpdateBraodcast = {
+export type PlayerCurrentStatusUpdateBroadcast = {
   seatId: number;
   playerCurrentStatus: PlayerStatus;
 };
 
-export type PlayerHoleCardsUpdateBraodcast = {
+export type PlayerHoleCardsUpdateBroadcast = {
   seatId: number;
   playerHoleCards: Card[];
 };

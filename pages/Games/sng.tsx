@@ -136,7 +136,7 @@ export default function Poker() {
         console.log("Connected to server.");
       });
 
-      socket.on("ServerMessageBraodcast", (message: Msg.ServerMessageBraodcast) => {
+      socket.on("ServerMessageBroadcast", (message: Msg.ServerMessageBroadcast) => {
         // RICKTODO:
       });
 
@@ -165,10 +165,10 @@ export default function Poker() {
         console.log("ReadyResponse: " + JSON.stringify(response));
       });
 
-      socket.on("ReadyBroadcast", (broadcast: Msg.ReadyBroadcast) => {
-        console.log("ReadyBroadcast: " + JSON.stringify(broadcast));
-        updatePlayerCurrentStatus(broadcast.id, PlayerStatus.READY);
-      });
+      // socket.on("ReadyBroadcast", (broadcast: Msg.ReadyBroadcast) => {
+      //   console.log("ReadyBroadcast: " + JSON.stringify(broadcast));
+      //   updatePlayerCurrentStatus(broadcast.id, PlayerStatus.READY);
+      // });
 
       // socket.on("PlayerCurrentChipsBroadcast", (broadcast: Msg.PlayerCurrentChipsBroadcast) => {
       //   console.log("PlayerCurrentChipsBroadcast: " + JSON.stringify(broadcast));
@@ -196,28 +196,28 @@ export default function Poker() {
       });
 
       // updates
-      socket.on("PlayerNameUpdateBraodcast", (broadcast: Msg.PlayerNameUpdateBraodcast) => {
-        console.log("PlayerNameUpdateBraodcast: " + JSON.stringify(broadcast));
+      socket.on("PlayerNameUpdateBroadcast", (broadcast: Msg.PlayerNameUpdateBroadcast) => {
+        console.log("PlayerNameUpdateBroadcast: " + JSON.stringify(broadcast));
         updatePlayerName(broadcast.seatId, broadcast.playerName);
       });
 
-      socket.on("PlayerCurrentChipsUpdateBraodcast", (broadcast: Msg.PlayerCurrentChipsUpdateBraodcast) => {
-        console.log("PlayerCurrentChipsUpdateBraodcast: " + JSON.stringify(broadcast));
+      socket.on("PlayerCurrentChipsUpdateBroadcast", (broadcast: Msg.PlayerCurrentChipsUpdateBroadcast) => {
+        console.log("PlayerCurrentChipsUpdateBroadcast: " + JSON.stringify(broadcast));
         updatePlayerCurrentChips(broadcast.seatId, broadcast.playerCurrentChips);
       });
 
-      socket.on("PlayerCurrentBetSizeUpdateBraodcast", (broadcast: Msg.PlayerCurrentBetSizeUpdateBraodcast) => {
-        console.log("PlayerCurrentBetSizeUpdateBraodcast: " + JSON.stringify(broadcast));
+      socket.on("PlayerCurrentBetSizeUpdateBroadcast", (broadcast: Msg.PlayerCurrentBetSizeUpdateBroadcast) => {
+        console.log("PlayerCurrentBetSizeUpdateBroadcast: " + JSON.stringify(broadcast));
         updatePlayerCurrentBetSize(broadcast.seatId, broadcast.playerCurrentBetSize);
       });
 
-      socket.on("PlayerCurrentStatusUpdateBraodcast", (broadcast: Msg.PlayerCurrentStatusUpdateBraodcast) => {
-        console.log("PlayerCurrentStatusUpdateBraodcast: " + JSON.stringify(broadcast));
+      socket.on("PlayerCurrentStatusUpdateBroadcast", (broadcast: Msg.PlayerCurrentStatusUpdateBroadcast) => {
+        console.log("PlayerCurrentStatusUpdateBroadcast: " + JSON.stringify(broadcast));
         updatePlayerCurrentStatus(broadcast.seatId, broadcast.playerCurrentStatus);
       });
 
-      socket.on("PlayerHoleCardsUpdateBraodcast", (broadcast: Msg.PlayerHoleCardsUpdateBraodcast) => {
-        console.log("PlayerHoleCardsUpdateBraodcast: " + JSON.stringify(broadcast));
+      socket.on("PlayerHoleCardsUpdatecast", (broadcast: Msg.PlayerHoleCardsUpdateBroadcast) => {
+        console.log("PlayerHoleCardsUpdateBroadcast: " + JSON.stringify(broadcast));
         updatePlayerHoleCards(broadcast.seatId, broadcast.playerHoleCards);
       });
 

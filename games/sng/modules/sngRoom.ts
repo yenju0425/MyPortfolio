@@ -324,11 +324,6 @@ export class SngRoom extends Room {
     const clientSeatId = this.getPlayerId(socket);
     console.log(socket.id + " is ready.");
 
-    const broadcast: Msg.ReadyBroadcast = {
-      id: clientSeatId
-    };
-    this.io.emit("ReadyBroadcast", broadcast);
-
     const response: Msg.ReadyResponse = {
       id: clientSeatId
     };
