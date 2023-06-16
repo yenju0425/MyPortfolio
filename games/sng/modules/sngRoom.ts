@@ -99,6 +99,19 @@ export class SngRoom extends Room {
 
   setPlayer(id: number, player: SngPlayer): void {
     this.players[id] = player;
+
+    // broadcast signup
+    const broadcast: Msg.SignupBroadcast = {
+      id: id,
+      name: player.getName(),
+    };
+    this.io.emit("SignupBroadcast", broadcast);
+  
+    // send signup response
+    const response: Msg.SignupResponse = {
+      id: id,
+    };
+    player.getSocket().emit("SignupResponse", response);
   };
 
   resetPlayer(id: number): void { //TODO: might need to do some safety check
@@ -223,12 +236,12 @@ export class SngRoom extends Room {
   // client actions
   loadRoomInfo(socket: Socket): void {
     const response: Msg.LoadRoomInfoResponse = {
+      clientSeatId: this.getPlayerId(socket),
+      roomCurrentStatus: this.getStatus(),
       playersNames: this.getPlayersName(),
       playersCurrentChips: this.getPlayersCurrentChip(),
       playersCurrentBetSizes: this.getPlayersCurrentBetSize(),
       playersCurrentStatuses: this.getPlayersStatus(),
-      roomCurrentStatus: this.getStatus(),
-      clientSeatId: this.getPlayerId(socket),
     };
     socket.emit("LoadRoomInfoResponse", response);
   };
@@ -262,29 +275,15 @@ export class SngRoom extends Room {
       return;
     }
 
-    const player = new SngPlayer(request.id, request.name, request.email, socket);
+    const player = new SngPlayer(request.id, request.name, request.email, socket, this.io);
     this.setPlayer(request.id, player);
 
     // Signup success.
     console.log(socket.id + " signup success.");
 
-    const broadcast: Msg.SignupBroadcast = {
-      id: request.id,
-      name: request.name
-    };
-    this.io.emit("SignupBroadcast", broadcast);
-
-    const response: Msg.SignupResponse = {
-      id: request.id,
-    };
-    socket.emit("SignupResponse", response);
-
-    // Swith the socket to the players room
+    // Swith the socket to the `players` room
     socket.leave("spectators");
     socket.join("players");
-
-    console.log("Number of Spectators: " + this.io.sockets.adapter.rooms.get('spectators')?.size || 0);
-    console.log("Number of Players: " + this.io.sockets.adapter.rooms.get('players')?.size || 0);
   };
 
   cancelSignUp(socket: Socket): void {
@@ -302,7 +301,7 @@ export class SngRoom extends Room {
     this.resetPlayer(id);
 
     const broadcast: Msg.StandupBroadcast = {
-      id: id,
+      seatId: id,
     };
     this.io.emit("StandupBroadcast", broadcast);
   };

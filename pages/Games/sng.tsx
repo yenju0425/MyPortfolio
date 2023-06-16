@@ -106,12 +106,12 @@ export default function Poker() {
   };
 
   const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
+    setClientSeatId(info.clientSeatId);
+    setCurrentRoomStatus(info.roomCurrentStatus);
     updatePlayersNames(info.playersNames);
     updatePlayersCurrentChips(info.playersCurrentChips);
     updatePlayersCurrentBetSizes(info.playersCurrentBetSizes);
     updatePlayersCurrentStatuses(info.playersCurrentStatuses);
-    setCurrentRoomStatus(info.roomCurrentStatus);
-    setClientSeatId(info.clientSeatId);
   };
 
   // utility functions
@@ -136,13 +136,13 @@ export default function Poker() {
         console.log("Connected to server.");
       });
 
-      socket.on("ServerMessage", (message: Msg.ServerMessage) => {
-        // RICKTODO
+      socket.on("ServerMessageBraodcast", (message: Msg.ServerMessageBraodcast) => {
+        // RICKTODO:
       });
 
       socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => { // player leave the seat
         console.log("StandupBroadcast: " + JSON.stringify(broadcast));
-        resetPlayerInfo(broadcast.id);
+        resetPlayerInfo(broadcast.seatId);
       });
 
       socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => { // player join the room
@@ -170,13 +170,13 @@ export default function Poker() {
         updatePlayerCurrentStatus(broadcast.id, PlayerStatus.READY);
       });
 
-      socket.on("PlayerCurrentChipsBroadcast", (broadcast: Msg.PlayerCurrentChipsBroadcast) => {
-        console.log("PlayerCurrentChipsBroadcast: " + JSON.stringify(broadcast)); // RICKTODO: The naming should change.
-        updatePlayerCurrentChips(broadcast.id, broadcast.playersCurrentChips);
-      });
+      // socket.on("PlayerCurrentChipsBroadcast", (broadcast: Msg.PlayerCurrentChipsBroadcast) => {
+      //   console.log("PlayerCurrentChipsBroadcast: " + JSON.stringify(broadcast));
+      //   updatePlayerCurrentChips(broadcast.id, broadcast.playersCurrentChips);
+      // });
 
       socket.on("PlayerCurrentBetSizeBroadcast", (broadcast: Msg.PlayerCurrentBetSizeBroadcast) => {
-        console.log("PlayerCurrentBetSizeBroadcast: " + JSON.stringify(broadcast)); // RICKTODO: The naming should change.
+        console.log("PlayerCurrentBetSizeBroadcast: " + JSON.stringify(broadcast));
         updatePlayerCurrentBetSize(broadcast.id, broadcast.currentBetSize);
       });
 
@@ -193,6 +193,32 @@ export default function Poker() {
       socket.on("PlayerPlayBroadcast", (broadcast: Msg.PlayerPlayBroadcast) => {
         console.log("PlayerPlayBroadcast: " + JSON.stringify(broadcast));
         updatePlayerCurrentStatus(broadcast.id, PlayerStatus.PLAYING);
+      });
+
+      // updates
+      socket.on("PlayerNameUpdateBraodcast", (broadcast: Msg.PlayerNameUpdateBraodcast) => {
+        console.log("PlayerNameUpdateBraodcast: " + JSON.stringify(broadcast));
+        updatePlayerName(broadcast.seatId, broadcast.playerName);
+      });
+
+      socket.on("PlayerCurrentChipsUpdateBraodcast", (broadcast: Msg.PlayerCurrentChipsUpdateBraodcast) => {
+        console.log("PlayerCurrentChipsUpdateBraodcast: " + JSON.stringify(broadcast));
+        updatePlayerCurrentChips(broadcast.seatId, broadcast.playerCurrentChips);
+      });
+
+      socket.on("PlayerCurrentBetSizeUpdateBraodcast", (broadcast: Msg.PlayerCurrentBetSizeUpdateBraodcast) => {
+        console.log("PlayerCurrentBetSizeUpdateBraodcast: " + JSON.stringify(broadcast));
+        updatePlayerCurrentBetSize(broadcast.seatId, broadcast.playerCurrentBetSize);
+      });
+
+      socket.on("PlayerCurrentStatusUpdateBraodcast", (broadcast: Msg.PlayerCurrentStatusUpdateBraodcast) => {
+        console.log("PlayerCurrentStatusUpdateBraodcast: " + JSON.stringify(broadcast));
+        updatePlayerCurrentStatus(broadcast.seatId, broadcast.playerCurrentStatus);
+      });
+
+      socket.on("PlayerHoleCardsUpdateBraodcast", (broadcast: Msg.PlayerHoleCardsUpdateBraodcast) => {
+        console.log("PlayerHoleCardsUpdateBraodcast: " + JSON.stringify(broadcast));
+        updatePlayerHoleCards(broadcast.seatId, broadcast.playerHoleCards);
       });
 
       // load room info every time the component mounts

@@ -5,24 +5,24 @@ import { RoomStatus, PlayerStatus } from '@/games/base/terms';
 // Response: to respond to the client of the request (e.g. success/ fail)
 // Update: to refresh some display related data (e.g. The bet size of a player has changed)
 
-export type ServerMessage = { // This can be used for both response and broadcast
+export type ServerMessageBraodcast = { // log some server message, e.g. error message
   text: string;
 };
 
 export type StandupBroadcast = {
-  id: number;
+  seatId: number;
 };
 
 // export type LoadRoomInfoRequest = {
 // }
 
 export type LoadRoomInfoResponse = {
+  clientSeatId: number;
+  roomCurrentStatus: RoomStatus;
   playersNames: string[];
   playersCurrentChips: number[];
   playersCurrentBetSizes: number[];
   playersCurrentStatuses: (PlayerStatus | null)[];
-  roomCurrentStatus: RoomStatus;
-  clientSeatId: number;
 };
 
 export type SignupRequest = {
@@ -35,7 +35,7 @@ export type SignupResponse = {
   id: number;
 };
 
-export type SignupBroadcast = { // 這個要改，從資料改變的視角（playerStatusUpdate）
+export type SignupBroadcast = { // used to initialize a new player
   id: number;
   name: string;
 };
@@ -71,4 +71,30 @@ export type PlayerHoleCardsBroadcast = { // This will send to the player and the
 
 export type PlayerPlayBroadcast = {
   id: number;
+};
+
+// updates
+export type PlayerNameUpdateBraodcast = {
+  seatId: number;
+  playerName: string;
+};
+
+export type PlayerCurrentChipsUpdateBraodcast = {
+  seatId: number;
+  playerCurrentChips: number;
+};
+
+export type PlayerCurrentBetSizeUpdateBraodcast = {
+  seatId: number;
+  playerCurrentBetSize: number;
+};
+
+export type PlayerCurrentStatusUpdateBraodcast = {
+  seatId: number;
+  playerCurrentStatus: PlayerStatus;
+};
+
+export type PlayerHoleCardsUpdateBraodcast = {
+  seatId: number;
+  playerHoleCards: Card[];
 };

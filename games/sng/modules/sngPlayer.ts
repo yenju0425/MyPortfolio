@@ -1,8 +1,8 @@
 import { Player } from '../../base/player';
 import { Card } from './deck';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { PlayerStatus } from '../../base/terms';
-import { Deck } from './deck';
+import * as Msg from "../../../types/messages";
 
 export class SngPlayer extends Player {
   // sng
@@ -17,8 +17,8 @@ export class SngPlayer extends Player {
   private currentBetSize: number; // displayed in the frontend
   private isActed: boolean; // whether the player has acted in the current street, small blind & big blind are not considered as acted
 
-  constructor(id: number, name: string, email: string, socket: Socket) {
-    super(id, name, email, socket);
+  constructor(id: number, name: string, email: string, socket: Socket, io: Server) {
+    super(id, name, email, socket, io);
     // sng
     this.currentChips = 0;
     // round
@@ -50,24 +50,25 @@ export class SngPlayer extends Player {
   }
 
   // currentChips
+  broadcastCurrentChips(): void {
+    const broadcast: Msg.PlayerCurrentChipsUpdateBraodcast = {
+      seatId: this.getId(),
+      playerCurrentChips: this.getCurrentChips()
+    };
+    this.io.emit('PlayerCurrentChipsUpdateBraodcast', broadcast);
+  }
+
   getCurrentChips(): number {
     return this.currentChips;
   }
 
   setCurrentChips(currentChips: number): void {
     this.currentChips = currentChips;
-
-    // BroadCast to all players to update
-    this.socket.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to the player himself
-    this.socket.broadcast.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to other players
+    this.broadcastCurrentChips();
   }
 
   updateCurrentChips(chips: number): void {
-    this.currentChips += chips;
-
-    // BroadCast to all players to update
-    this.socket.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to the player himself
-    this.socket.broadcast.emit('PlayerCurrentChipsBroadcast', { id: this.getId(), currentChips: this.getCurrentChips() }); // to other players
+    this.setCurrentChips(this.getCurrentChips() + chips); // Must use `set` to trigger broadcast
   }
 
   // currentPosition

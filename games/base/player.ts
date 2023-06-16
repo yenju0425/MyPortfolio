@@ -1,18 +1,20 @@
 import { PlayerStatus } from './terms';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 export abstract class Player {
   private readonly id: number;
-  private readonly name: string;
+  private readonly name: string; // displayed in the frontend
   private readonly email: string;
   protected socket: Socket;
+  protected io: Server;
   protected currentStatus: PlayerStatus;
 
-  constructor(id: number, name: string, email: string, socket: Socket) {
+  constructor(id: number, name: string, email: string, socket: Socket, io: Server) {
     this.id = id;
     this.name = name;
     this.email = email;
     this.socket = socket;
+    this.io = io;
     this.currentStatus = PlayerStatus.NONE;
   }
 
