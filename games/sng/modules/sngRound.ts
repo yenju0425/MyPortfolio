@@ -6,7 +6,7 @@ import { SngPlayer } from './sngPlayer';
 
 export class SngRound extends Round {
   private readonly endRoundCallback: () => void;
-  private readonly bmallBlindId: number;
+  private readonly bigBlindSeatId: number;
   private readonly bigBlind: number;
   private readonly players: (SngPlayer | null)[];
   private communityCards: Card[];
@@ -16,17 +16,17 @@ export class SngRound extends Round {
   private currentPlayerId: number;
   private currentBetSize: number;
 
-  constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], bmallBlindId: number, bigBlind: number) {
+  constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number) {
     super();
     this.endRoundCallback = endRoundCallback;
-    this.bmallBlindId = bmallBlindId;
+    this.bigBlindSeatId = bigBlindSeatId;
     this.bigBlind = bigBlind;
     this.players = players;
     this.communityCards = [];
     this.deck = new Deck(); // The deck needs to be shuffled after created.
     this.pots = [];
     this.currentStreet = Streets.NONE;
-    this.currentPlayerId = bmallBlindId; // Initialize the current player as the bmallBlind.
+    this.currentPlayerId = bigBlindSeatId; // Initialize the current player as the bmallBlind.
     this.currentBetSize = 0;
   }
 
@@ -171,8 +171,10 @@ export class SngRound extends Round {
   initRoundPlayers(): void {
     let position = 2; // 0: dealer, 1: small blind, 2: big blind
     for (let i = 0; i < this.players.length; i++) {
-      let index = (this.bmallBlindId - i) % this.players.length;
-      this.players[index]?.startRound(position, this.deck);
+      let index = (this.bigBlindSeatId - i + this.players.length) % this.players.length;
+
+      console.log(index, position);
+      this.players[index]?.startRound(position, this.deck); // RICKTODO: directly give two cards.
       if (this.players[index]) {
         position = (position - 1 + this.players.length) % this.players.length; // If there are 2 players, small blind will be the dealer.
       }
@@ -237,7 +239,7 @@ export class SngRound extends Round {
   }
 
   resetCurrentPlayerId(): void {
-    this.currentPlayerId = this.bmallBlindId;
+    this.currentPlayerId = this.bigBlindSeatId;
   }
 
   getCurrentPlayerId(): number {

@@ -18,7 +18,7 @@ export type LoadRoomInfoResponse = {
   currentBetSizes: number[];
   currentPlayerStatuses: (PlayerStatus | null)[];
   currentRoomStatus: RoomStatus;
-  playerId: number;
+  clientSeatId: number;
 };
 
 export type SignupRequest = {
@@ -31,7 +31,7 @@ export type SignupResponse = {
   id: number;
 };
 
-export type SignupBroadcast = {
+export type SignupBroadcast = { // 這個要改，從資料改變的視角（playerStatusUpdate）
   id: number;
   name: string;
 };

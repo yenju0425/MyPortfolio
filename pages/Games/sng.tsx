@@ -5,14 +5,13 @@ import PlayerInfoCard from '@/components/playerInfoCard';
 import { RoomStatus, PlayerStatus } from '../../games/base/terms';
 import { Card, Deck } from '../../games/sng/modules/deck';
 
-import * as Msg from '../../types/messages';
-import { info } from 'console';
+import * as Msg from '../../types/messages'; // RICKTODO: upgrade to protobuf
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
 
 export default function Poker() {
-  const [playerId, setPlayerId] = useState(-1);
+  const [clientSeatId, setClientSeatId] = useState(-1);
   const [currentRoomStatus, setCurrentRoomStatus] = useState(RoomStatus.NONE);
 
   // For more details on how to use useState with arrays, see: https://react.dev/learn/updating-arrays-in-state
@@ -115,7 +114,7 @@ export default function Poker() {
     updateCurrentBetSizes(info.currentBetSizes);
     updateCurrentPlayerStatuses(info.currentPlayerStatuses);
     setCurrentRoomStatus(info.currentRoomStatus);
-    setPlayerId(info.playerId);
+    setClientSeatId(info.clientSeatId);
   };
 
   // utility functions
@@ -156,7 +155,7 @@ export default function Poker() {
 
       socket.on("SignupResponse", (response: Msg.SignupResponse) => {
         console.log("SignupResponse: " + JSON.stringify(response));
-        setPlayerId(response.id);
+        setClientSeatId(response.id);
       });
 
       socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
@@ -220,7 +219,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[0]}
             holeCards={playersHoleCards[0]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -231,7 +230,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[1]}
             holeCards={playersHoleCards[1]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -242,7 +241,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[2]}
             holeCards={playersHoleCards[2]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -253,7 +252,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[3]}
             holeCards={playersHoleCards[3]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
         </div>
         <div className={styles.second_row}>
@@ -266,7 +265,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[8]}
             holeCards={playersHoleCards[8]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
           <button>DEALER</button>
           <PlayerInfoCard
@@ -278,7 +277,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[4]}
             holeCards={playersHoleCards[4]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
         </div>
         <div className={styles.third_row}>
@@ -291,7 +290,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[7]}
             holeCards={playersHoleCards[7]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -302,7 +301,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[6]}
             holeCards={playersHoleCards[6]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -313,7 +312,7 @@ export default function Poker() {
             currentPlayerStatus={currentPlayerStatuses[5]}
             holeCards={playersHoleCards[5]}
             currentRoomStatus={currentRoomStatus}
-            playerId={playerId}
+            clientSeatId={clientSeatId}
           />
         </div>
       </div>

@@ -14,13 +14,13 @@ interface PlayerInfoCardProps {
   currentPlayerStatus: PlayerStatus | null;
   holeCards: Card[];
   currentRoomStatus: RoomStatus;
-  playerId: number;
+  clientSeatId: number;
 }
 
 const PlayerInfoCard = (props: PlayerInfoCardProps) => {
 
   // show control
-  const isShowControl = props.currentRoomStatus === RoomStatus.NONE && (props.playerId === props.id || (props.playerId === -1 && props.currentPlayerStatus === null));
+  const isShowControl = props.currentRoomStatus === RoomStatus.NONE && (props.clientSeatId === props.id || (props.clientSeatId === -1 && props.currentPlayerStatus === null));
 
   // show info
   const isShowInfo = props.currentPlayerStatus !== null && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && props.currentPlayerStatus !== PlayerStatus.QUIT;
