@@ -140,12 +140,12 @@ export default function Poker() {
         // RICKTODO:
       });
 
-      socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => { // player leave the seat
+      socket.on("StandupBroadcast", (broadcast: Msg.StandupBroadcast) => {
         console.log("StandupBroadcast: " + JSON.stringify(broadcast));
         resetPlayerInfo(broadcast.seatId);
       });
 
-      socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => { // player join the room
+      socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
         console.log("LoadRoomInfoResponse: " + JSON.stringify(response));
         loadRoomInfo(response);
       });
@@ -155,7 +155,7 @@ export default function Poker() {
         setClientSeatId(response.id);
       });
 
-      socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => {
+      socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => { // Initialize player info, cannot use xxxUpdate, use xxxResponse instead.
         console.log("SignupBroadcast: " + JSON.stringify(broadcast));
         updatePlayerName(broadcast.id, broadcast.name);
         updatePlayerCurrentStatus(broadcast.id, PlayerStatus.NONE);
@@ -165,37 +165,17 @@ export default function Poker() {
         console.log("ReadyResponse: " + JSON.stringify(response));
       });
 
-      // socket.on("ReadyBroadcast", (broadcast: Msg.ReadyBroadcast) => {
-      //   console.log("ReadyBroadcast: " + JSON.stringify(broadcast));
-      //   updatePlayerCurrentStatus(broadcast.id, PlayerStatus.READY);
-      // });
-
-      // socket.on("PlayerCurrentChipsBroadcast", (broadcast: Msg.PlayerCurrentChipsBroadcast) => {
-      //   console.log("PlayerCurrentChipsBroadcast: " + JSON.stringify(broadcast));
-      //   updatePlayerCurrentChips(broadcast.id, broadcast.playersCurrentChips);
-      // });
-
-      socket.on("PlayerCurrentBetSizeBroadcast", (broadcast: Msg.PlayerCurrentBetSizeBroadcast) => {
-        console.log("PlayerCurrentBetSizeBroadcast: " + JSON.stringify(broadcast));
-        updatePlayerCurrentBetSize(broadcast.id, broadcast.currentBetSize);
-      });
-
-      socket.on("PlayerHoleCardsBroadcast", (broadcast: Msg.PlayerHoleCardsBroadcast) => {
-        console.log("PlayerHoleCardsBroadcast: " + JSON.stringify(broadcast));
-        updatePlayerHoleCards(broadcast.id, broadcast.holeCards);
-      });
-
-      socket.on("RoomPlayBroadcast", () => {
-        console.log("RoomPlayBroadcast.");
-        setCurrentRoomStatus(RoomStatus.PLAYING);
-      });
-
-      socket.on("PlayerPlayBroadcast", (broadcast: Msg.PlayerPlayBroadcast) => {
-        console.log("PlayerPlayBroadcast: " + JSON.stringify(broadcast));
-        updatePlayerCurrentStatus(broadcast.id, PlayerStatus.PLAYING);
-      });
-
       // updates
+      socket.on("ClientSeatIdUpdateBroadcast", (broadcast: Msg.ClientSeatIdUpdateBroadcast) => {
+        console.log("ClientSeatIdUpdateBroadcast: " + JSON.stringify(broadcast));
+        setClientSeatId(broadcast.clientSeatId);
+      });
+
+      socket.on("RoomCurrentStatusUpdateBroadcast", (broadcast: Msg.RoomCurrentStatusUpdateBroadcast) => {
+        console.log("RoomCurrentStatusUpdateBroadcast: " + JSON.stringify(broadcast));
+        setCurrentRoomStatus(broadcast.roomCurrentStatus);
+      });
+
       socket.on("PlayerNameUpdateBroadcast", (broadcast: Msg.PlayerNameUpdateBroadcast) => {
         console.log("PlayerNameUpdateBroadcast: " + JSON.stringify(broadcast));
         updatePlayerName(broadcast.seatId, broadcast.playerName);
@@ -216,12 +196,12 @@ export default function Poker() {
         updatePlayerCurrentStatus(broadcast.seatId, broadcast.playerCurrentStatus);
       });
 
-      socket.on("PlayerHoleCardsUpdatecast", (broadcast: Msg.PlayerHoleCardsUpdateBroadcast) => {
+      socket.on("PlayerHoleCardsUpdateBroadcast", (broadcast: Msg.PlayerHoleCardsUpdateBroadcast) => {
         console.log("PlayerHoleCardsUpdateBroadcast: " + JSON.stringify(broadcast));
         updatePlayerHoleCards(broadcast.seatId, broadcast.playerHoleCards);
       });
 
-      // load room info every time the component mounts
+      // Load room info every time the component mounts.
       socket.emit("LoadRoomInfoRequest");
     });
   

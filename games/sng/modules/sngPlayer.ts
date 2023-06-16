@@ -11,11 +11,11 @@ export class SngPlayer extends Player {
   private currentPosition: number | null;
   private holeCards: Card[]; // displayed in the frontend
   private currentPotContribution: number;
-  private isFold: boolean;
+  private folded: boolean;
   private handRanking: number; // hexadecimal, e.g. AA335 -> 0x['3' + '00E35']
   // street
   private currentBetSize: number; // displayed in the frontend
-  private isActed: boolean; // whether the player has acted in the current street, small blind & big blind are not considered as acted
+  private acted: boolean; // whether the player has acted in the current street, small blind & big blind are not considered as acted
 
   constructor(id: number, name: string, email: string, socket: Socket, io: Server) {
     super(id, name, email, socket, io);
@@ -25,37 +25,21 @@ export class SngPlayer extends Player {
     this.currentPosition = null;
     this.holeCards = [];
     this.currentPotContribution = 0;
-    this.isFold = false;
+    this.folded = false;
     this.handRanking = 0;
     // street
     this.currentBetSize = 0;
-    this.isActed = false;
+    this.acted = false;
   }
 
-  // utility functions
-  isStillInSng(): boolean {
-    return this.getStatus() === PlayerStatus.PLAYING;
-  }
-
-  isStillInRound(): boolean {
-    return this.isStillInSng() && !this.isFold;
-  }
-
-  isStillInStreet(): boolean {
-    return this.isStillInRound() && this.currentChips > 0;
-  }
-
-  isAllIn(): boolean {
-    return this.isStillInRound() && this.currentChips === 0;
-  }
-
-  // currentChips
+  // currentChips, displayed in the frontend
   broadcastCurrentChips(): void {
     const broadcast: Msg.PlayerCurrentChipsUpdateBroadcast = {
       seatId: this.getId(),
       playerCurrentChips: this.getCurrentChips()
     };
     this.io.emit('PlayerCurrentChipsUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastCurrentChips: " + JSON.stringify(broadcast));
   }
 
   getCurrentChips(): number {
@@ -76,9 +60,27 @@ export class SngPlayer extends Player {
     return this.currentPosition;
   }
 
-  // holeCards
+  setCurrentPosition(currentPosition: number): void {
+    this.currentPosition = currentPosition;
+  }
+
+  // holeCards, displayed in the frontend
+  broadcastHoleCards(): void {
+    const broadcast: Msg.PlayerHoleCardsUpdateBroadcast = {
+      seatId: this.getId(),
+      playerHoleCards: this.getHoleCards()
+    };
+    this.io.emit('PlayerHoleCardsUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastHoleCards: " + JSON.stringify(broadcast));
+  }
+
   getHoleCards(): Card[] {
     return this.holeCards;
+  }
+
+  setHoleCards(holeCards: Card[]): void {
+    this.holeCards = holeCards;
+    this.broadcastHoleCards();
   }
 
   // currentPotContribution
@@ -86,60 +88,66 @@ export class SngPlayer extends Player {
     return this.currentPotContribution;
   }
 
-  // isFold
+  setCurrentPotContribution(currentPotContribution: number): void {
+    this.currentPotContribution = currentPotContribution;
+  }
+
+  // folded
   fold() {
-    this.isFold = true;
+    this.folded = true;
   }
 
-  resetIsFold() {
-    this.isFold = false;
+  resetFolded() {
+    this.folded = false;
   }
 
-  getIsFold(): boolean {
-    return this.isFold;
+  isFold(): boolean {
+    return this.folded;
   }
 
   // handRanking
-  setHandRanking(handRanking: number): void {
-    this.handRanking = handRanking;
-  }
-
   getHandRanking(): number {
     return this.handRanking;
   }
 
-  // currentBetSize
+  setHandRanking(handRanking: number): void {
+    this.handRanking = handRanking;
+  }
+
+  // currentBetSize, displayed in the frontend
+  broadcastCurrentBetSize(): void {
+    const broadcast: Msg.PlayerCurrentBetSizeUpdateBroadcast = {
+      seatId: this.getId(),
+      playerCurrentBetSize: this.getCurrentBetSize()
+    };
+    this.io.emit('PlayerCurrentBetSizeUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastCurrentBetSize: " + JSON.stringify(broadcast));
+  }
+
   getCurrentBetSize(): number {
     return this.currentBetSize;
   }
 
   setCurrentBetSize(chips: number): void {
     this.currentBetSize = chips;
-
-    // BroadCast to all players to update
-    this.socket.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to the player himself
-    this.socket.broadcast.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to other players
+    this.broadcastCurrentBetSize();
   }
 
   updateCurrentBetSize(chips: number): void {
-    this.currentBetSize += chips;
-
-    // BroadCast to all players to update
-    this.socket.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to the player himself
-    this.socket.broadcast.emit('PlayerCurrentBetSizeBroadcast', { id: this.getId(), currentBetSize: this.getCurrentBetSize() }); // to other players
+    this.setCurrentBetSize(this.getCurrentBetSize() + chips);
   }
 
-  // isActed
+  // acted
   act(): void { // act() is called when the player acts in the current street, e.g. call, raise, all-in, etc.
-    this.isActed = true;
+    this.acted = true;
   }
 
-  resetIsActed(): void {
-    this.isActed = false;
+  resetActed(): void {
+    this.acted = false;
   }
 
-  getIsActed(): boolean {
-    return this.isActed;
+  isActed(): boolean {
+    return this.acted;
   }
 
   // player functions
@@ -152,16 +160,12 @@ export class SngPlayer extends Player {
 
   startRound(position: number, cards: Card[]): void {
     this.currentPosition = position;
-    this.holeCards = cards;
+    this.setHoleCards(cards);
     this.currentPotContribution = 0;
-    this.isFold = false;
-    this.isActed = false;
+    this.folded = false;
+    this.acted = false;
 
     console.log(">" + this.getId(), position);
-
-    // RICKTODO: 最好還是用 datadriven 的寫法，傳給前端的協議表示資料有異動
-    this.socket.emit('PlayerHoleCardsBroadcast', { id: this.getId(), holeCards: this.getHoleCards() }); // to the player himself
-
   }
 
   startStreet(): void {
@@ -190,17 +194,21 @@ export class SngPlayer extends Player {
   showCards(): void {
     // RICKTODO: notify the player that he/she has shown the cards
   }
-}
 
-// 所有需要通知前端的動作
-// 1. 玩家報名 (P, O, A)
-// 2. 玩家取消報名 (P, O, A)
-// 3. 玩家準備 (P, O, A)
-// 4. 玩家取消準備 (P, O, A)
-// 5. 發牌 (P, A) <---------------
-// 6. 等待玩家下注 (P, O, A)
-// 7. 通知玩家行動 (P) <-----------
-// 7. 玩家下注 (P, O, A)
-// 8. 發獎 (P, O, A)
-// 9. 結束遊戲 (P, O, A)
-// 9. 玩家離開 (P, O, A)
+  // utility functions
+  isStillInSng(): boolean {
+    return this.getStatus() === PlayerStatus.PLAYING;
+  }
+
+  isStillInRound(): boolean {
+    return this.isStillInSng() && !this.folded;
+  }
+
+  isStillInStreet(): boolean {
+    return this.isStillInRound() && this.currentChips > 0;
+  }
+
+  isAllIn(): boolean {
+    return this.isStillInRound() && this.currentChips === 0;
+  }
+}

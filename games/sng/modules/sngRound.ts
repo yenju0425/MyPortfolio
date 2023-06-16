@@ -32,7 +32,7 @@ export class SngRound extends Round {
 
   // utility functions
   isAllPlayersActed(): boolean {
-    return this.players.filter(player => player !== null).every(player => player?.getIsActed());
+    return this.players.filter(player => player !== null).every(player => player?.isActed());
   }
 
   isBetConsensusReached(): boolean {

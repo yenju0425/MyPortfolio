@@ -51,6 +51,7 @@ export abstract class Player {
       playerCurrentStatus: this.getStatus()
     };
     this.io.emit('PlayerCurrentStatusUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastCurrentStatus: " + JSON.stringify(broadcast));
   }
 
   getStatus(): PlayerStatus {

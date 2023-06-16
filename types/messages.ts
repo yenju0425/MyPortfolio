@@ -47,28 +47,15 @@ export type ReadyResponse = {
   id: number;
 };
 
-// export type ReadyBroadcast = {
-//   id: number;
-// };
-
-export type PlayerCurrentBetSizeBroadcast = {
-  id: number;
-  currentBetSize: number;
-};
-
-export type PlayerHoleCardsBroadcast = { // This will send to the player and the spectators
-  id: number;
-  holeCards: Card[];
-};
-
-// export type RoomPlayBroadcast = {
-// }
-
-export type PlayerPlayBroadcast = {
-  id: number;
-};
-
 // updates
+export type ClientSeatIdUpdateBroadcast = {
+  clientSeatId: number;
+};
+
+export type RoomCurrentStatusUpdateBroadcast = {
+  roomCurrentStatus: RoomStatus;
+};
+
 export type PlayerNameUpdateBroadcast = {
   seatId: number;
   playerName: string;
