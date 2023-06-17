@@ -1,10 +1,6 @@
-import type { Server, Socket } from 'socket.io';
-import { SngRoom } from './modules/sngRoom';
-import * as Msg from "../../types/messages";
-
-type gameData = {
-  num: number;
-};
+import type { Socket } from 'socket.io';
+import type { SngRoom } from './modules/sngRoom';
+import * as Msg from "@/types/messages";
 
 export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom) {
   console.log("Adding socket listeners.");

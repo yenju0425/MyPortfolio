@@ -1,4 +1,4 @@
-import { Streets, Suits, Ranks, HandRankings } from './terms';
+import { Suits, Ranks, HandRankings } from './terms';
 
 export type Card = {
   suit: Suits;

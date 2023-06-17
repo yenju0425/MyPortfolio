@@ -1,7 +1,7 @@
-import { Streets, Suits, Ranks, HandRankings } from './terms';
+import { Round } from '@/games/base/round';
 import { Card, Deck } from './deck';
 import { Pot } from './pots';
-import { Round } from '../../base/round';
+import { Streets } from './terms';
 import { SngPlayer } from './sngPlayer';
 
 export class SngRound extends Round {

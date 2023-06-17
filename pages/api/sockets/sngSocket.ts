@@ -1,35 +1,31 @@
 import type { NextApiRequest } from 'next'
-import type { NextApiResponseWithSocketIO } from '../../../types/socketServer' // custom response
-import { SngRoom } from '../../../games/sng/modules/sngRoom';
+import type { NextApiResponseWithSocketIO } from '@/types/socketServer'
 import { Server } from "socket.io";
-import registerSngSocketEvents from '../../../games/sng/socketHandler';
+import { SngRoom } from '@/games/sng/modules/sngRoom';
+import registerSngSocketEvents from '@/games/sng/socketHandler';
 
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponseWithSocketIO
 ) {
   if (!res.socket.server.io) {
-    console.log("First connection. Setting up the server.");
+    console.log("First connection, starting socket.io server.");
 
-    // Creating socket.io server
     const io = new Server(res.socket.server);
-
-    // Init game data
     const sngRoom = new SngRoom(io);
 
-    // Add event listeners to client when client connects
+    // Add event listeners to client when client connects.
     io.on("connection", (socket) => {
       console.log(socket.id + " connected.");
+
+      // Join the spectators group by default.
       socket.join("spectators");
 
-      // register all socket events
+      // Register all events.
       registerSngSocketEvents(socket, sngRoom);
-
-      // load sng room
-      // socket.emit(ServerEvents.update_sng_room, sngRoom);
     });
 
-    // Save socket.io server to res.socket.server.io
+    // Save socket.io server to `res.socket.server.io`.
     res.socket.server.io = io;
   } else {
     console.log("Server already running.");

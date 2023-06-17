@@ -1,7 +1,6 @@
+import type { Server } from 'socket.io';
 import { RoomStatus } from './terms';
-import type { Server, Socket } from 'socket.io';
-
-import * as Msg from "../../types/messages";
+import * as Msg from "@/types/messages";
 
 export abstract class Room {
   private readonly startTime: number;

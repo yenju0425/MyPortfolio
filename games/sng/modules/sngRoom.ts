@@ -1,17 +1,10 @@
-import { Server, Socket } from 'socket.io';
-import { SngPlayer } from "./sngPlayer";
-import { Room } from "../../base/room";
+import type { Server, Socket } from 'socket.io';
+import { Room } from "@/games/base/room";
+import { RoomStatus, PlayerStatus } from '@/games/base/terms';
 import { configs } from "./configs";
-import { Card, Deck } from './deck';
-import { RoomStatus } from '../../base/terms';
-import { PlayerStatus } from '../../base/terms';
 import { SngRound } from "./sngRound";
-import { get } from "http";
-import { Streets } from './terms';
-import { Pot } from './pots';
-import { Round } from '../../base/round';
-
-import * as Msg from "../../../types/messages";
+import { SngPlayer } from "./sngPlayer";
+import * as Msg from "@/types/messages";
 
 export class SngRoom extends Room {
   private readonly numPlayers: number;

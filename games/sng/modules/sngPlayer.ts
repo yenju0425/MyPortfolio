@@ -1,8 +1,8 @@
-import { Player } from '../../base/player';
+import type { Server, Socket } from 'socket.io';
+import { Player } from '@/games/base/player';
+import { PlayerStatus } from '@/games/base/terms';
 import { Card } from './deck';
-import { Server, Socket } from 'socket.io';
-import { PlayerStatus } from '../../base/terms';
-import * as Msg from "../../../types/messages";
+import * as Msg from "@/types/messages";
 
 export class SngPlayer extends Player {
   // sng

@@ -1,6 +1,6 @@
+import type { Server, Socket } from 'socket.io';
 import { PlayerStatus } from './terms';
-import { Server, Socket } from 'socket.io';
-import * as Msg from "../../types/messages"; // RICKTODO: 拆分出去，基本會用的 proto (base.message 之類的)
+import * as Msg from "@/types/messages";
 
 export abstract class Player {
   private readonly id: number;
