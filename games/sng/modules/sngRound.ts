@@ -13,7 +13,7 @@ export class SngRound extends Round {
   private deck: Deck;
   private pots: Pot[];
   private currentStreet: Streets;
-  private currentPlayerId: number;
+  private currentPlayerSeatId: number;
   private currentBetSize: number;
 
   constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number) {
@@ -26,13 +26,23 @@ export class SngRound extends Round {
     this.deck = new Deck(); // The deck needs to be shuffled after created.
     this.pots = [];
     this.currentStreet = Streets.NONE;
-    this.currentPlayerId = bigBlindSeatId; // Initialize the current player as the bmallBlind.
+    this.currentPlayerSeatId = bigBlindSeatId; // Initialize the current player as the bmallBlind.
     this.currentBetSize = 0;
+  }
+
+  // bigBlindSeatId
+  getBigBlindSeatId(): number {
+    return this.bigBlindSeatId;
+  }
+
+  // bigBlind
+  getBigBlind(): number {
+    return this.bigBlind;
   }
 
   // players
   getPlayer(): SngPlayer | null {
-    return this.players[this.currentPlayerId];
+    return this.players[this.currentPlayerSeatId];
   }
     
   // communityCards
@@ -46,15 +56,26 @@ export class SngRound extends Round {
   }
 
   // Pots
-  updatePot(): void {
-    let potContribations = this.players.map((player, index) => [index, player ? player.getCurrentPotContribution() : 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
+  getPots(): Pot[] {
+    return this.pots;
+  }
+
+  setPots(pots: Pot[]): void {
+    this.pots = pots;
+  }
+
+  updatePots(): void {
+    const newPots: Pot[] = [];
+    let potContribations = this.players.map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
     for (let i = 0; potContribations.length > 0; i++) {
-      this.pots[i] = {
+      newPots.push({
         amount: potContribations[0][1] * potContribations.length,
         participants: potContribations.map(([index]) => index)
-      };
+      });
       potContribations = potContribations.map(([index, contribution]) => [index, contribution - potContribations[0][1]]).filter(([, contribution]) => contribution > 0);
     }
+
+    this.setPots(newPots);
   }
 
   // currentStreet
@@ -62,45 +83,52 @@ export class SngRound extends Round {
     return this.currentStreet;
   }
 
+  setCurrentStreet(street: Streets): void {
+    this.currentStreet = street;
+  }
+
   updateCurrentStreet(): void {
-    this.currentStreet = this.currentStreet + 1;
+    this.setCurrentStreet(this.getCurrentStreet() + 1);
   }
 
   // currentBetSize
-  updateCurrentBetSize(amount: number): void {
-    // get the max of currentBetSize and amount
-    this.currentBetSize = Math.max(this.currentBetSize, amount);
-  }
-
   getCurrentBetSize(): number {
     return this.currentBetSize;
   }
 
-  // currentPlayerId
-  getNextPlayerId(): number {
-    let nextPlayerId = (this.currentPlayerId + 1) % this.players.length;
-    while(!this.players[nextPlayerId]?.isStillInStreet()) {
-      nextPlayerId = (nextPlayerId + 1) % this.players.length
-    }
-    return nextPlayerId;
+  setCurrentBetSize(amount: number): void {
+    this.currentBetSize = amount;
   }
 
-  updateCurrentPlayerId(): void {
-    this.currentPlayerId = this.getNextPlayerId();
+  updateCurrentBetSize(amount: number): void {
+    this.setCurrentBetSize(Math.max(this.getCurrentBetSize(), amount));
   }
 
-  resetCurrentPlayerId(): void {
-    this.currentPlayerId = this.bigBlindSeatId;
-  }
-
-  getCurrentPlayerId(): number {
-    if (this.currentPlayerId === null) {
-      console.log("currentPlayerId is null, update it automatically.");
-      this.updateCurrentPlayerId();
-      return this.getCurrentPlayerId();
+  // currentPlayerSeatId
+  getCurrentPlayerSeatId(): number {
+    if (this.currentPlayerSeatId === null) {
+      console.log("currentPlayerSeatId is null, update it automatically.");
+      this.updateCurrentPlayerSeatId();
+      return this.getCurrentPlayerSeatId();
     } else {
-      return this.currentPlayerId;
+      return this.currentPlayerSeatId;
     }
+  }
+
+  setCurrentPlayerSeatId(seatId: number): void {
+    this.currentPlayerSeatId = seatId;
+  }
+
+  updateCurrentPlayerSeatId(): void {
+    let nextPlayerSeatId = (this.currentPlayerSeatId + 1) % this.players.length;
+    while(!this.players[nextPlayerSeatId]?.isStillInStreet()) {
+      nextPlayerSeatId = (nextPlayerSeatId + 1) % this.players.length
+    }
+    this.setCurrentPlayerSeatId(nextPlayerSeatId);
+  }
+
+  resetCurrentPlayerSeatId(): void {
+    this.setCurrentPlayerSeatId(this.getBigBlindSeatId());
   }
 
   // round functions
@@ -119,8 +147,8 @@ export class SngRound extends Round {
 
   startAction(): void {
 
-    // Update current player id.
-    this.updateCurrentPlayerId();
+    // Update current player seat id.
+    this.updateCurrentPlayerSeatId();
 
     // Get current player.
     const currentPlayer = this.getPlayer();
@@ -130,7 +158,7 @@ export class SngRound extends Round {
       return;
     }
 
-    console.log('[RICKDEBUG] startAction', this.getCurrentPlayerId(), currentPlayer.getCurrentPosition());
+    console.log('[RICKDEBUG] startAction', this.getCurrentPlayerSeatId(), currentPlayer.getCurrentPosition());
     
     // Automatically place bet for small blind and big blind.
     if (this.getCurrentStreet() === Streets.PREFLOP) {
@@ -160,7 +188,7 @@ export class SngRound extends Round {
   }
 
   endStreet(): void {
-    this.updatePot();
+    this.updatePots();
 
     // TODO: return the overbet chips to the player
 

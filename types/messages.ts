@@ -26,17 +26,17 @@ export type LoadRoomInfoResponse = {
 };
 
 export type SignupRequest = {
-  id: number;
+  seatId: number;
   name: string;
   email: string;
 };
 
 export type SignupResponse = {
-  id: number;
+  seatId: number;
 };
 
 export type SignupBroadcast = { // used to initialize a new player
-  id: number;
+  seatId: number;
   name: string;
 };
 
@@ -44,7 +44,7 @@ export type SignupBroadcast = { // used to initialize a new player
 // }
 
 export type ReadyResponse = {
-  id: number;
+  seatId: number;
 };
 
 // updates

@@ -21,7 +21,7 @@ export class SngRoom extends Room {
   private lastBlindUpdateTime: number | null;
   private currentBlindUpdateTimer: NodeJS.Timeout | undefined;
   private currentRound: SngRound | null;
-  private currentPlayerId: number | null; // an index of players
+  private currentPlayerSeatId: number | null;
 
   constructor(io: Server) {
     super(io);
@@ -39,104 +39,121 @@ export class SngRoom extends Room {
     this.lastBlindUpdateTime = null;
     this.currentBlindUpdateTimer = undefined;
     this.currentRound = null;
-    this.currentPlayerId = null;
+    this.currentPlayerSeatId = null;
   };
 
   // totalNumSngs
-  updateTotalNumSngs(): void {
-    this.totalNumSngs++;
-  };
-
   getTotalNumSngs(): number {
     return this.totalNumSngs;
   };
 
-  // totalNumRounds
-  udateTotalNumRounds(): void {
-    this.totalNumRounds++;
+  setTotalNumSngs(num: number): void {
+    this.totalNumSngs = num;
   };
 
+  updateTotalNumSngs(): void {
+    this.setTotalNumSngs(this.getTotalNumSngs() + 1);
+  };
+
+  // totalNumRounds
   getTotalNumRounds(): number {
     return this.totalNumRounds;
   };
 
+  setTotalNumRounds(num: number): void {
+    this.totalNumRounds = num;
+  };
+
+  udateTotalNumRounds(): void {
+    this.setTotalNumRounds(this.getTotalNumRounds() + 1);
+  };
+
   // players
-  initSngPlayers(): void {
-    this.players.forEach(player => player?.startSng(this.initChips));
+  getPlayers(): (SngPlayer | null)[] {
+    return this.players;
+  };
+
+  setPlayers(players: (SngPlayer | null)[]): void {
+    this.players = players;
   };
 
   resetPlayers(): void {
-    this.players = new Array<SngPlayer | null>(this.numPlayers).fill(null);
-  };
-
-  setPlayer(id: number, player: SngPlayer): void {
-    this.players[id] = player;
-
-    // Broadcast to clients to init player info. And then every data change will automatically reflect on the frontend by every `set` function.
-    const broadcast: Msg.SignupBroadcast = {
-      id: id,
-      name: player.getName(),
-    };
-    this.io.emit("SignupBroadcast", broadcast);
-  
-    // Send signup response.
-    const response: Msg.SignupResponse = {
-      id: id,
-    };
-    player.getSocket().emit("SignupResponse", response);
-  };
-
-  resetPlayer(id: number): void { //TODO: might need to do some safety check
-    this.players[id] = null;
+    this.setPlayers(new Array<SngPlayer | null>(this.numPlayers).fill(null));
   };
 
   getPlayer(socket: Socket): SngPlayer | null {
     return this.players.find(player => player?.getSocket() === socket) || null;
   };
 
-  getPlayerId(socket: Socket): number { // If the client is not a player, return -1.
+  setPlayer(seatId: number, player: SngPlayer | null): void {
+    this.players[seatId] = player;
+
+    // Broadcast to clients to init player info. And then every data change will automatically reflect on the frontend by every `set` function.
+    const broadcast: Msg.SignupBroadcast = {
+      seatId: seatId,
+      name: player?.getName() || '',
+    };
+    this.io.emit("SignupBroadcast", broadcast);
+  
+    // Send signup response.
+    const response: Msg.SignupResponse = {
+      seatId: seatId,
+    };
+    player?.getSocket().emit("SignupResponse", response);
+  };
+
+  resetPlayer(seatId: number): void {
+    this.setPlayer(seatId, null);
+  };
+
+  getPlayerSeatId(socket: Socket): number { // If the client is not a player, return -1.
     return this.players.findIndex(player => player?.getSocket() === socket);
   };
 
-  getPlayersName(): string[] {
+  getPlayersNames(): string[] {
     return this.players.map(player => player ? player.getName() : '');
   };
 
-  getPlayersCurrentChip(): number[] {
+  getPlayersCurrentChips(): number[] {
     return this.players.map(player => player ? player.getCurrentChips() : 0);
   };
 
-  getPlayersCurrentBetSize(): number[] {
+  getPlayersCurrentBetSizes(): number[] {
     return this.players.map(player => player ? player.getCurrentBetSize() : 0);
   };
 
-  getPlayersStatus(): (PlayerStatus | null)[] {
+  getPlayersStatuses(): (PlayerStatus | null)[] {
     // return this.players.map(player => player?.getStatus() || null); <- The `||` returns the first operand if it is truthy and the second operand otherwise.
     return this.players.map(player => player ? player.getStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
   };
 
+  // currentSngStartTime
+  getCurrentSngStartTime(): number | null {
+    return this.currentSngStartTime;
+  };
+
+  setCurrentSngStartTime(time: number | null): void {
+    this.currentSngStartTime = time;
+  };
+
+  resetCurrentSngStartTime(): void {
+    this.setCurrentSngStartTime(null);
+  };
+
+  // currentNumSngRounds
+  getCurrentNumSngRounds(): number {
+    return this.currentNumSngRounds;
+  };
+
+  setCurrentNumSngRounds(num: number): void {
+    this.currentNumSngRounds = num;
+  };
+
+  resetCurrentNumSngRounds(): void {
+    this.setCurrentNumSngRounds(0);
+  };
+
   // currentBigBlindSeatId
-  getNextBigBlindSeatId(): number {
-    if (!this.currentBigBlindSeatId) {
-      const nonNullIds = this.players.map((player, id) => player !== null ? id : -1).filter(id => id !== -1);
-      return nonNullIds[Math.floor(Math.random() * nonNullIds.length)];
-    } else {
-      let nextBmallBlind = (this.currentBigBlindSeatId + 1) % this.numPlayers;
-      while (this.players[nextBmallBlind] === null) {
-        nextBmallBlind = (nextBmallBlind + 1) % this.numPlayers;
-      }
-      return nextBmallBlind;
-    }
-  }
-
-  updateCurrentBigBlindSeatId(): void {
-    this.currentBigBlindSeatId = this.getNextBigBlindSeatId();
-  };
-
-  resetCurrentBigBlindSeatId(): void {
-    this.currentBigBlindSeatId = null;
-  };
-
   getCurrentBigBlindSeatId(): number {
     if (this.currentBigBlindSeatId === null) {
       console.log("currentBigBlindSeatId is null, update it automatically.");
@@ -147,41 +164,50 @@ export class SngRoom extends Room {
     }
   }
 
-  // currentRound
-  initCurrentRound(): void {
-    this.currentRound = new SngRound(this.endRound, this.players, this.getCurrentBigBlindSeatId(), this.getCurrentBigBlind());
-    this.currentRound.getDeck().shuffle(); // The deck needs to be shuffled after it is created.
+  setCurrentBigBlindSeatId(seatId: number | null): void {
+    this.currentBigBlindSeatId = seatId;
   };
 
-  getCurrentRound(): SngRound {
-    if (!this.currentRound) {
-      console.log("currentRound is null, please init it first.");
-      this.initCurrentRound();
-      return this.getCurrentRound();
+  updateCurrentBigBlindSeatId(): void {
+    if (!this.currentBigBlindSeatId) {
+      const nonNullIds = this.players.map((player, seatId) => player !== null ? seatId : -1).filter(seatId => seatId !== -1);
+      this.setCurrentBigBlindSeatId(nonNullIds[Math.floor(Math.random() * nonNullIds.length)]);
     } else {
-      return this.currentRound;
+      let nextBmallBlind = (this.currentBigBlindSeatId + 1) % this.numPlayers;
+      while (this.players[nextBmallBlind] === null) {
+        nextBmallBlind = (nextBmallBlind + 1) % this.numPlayers;
+      }
+      this.setCurrentBigBlindSeatId(nextBmallBlind);
     }
-  }
+  };
+
+  resetCurrentBigBlindSeatId(): void {
+    this.setCurrentBigBlindSeatId(null);
+  };
 
   // currentBlindLevel
-  updateCurrentBlindLevel(): void {
-    this.currentBlindLevel++;
-    this.lastBlindUpdateTime = Date.now();
-
-    console.log("Current big blind: " + this.getCurrentBigBlind());
-  };
-
-  resetCurrentBlindLevel(): void {
-    this.currentBlindLevel = 0;
-    this.lastBlindUpdateTime = null;
-  };
-
   getCurrentBigBlind(): number {
     if (this.currentBlindLevel === 0) {
       console.log("currentBlindLevel is 0, update it automatically.");
       this.updateCurrentBlindLevel();
     }
     return this.blindStructure[this.currentBlindLevel].bigBlind;
+  };
+
+  setCurrentBlindLevel(level: number): void {
+    this.currentBlindLevel = level;
+  };
+
+  updateCurrentBlindLevel(): void {
+    this.setCurrentBlindLevel(this.currentBlindLevel + 1);
+    this.setLastBlindUpdateTime(Date.now());
+
+    console.log("Current big blind: " + this.getCurrentBigBlind());
+  };
+
+  resetCurrentBlindLevel(): void {
+    this.resetCurrentBlindLevel();
+    this.resetLastBlindUpdateTime();
   };
 
   startBlindUp(): void {
@@ -199,21 +225,77 @@ export class SngRoom extends Room {
     if (!blindLevelTime) {
       return;
     }
-    this.currentBlindUpdateTimer = setTimeout(() => {
+
+    this.setCurrentBlindUpdateTimer(setTimeout(() => {
       this.updateCurrentBlindLevel();
       this.setBlinUpTimer();
-    }, blindLevelTime);
+    }, blindLevelTime));
+  };
+
+  // lastBlindUpdateTime
+  getLastBlindUpdateTime(): number | null {
+    return this.lastBlindUpdateTime;
+  };
+
+  setLastBlindUpdateTime(time: number | null): void {
+    this.lastBlindUpdateTime = time;
+  };
+
+  resetLastBlindUpdateTime(): void {
+    this.setLastBlindUpdateTime(null);
+  };
+
+  // currentBlindUpdateTimer
+  getCurrentBlindUpdateTimer(): NodeJS.Timeout | undefined {
+    return this.currentBlindUpdateTimer;
+  };
+
+  setCurrentBlindUpdateTimer(timer: NodeJS.Timeout): void {
+    this.currentBlindUpdateTimer = timer;
+  };
+
+  // currentRound
+  getCurrentRound(): SngRound {
+    if (!this.currentRound) {
+      console.log("currentRound is null, please init it first.");
+      this.initCurrentRound();
+      return this.getCurrentRound();
+    } else {
+      return this.currentRound;
+    }
+  }
+
+  setCurrentRound(round: SngRound | null): void {
+    this.currentRound = round;
+  };
+
+  initCurrentRound(): void {
+    this.setCurrentRound(new SngRound(this.endRound, this.players, this.getCurrentBigBlindSeatId(), this.getCurrentBigBlind()));
+    this.getCurrentRound().getDeck().shuffle(); // The deck needs to be shuffled before using it.
+  };
+
+  resetCurrentRound(): void {
+    this.setCurrentRound(null);
+  };
+
+  // currentPlayerSeatId
+  getCurrentPlayerSeatId(): number | null {
+    return this.currentPlayerSeatId;
+  };
+
+  setCurrentPlayerSeatId(seatId: number | null): void {
+    this.currentPlayerSeatId = seatId;
   };
 
   // client actions
   loadRoomInfo(socket: Socket): void {
     const response: Msg.LoadRoomInfoResponse = {
-      clientSeatId: this.getPlayerId(socket),
+      clientSeatId: this.getPlayerSeatId(socket),
       roomCurrentStatus: this.getStatus(),
-      playersNames: this.getPlayersName(),
-      playersCurrentChips: this.getPlayersCurrentChip(),
-      playersCurrentBetSizes: this.getPlayersCurrentBetSize(),
-      playersCurrentStatuses: this.getPlayersStatus(),
+      playersNames: this.getPlayersNames(),
+      playersCurrentChips: this.getPlayersCurrentChips(),
+      playersCurrentBetSizes: this.getPlayersCurrentBetSizes(),
+      playersCurrentStatuses: this.getPlayersStatuses(),
     };
     socket.emit("LoadRoomInfoResponse", response);
   };
@@ -232,7 +314,7 @@ export class SngRoom extends Room {
       this.playerQuit(socket);
     } else {
       console.error("Unexpected room status: " + this.currentStatus);
-      // TODO: Shut down the room...
+      // RICKTODO: Shut down the room...
     }
   }
 
@@ -242,13 +324,13 @@ export class SngRoom extends Room {
       return;
     }
 
-    if (this.players[request.id] !== null) {
+    if (this.players[request.seatId] !== null) {
       console.log(socket.id + " signup failed: The seat is occupied.");
       return;
     }
 
-    const player = new SngPlayer(request.id, request.name, request.email, socket, this.io);
-    this.setPlayer(request.id, player);
+    const player = new SngPlayer(request.seatId, request.name, request.email, socket, this.io);
+    this.setPlayer(request.seatId, player);
 
     // Signup success.
     console.log(socket.id + " signup success.");
@@ -264,16 +346,16 @@ export class SngRoom extends Room {
       return;
     }
 
-    const id = this.getPlayerId(socket);
-    if (id === -1) {
+    const seatId = this.getPlayerSeatId(socket);
+    if (seatId === -1) {
       // Response to client, "failed"
       return;
     }
 
-    this.resetPlayer(id);
+    this.resetPlayer(seatId);
 
     const broadcast: Msg.StandupBroadcast = {
-      seatId: id,
+      seatId: seatId,
     };
     this.io.emit("StandupBroadcast", broadcast);
   };
@@ -293,11 +375,11 @@ export class SngRoom extends Room {
     player.ready();
 
     // Ready success.
-    const clientSeatId = this.getPlayerId(socket);
+    const clientSeatId = this.getPlayerSeatId(socket);
     console.log(socket.id + " is ready.");
 
     const response: Msg.ReadyResponse = {
-      id: clientSeatId
+      seatId: clientSeatId
     };
     socket.emit("ReadyResponse", response);
 
@@ -380,10 +462,10 @@ export class SngRoom extends Room {
     this.initSngPlayers();
 
     // Initialize the start time of the current SNG.
-    this.currentSngStartTime = Date.now();
+    this.setCurrentSngStartTime(Date.now());
 
     // Initialize the number of rounds of the current SNG.
-    this.currentNumSngRounds = 0;
+    this.setCurrentNumSngRounds(0);
 
     // Initialize the current blind level, and set the timeout for updating the blind level
     this.startBlindUp();
@@ -398,7 +480,7 @@ export class SngRoom extends Room {
     // Update totalNumRounds.
     this.udateTotalNumRounds();
 
-    // Update current bmallBlind id.
+    // Update current bmallBlind seatId.
     this.updateCurrentBigBlindSeatId();
 
     // Create a new round.
@@ -413,7 +495,7 @@ export class SngRoom extends Room {
 
   endRound(): void {
     // Reset current round.
-    this.currentRound = null;
+    this.setCurrentRound(null);
 
     // Eliminate players who have no chips.
     this.roundElimination();
@@ -434,10 +516,10 @@ export class SngRoom extends Room {
     this.resetPlayers();
 
     // Reset the start time of the current SNG.
-    this.currentSngStartTime = null;
+    this.resetCurrentSngStartTime();
 
     // Reset the number of rounds of the current SNG.
-    this.currentNumSngRounds = 0;
+    this.resetCurrentNumSngRounds();
   
     // Reset the current bmallBlind.
     this.resetCurrentBigBlindSeatId();
@@ -470,5 +552,9 @@ export class SngRoom extends Room {
 
   getNumOfPlayers(): number {
     return this.players.filter(player => player !== null).length;
+  };
+
+  initSngPlayers(): void {
+    this.players.forEach(player => player?.startSng(this.initChips));
   };
 }

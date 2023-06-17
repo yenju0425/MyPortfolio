@@ -3,15 +3,15 @@ import { PlayerStatus } from './terms';
 import * as Msg from "@/types/messages";
 
 export abstract class Player {
-  private readonly id: number;
+  private readonly seatId: number;
   private readonly name: string; // displayed in the frontend
   private readonly email: string;
   protected socket: Socket;
   protected io: Server;
   protected currentStatus: PlayerStatus; // displayed in the frontend
 
-  constructor(id: number, name: string, email: string, socket: Socket, io: Server) {
-    this.id = id;
+  constructor(seatId: number, name: string, email: string, socket: Socket, io: Server) {
+    this.seatId = seatId;
     this.name = name;
     this.email = email;
     this.socket = socket;
@@ -19,9 +19,9 @@ export abstract class Player {
     this.currentStatus = PlayerStatus.NONE;
   }
 
-  // id
-  getId(): number {
-    return this.id;
+  // seatId
+  getSeatId(): number {
+    return this.seatId;
   }
 
   // name
@@ -47,7 +47,7 @@ export abstract class Player {
   // currentStatus, displayed in the frontend
   broadcastCurrentStatus(): void {
     const broadcast: Msg.PlayerCurrentStatusUpdateBroadcast = {
-      seatId: this.getId(),
+      seatId: this.getSeatId(),
       playerCurrentStatus: this.getStatus()
     };
     this.io.emit('PlayerCurrentStatusUpdateBroadcast', broadcast);

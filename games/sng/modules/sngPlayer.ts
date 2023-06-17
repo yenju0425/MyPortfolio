@@ -17,8 +17,8 @@ export class SngPlayer extends Player {
   private currentBetSize: number; // displayed in the frontend
   private acted: boolean; // whether the player has acted in the current street, small blind & big blind are not considered as acted
 
-  constructor(id: number, name: string, email: string, socket: Socket, io: Server) {
-    super(id, name, email, socket, io);
+  constructor(seatId: number, name: string, email: string, socket: Socket, io: Server) {
+    super(seatId, name, email, socket, io);
     // sng
     this.currentChips = 0;
     // round
@@ -35,7 +35,7 @@ export class SngPlayer extends Player {
   // currentChips, displayed in the frontend
   broadcastCurrentChips(): void {
     const broadcast: Msg.PlayerCurrentChipsUpdateBroadcast = {
-      seatId: this.getId(),
+      seatId: this.getSeatId(),
       playerCurrentChips: this.getCurrentChips()
     };
     this.io.emit('PlayerCurrentChipsUpdateBroadcast', broadcast);
@@ -67,10 +67,13 @@ export class SngPlayer extends Player {
   // holeCards, displayed in the frontend
   broadcastHoleCards(): void {
     const broadcast: Msg.PlayerHoleCardsUpdateBroadcast = {
-      seatId: this.getId(),
+      seatId: this.getSeatId(),
       playerHoleCards: this.getHoleCards()
     };
-    this.io.emit('PlayerHoleCardsUpdateBroadcast', broadcast);
+    // this.io.emit('PlayerHoleCardsUpdateBroadcast', broadcast); <- The hold cards are private to the player, do not broadcast to other players.
+    // console.log("[RICKDEBUG] broadcastHoleCards: " + JSON.stringify(broadcast));
+    this.socket.to("spectators").emit("PlayerHoleCardsUpdateBroadcast", broadcast); // Broadcast to spectators and the player himself
+    this.socket.emit("PlayerHoleCardsUpdateBroadcast", broadcast);
     console.log("[RICKDEBUG] broadcastHoleCards: " + JSON.stringify(broadcast));
   }
 
@@ -90,6 +93,10 @@ export class SngPlayer extends Player {
 
   setCurrentPotContribution(currentPotContribution: number): void {
     this.currentPotContribution = currentPotContribution;
+  }
+
+  resetCurrentPotContribution(): void {
+    this.currentPotContribution = 0;
   }
 
   // folded
@@ -117,7 +124,7 @@ export class SngPlayer extends Player {
   // currentBetSize, displayed in the frontend
   broadcastCurrentBetSize(): void {
     const broadcast: Msg.PlayerCurrentBetSizeUpdateBroadcast = {
-      seatId: this.getId(),
+      seatId: this.getSeatId(),
       playerCurrentBetSize: this.getCurrentBetSize()
     };
     this.io.emit('PlayerCurrentBetSizeUpdateBroadcast', broadcast);
@@ -159,13 +166,13 @@ export class SngPlayer extends Player {
   }
 
   startRound(position: number, cards: Card[]): void {
-    this.currentPosition = position;
+    this.setCurrentPosition(position);
     this.setHoleCards(cards);
-    this.currentPotContribution = 0;
-    this.folded = false;
-    this.acted = false;
+    this.resetCurrentPotContribution();
+    this.resetFolded();
+    this.resetActed();
 
-    console.log(">" + this.getId(), position);
+    console.log(">" + this.getSeatId(), position);
   }
 
   startStreet(): void {
@@ -179,7 +186,7 @@ export class SngPlayer extends Player {
   placeBet(amount: number) { // placeBet() is called when the player places a bet, e.g. small blind, big blind, call, raise, all-in ,etc.
     this.updateCurrentChips(-amount);   
     this.updateCurrentBetSize(amount);
-    this.currentPotContribution += amount;
+    this.setCurrentPotContribution(this.getCurrentPotContribution() + amount);
 
     // RICKTODO: notify the player that he/she has placed a bet [RICKTODO]:
   }

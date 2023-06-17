@@ -23,10 +23,10 @@ export default function Poker() {
   const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(null));
   const [playersHoleCards, setPlayersHoleCards] = useState(Array(9).fill(Array(2).fill(null)));
 
-  const updatePlayerName = useCallback((id: number, newName: string) => {
+  const updatePlayerName = useCallback((seatId: number, newName: string) => {
     setPlayersNames((prevNames) => {
       return prevNames.map((name, index) => {
-        return index === id ? newName : name;
+        return index === seatId ? newName : name;
       });
     });
   }, []);
@@ -38,10 +38,10 @@ export default function Poker() {
     });
   }, []);
 
-  const updatePlayerCurrentChips = useCallback((id: number, newCurrentChip: number) => {
+  const updatePlayerCurrentChips = useCallback((seatId: number, newCurrentChip: number) => {
     setPlayersCurrentChips((prevCurrentChips) => {
       return prevCurrentChips.map((currentChip, index) => {
-        return index === id ? newCurrentChip : currentChip;
+        return index === seatId ? newCurrentChip : currentChip;
       });
     });
   }, []);
@@ -53,10 +53,10 @@ export default function Poker() {
     });
   }, []);
 
-  const updatePlayerCurrentBetSize = useCallback((id: number, newCurrentBetSize: number) => {
+  const updatePlayerCurrentBetSize = useCallback((seatId: number, newCurrentBetSize: number) => {
     setPlayersCurrentBetSizes((prevCurrentBetSizes) => {
       return prevCurrentBetSizes.map((currentBetSize, index) => {
-        return index === id ? newCurrentBetSize : currentBetSize;
+        return index === seatId ? newCurrentBetSize : currentBetSize;
       });
     });
   }, []);
@@ -68,10 +68,10 @@ export default function Poker() {
     });
   }, []);
 
-  const updatePlayerCurrentStatus = useCallback((id: number, newCurrentPlayerStatus: PlayerStatus | null) => {
+  const updatePlayerCurrentStatus = useCallback((seatId: number, newCurrentPlayerStatus: PlayerStatus | null) => {
     setPlayersCurrentStatuses((prevCurrentPlayerStatuses) => {
       return prevCurrentPlayerStatuses.map((currentPlayerStatus, index) => {
-        return index === id ? newCurrentPlayerStatus : currentPlayerStatus;
+        return index === seatId ? newCurrentPlayerStatus : currentPlayerStatus;
       });
     });
   }, []);
@@ -83,10 +83,10 @@ export default function Poker() {
     });
   }, []);
 
-  const updatePlayerHoleCards = useCallback((id: number, newPlayerHoleCards: Card[]) => {
+  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: Card[]) => {
     setPlayersHoleCards((prevPlayersHoleCards) => {
       return prevPlayersHoleCards.map((playersHoleCard, index) => {
-        return index === id ? newPlayerHoleCards : playersHoleCard;
+        return index === seatId ? newPlayerHoleCards : playersHoleCard;
       });
     });
   }, []);
@@ -98,11 +98,11 @@ export default function Poker() {
     });
   }, []);
 
-  const resetPlayerInfo = (id: number) => {
-    updatePlayerName(id, '');
-    updatePlayerCurrentChips(id, 0);
-    updatePlayerCurrentBetSize(id, 0);
-    updatePlayerCurrentStatus(id, null);
+  const resetPlayerInfo = (seatId: number) => {
+    updatePlayerName(seatId, '');
+    updatePlayerCurrentChips(seatId, 0);
+    updatePlayerCurrentBetSize(seatId, 0);
+    updatePlayerCurrentStatus(seatId, null);
   };
 
   const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
@@ -152,13 +152,13 @@ export default function Poker() {
 
       socket.on("SignupResponse", (response: Msg.SignupResponse) => {
         console.log("SignupResponse: " + JSON.stringify(response));
-        setClientSeatId(response.id);
+        setClientSeatId(response.seatId);
       });
 
       socket.on("SignupBroadcast", (broadcast: Msg.SignupBroadcast) => { // Initialize player info, cannot use xxxUpdate, use xxxResponse instead.
         console.log("SignupBroadcast: " + JSON.stringify(broadcast));
-        updatePlayerName(broadcast.id, broadcast.name);
-        updatePlayerCurrentStatus(broadcast.id, PlayerStatus.NONE);
+        updatePlayerName(broadcast.seatId, broadcast.name);
+        updatePlayerCurrentStatus(broadcast.seatId, PlayerStatus.NONE);
       });
 
       socket.on("ReadyResponse", (response: Msg.ReadyResponse) => {
@@ -215,7 +215,7 @@ export default function Poker() {
         <div className={styles.first_row}>
           <PlayerInfoCard
             socket={getSockets}
-            id={0}
+            seatId={0}
             name={playersNames[0]}
             currentChip={playersCurrentChips[0]}
             currentBetSize={playersCurrentBetSizes[0]}
@@ -226,7 +226,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            id={1}
+            seatId={1}
             name={playersNames[1]}
             currentChip={playersCurrentChips[1]}
             currentBetSize={playersCurrentBetSizes[1]}
@@ -237,7 +237,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            id={2}
+            seatId={2}
             name={playersNames[2]}
             currentChip={playersCurrentChips[2]}
             currentBetSize={playersCurrentBetSizes[2]}
@@ -248,7 +248,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            id={3}
+            seatId={3}
             name={playersNames[3]}
             currentChip={playersCurrentChips[3]}
             currentBetSize={playersCurrentBetSizes[3]}
@@ -261,7 +261,7 @@ export default function Poker() {
         <div className={styles.second_row}>
           <PlayerInfoCard
             socket={getSockets}
-            id={8}
+            seatId={8}
             name={playersNames[8]}
             currentChip={playersCurrentChips[8]}
             currentBetSize={playersCurrentBetSizes[8]}
@@ -273,7 +273,7 @@ export default function Poker() {
           <button>DEALER</button>
           <PlayerInfoCard
             socket={getSockets}
-            id={4}
+            seatId={4}
             name={playersNames[4]}
             currentChip={playersCurrentChips[4]}
             currentBetSize={playersCurrentBetSizes[4]}
@@ -286,7 +286,7 @@ export default function Poker() {
         <div className={styles.third_row}>
           <PlayerInfoCard
             socket={getSockets}
-            id={7}
+            seatId={7}
             name={playersNames[7]}
             currentChip={playersCurrentChips[7]}
             currentBetSize={playersCurrentBetSizes[7]}
@@ -297,7 +297,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            id={6}
+            seatId={6}
             name={playersNames[6]}
             currentChip={playersCurrentChips[6]}
             currentBetSize={playersCurrentBetSizes[6]}
@@ -308,7 +308,7 @@ export default function Poker() {
           />
           <PlayerInfoCard
             socket={getSockets}
-            id={5}
+            seatId={5}
             name={playersNames[5]}
             currentChip={playersCurrentChips[5]}
             currentBetSize={playersCurrentBetSizes[5]}

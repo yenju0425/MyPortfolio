@@ -7,7 +7,7 @@ import * as Msg from "../types/messages";
 
 interface PlayerInfoCardProps {
   socket: () => Socket;
-  id: number;
+  seatId: number;
   name: string;
   currentChip: number;
   currentBetSize: number;
@@ -20,7 +20,7 @@ interface PlayerInfoCardProps {
 const PlayerInfoCard = (props: PlayerInfoCardProps) => {
 
   // show control
-  const isShowControl = props.roomCurrentStatus === RoomStatus.NONE && (props.clientSeatId === props.id || (props.clientSeatId === -1 && props.currentPlayerStatus === null));
+  const isShowControl = props.roomCurrentStatus === RoomStatus.NONE && (props.clientSeatId === props.seatId || (props.clientSeatId === -1 && props.currentPlayerStatus === null));
 
   // show info
   const isShowInfo = props.currentPlayerStatus !== null && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && props.currentPlayerStatus !== PlayerStatus.QUIT;
@@ -41,7 +41,7 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
   const signUp = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const request: Msg.SignupRequest = { id: props.id, name: formName, email: formEmail };
+    const request: Msg.SignupRequest = { seatId: props.seatId, name: formName, email: formEmail };
     props.socket().emit("SignupRequest", request);
 
     toggleForm();

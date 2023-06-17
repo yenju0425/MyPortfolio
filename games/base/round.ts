@@ -5,6 +5,7 @@ export abstract class Round {
     this.startTime = Date.now();
   }
 
+  // startTime
   getStartTime(): number {
     return this.startTime;
   }
