@@ -156,11 +156,11 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
                 <div>
                   <button className={styles.fold} onClick={fold}>Fold</button>
 
-                  {props.roomCurrentBetSize == 0 && (
+                  {props.roomCurrentBetSize == props.currentBetSize && (
                     <button className={styles.check} onClick={check}>Check</button>
                   )}
 
-                  {props.roomCurrentBetSize > 0 && (
+                  {props.roomCurrentBetSize > props.currentBetSize && (
                     <button className={styles.call} onClick={call}>Call</button>
                   )}
 

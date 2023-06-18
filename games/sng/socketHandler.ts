@@ -30,4 +30,28 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
     sngRoom.playerFold(socket);
   });
 
+  socket.on("CheckRequest", () => {
+    console.log("socket: " + socket.id + " CheckRequest.");
+    sngRoom.playerCheck(socket);
+  });
+
+  socket.on("CallRequest", () => {
+    console.log("socket: " + socket.id + " CallRequest.");
+    sngRoom.playerCall(socket);
+  });
+
+  socket.on("BetRequest", (request: Msg.BetRequest) => {
+    console.log("socket: " + socket.id + " BetRequest: " + JSON.stringify(request));
+    //sngRoom.playerBet(request, socket);
+  });
+
+  socket.on("RaiseRequest", (request: Msg.RaiseRequest) => {
+    console.log("socket: " + socket.id + " RaiseRequest: " + JSON.stringify(request));
+    //sngRoom.playerRaise(request, socket);
+  });
+
+  socket.on("AllInRequest", () => {
+    console.log("socket: " + socket.id + " AllInRequest.");
+    //sngRoom.playerAllIn(socket);
+  });
 };

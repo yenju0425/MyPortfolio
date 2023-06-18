@@ -416,10 +416,57 @@ export class SngRoom extends Room {
     this.getCurrentRound().endAction();
   }
 
+  playerCheck(socket: Socket): void {
+    if (this.currentStatus !== RoomStatus.PLAYING) {
+      console.log(socket.id + " fold failed: The game is not started.");
+      return;
+    }
 
-  //playerCall(index: number): void {
+    const player = this.getPlayer(socket);
+    if (player === null || player.getSeatId() !== this.getCurrentRound().getCurrentPlayerSeatId()) {
+      console.log(socket.id + " fold failed: Not your turn.");
+      return;
+    }
 
-  //playerCheck(index: number): void {
+    // player.placeBet(0);
+    player.act();
+  
+    // Check success.
+    console.log(socket.id + " check success.");
+    const response: Msg.CheckResponse = {
+      seatId: this.getPlayerSeatId(socket)
+    };
+    socket.emit("CheckResponse", response);
+
+    // End action.
+    this.getCurrentRound().endAction();
+  }
+
+  playerCall(socket: Socket): void {
+    if (this.currentStatus !== RoomStatus.PLAYING) {
+      console.log(socket.id + " call failed: The game is not started.");
+      return;
+    }
+
+    const player = this.getPlayer(socket);
+    if (player === null || player.getSeatId() !== this.getCurrentRound().getCurrentPlayerSeatId()) {
+      console.log(socket.id + " fold failed: Not your turn.");
+      return;
+    }
+
+    player.placeBet(this.getCurrentRound().getCurrentBetSize() - player.getCurrentBetSize());
+    player.act();
+
+    // Call success.
+    console.log(socket.id + " call success.");
+    const response: Msg.CallResponse = {
+      seatId: this.getPlayerSeatId(socket)
+    };
+    socket.emit("CallResponse", response);
+
+    // End action.
+    this.getCurrentRound().endAction();
+  }
 
   // playerBet(socket: Socket, amount: number): void {
   //   const player = this.getPlayer(socket);
@@ -439,6 +486,7 @@ export class SngRoom extends Room {
   //   // update round info
   //   this.getCurrentRound().updateCurrentBetSize(amount);
   // };
+
 
   //playerRaise(index: number, amount: number): void {
 

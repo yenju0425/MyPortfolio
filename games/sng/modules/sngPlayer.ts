@@ -180,15 +180,12 @@ export class SngPlayer extends Player {
   }
 
   startAct(): void {
-    // RICKTODO: notify the player that he/she has started the act
   }
 
-  placeBet(amount: number) { // placeBet() is called when the player places a bet, e.g. small blind, big blind, call, raise, all-in ,etc.
+  placeBet(amount: number) { // `placeBet()` is called when the player places a bet, e.g. small blind, big blind, call, raise, all-in ,etc.
     this.updateCurrentChips(-amount);   
     this.updateCurrentBetSize(amount);
     this.setCurrentPotContribution(this.getCurrentPotContribution() + amount);
-
-    // RICKTODO: notify the player that he/she has placed a bet [RICKTODO]:
   }
 
   receivePotReward(amount: number): void {
