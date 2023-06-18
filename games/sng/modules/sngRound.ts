@@ -1,5 +1,6 @@
 import type { Server } from 'socket.io';
 import { Round } from '@/games/base/round';
+import { SngRoom } from "./sngRoom";
 import { Card, Deck } from './deck';
 import { Pot } from './pots';
 import { Streets } from './terms';
@@ -7,7 +8,7 @@ import { SngPlayer } from './sngPlayer';
 import * as Msg from "@/types/messages";
 
 export class SngRound extends Round {
-  private readonly endRoundCallback: () => void;
+  private readonly room: SngRoom;
   private readonly bigBlindSeatId: number; // If there are only two players, the big blind is the dealer.
   private readonly bigBlind: number;
   private readonly players: (SngPlayer | null)[];
@@ -18,9 +19,9 @@ export class SngRound extends Round {
   private currentPlayerSeatId: number | null; // displayed in the frontend
   private currentBetSize: number; // displayed in the frontend
 
-  constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number, io: Server) {
+  constructor(room: SngRoom, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number, io: Server) {
     super(io);
-    this.endRoundCallback = endRoundCallback;
+    this.room = room;
     this.bigBlindSeatId = bigBlindSeatId;
     this.bigBlind = bigBlind;
     this.players = players;
@@ -30,6 +31,11 @@ export class SngRound extends Round {
     this.currentStreet = Streets.NONE;
     this.currentPlayerSeatId = null;
     this.currentBetSize = 0;
+  }
+
+  // room
+  getRoom(): SngRoom {
+    return this.room;
   }
 
   // bigBlindSeatId
@@ -102,7 +108,7 @@ export class SngRound extends Round {
     const broadcast: Msg.RoomCurrentBetSizeUpdateBroadcast = {
       roomCurrentBetSize: this.getCurrentBetSize()
     };
-    this.io.emit('CurrentBetSizeUpdateBroadcast', broadcast);
+    this.io.emit('RoomCurrentBetSizeUpdateBroadcast', broadcast);
     console.log("[RICKDEBUG] broadcastCurrentBetSize: " + JSON.stringify(broadcast));
   }
 
@@ -182,8 +188,7 @@ export class SngRound extends Round {
   }
 
   startAction(): void {
-
-    // Update current player seat id.
+    // Update current player seat id, the client will figure out if it is its turn.
     this.updateCurrentPlayerSeatId();
 
     // Get current player.
@@ -201,19 +206,22 @@ export class SngRound extends Round {
       if (currentPlayer?.getCurrentPosition() === 1 && !currentPlayer.getCurrentBetSize()) { // small blind
         console.log('player: ' + currentPlayer?.getName() + ' is small blind');
         currentPlayer.placeBet(this.bigBlind / 2);
+        this.updateCurrentBetSize(this.bigBlind / 2);
         this.endAction();
         return;
       } else if (currentPlayer?.getCurrentPosition() === 2 && !currentPlayer.getCurrentBetSize()) { // big blind
         console.log('player: ' + currentPlayer?.getName() + ' is big blind');
         currentPlayer.placeBet(this.bigBlind);
+        this.updateCurrentBetSize(this.bigBlind);
         this.endAction();
         return;
       }
     }
-    // TODO: Send message to the client to ask for action.
   }
 
   endAction(): void {
+    console.log('[RICKDEBUG] endAction');
+
     if (this.getNumOfPlayersStillInStreet() < 2) {
       this.endStreet();
     } else if (this.isAllPlayersActed() && this.isBetConsensusReached()) {
@@ -224,17 +232,19 @@ export class SngRound extends Round {
   }
 
   endStreet(): void {
+    console.log('[RICKDEBUG] endStreet');
+
     this.updatePots();
 
     // TODO: return the overbet chips to the player
 
     if (this.getNumOfPlayersStillInRound() < 2) {
       this.rewardPotsToWinners();
-      this.endRoundCallback();
+      this.getRoom().endRound();
     } else if (this.getCurrentStreet() === Streets.RIVER) {
       this.calculatePlayersHandRanking();
       this.rewardPotsToWinners();
-      this.endRoundCallback();
+      this.getRoom().endRound();
     } else {
       this.startStreet();
     }

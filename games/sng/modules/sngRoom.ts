@@ -21,7 +21,6 @@ export class SngRoom extends Room {
   private lastBlindUpdateTime: number | null;
   private currentBlindUpdateTimer: NodeJS.Timeout | undefined;
   private currentRound: SngRound | null;
-  private currentPlayerSeatId: number | null;
 
   constructor(io: Server) {
     super(io);
@@ -39,7 +38,6 @@ export class SngRoom extends Room {
     this.lastBlindUpdateTime = null;
     this.currentBlindUpdateTimer = undefined;
     this.currentRound = null;
-    this.currentPlayerSeatId = null;
   };
 
   // totalNumSngs
@@ -94,12 +92,6 @@ export class SngRoom extends Room {
       name: player?.getName() || '',
     };
     this.io.emit("SignupBroadcast", broadcast);
-  
-    // Send signup response.
-    const response: Msg.SignupResponse = {
-      seatId: seatId,
-    };
-    player?.getSocket().emit("SignupResponse", response);
   };
 
   resetPlayer(seatId: number): void {
@@ -270,7 +262,7 @@ export class SngRoom extends Room {
   };
 
   initCurrentRound(): void {
-    this.setCurrentRound(new SngRound(this.endRound, this.players, this.getCurrentBigBlindSeatId(), this.getCurrentBigBlind(), this.getIo()));
+    this.setCurrentRound(new SngRound(this, this.players, this.getCurrentBigBlindSeatId(), this.getCurrentBigBlind(), this.getIo()));
     this.getCurrentRound().getDeck().shuffle(); // The deck needs to be shuffled before using it.
   };
 
@@ -278,17 +270,26 @@ export class SngRoom extends Room {
     this.setCurrentRound(null);
   };
 
-  // currentPlayerSeatId
-  getCurrentPlayerSeatId(): number | null {
-    return this.currentPlayerSeatId;
-  };
-
-  setCurrentPlayerSeatId(seatId: number | null): void {
-    this.currentPlayerSeatId = seatId;
-  };
-
   // client actions
-  loadRoomInfo(socket: Socket): void {
+  clientDisconnect(socket: Socket): void {
+    const player = this.getPlayer(socket);
+
+    if (player === null) {
+      console.log("Specator disconnected. socket.id: " + socket.id);
+      return;
+    }
+
+    if (this.currentStatus === RoomStatus.NONE) {
+      this.clientCancelSignUp(socket);
+    } else if (this.currentStatus === RoomStatus.PLAYING) {
+      this.playerQuit(socket);
+    } else {
+      console.error("Unexpected room status: " + this.currentStatus);
+      // RICKTODO: Shut down the room...
+    }
+  }
+
+  clientLoadRoomInfo(socket: Socket): void {
     const response: Msg.LoadRoomInfoResponse = {
       clientSeatId: this.getPlayerSeatId(socket),
       roomCurrentStatus: this.getStatus(),
@@ -300,25 +301,7 @@ export class SngRoom extends Room {
     socket.emit("LoadRoomInfoResponse", response);
   };
 
-  disconnect(socket: Socket): void {
-    const player = this.getPlayer(socket);
-
-    if (player === null) {
-      console.log("Specator disconnected. socket.id: " + socket.id);
-      return;
-    }
-
-    if (this.currentStatus === RoomStatus.NONE) {
-      this.cancelSignUp(socket);
-    } else if (this.currentStatus === RoomStatus.PLAYING) {
-      this.playerQuit(socket);
-    } else {
-      console.error("Unexpected room status: " + this.currentStatus);
-      // RICKTODO: Shut down the room...
-    }
-  }
-
-  signup(request: Msg.SignupRequest, socket: Socket): void {
+  clientSignup(request: Msg.SignupRequest, socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       console.log(socket.id + " signup failed: Cannot signup when the game is started.");
       return;
@@ -334,21 +317,25 @@ export class SngRoom extends Room {
 
     // Signup success.
     console.log(socket.id + " signup success.");
+    const response: Msg.SignupResponse = {
+      seatId: request.seatId,
+    };
+    socket.emit("SignupResponse", response);
 
-    // Swith the socket to the `players` room
+    // Swith the socket to the `players` room.
     socket.leave("spectators");
     socket.join("players");
   };
 
-  cancelSignUp(socket: Socket): void {
+  clientCancelSignUp(socket: Socket): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
-      // Response to client, "The game is started, you cannot cancel sign up"
+      console.log(socket.id + " cancel signup failed: Cannot cancel signup when the game is started.");
       return;
     }
 
     const seatId = this.getPlayerSeatId(socket);
     if (seatId === -1) {
-      // Response to client, "failed"
+      console.log(socket.id + " cancel signup failed: Not signed up.");
       return;
     }
 
@@ -360,7 +347,7 @@ export class SngRoom extends Room {
     this.io.emit("StandupBroadcast", broadcast);
   };
 
-  ready(socket: Socket): void {
+  playerReady(socket: Socket): void {
     if (this.currentStatus !== RoomStatus.NONE) {
       console.log(socket.id + " ready failed: The game is started.");
       return;
@@ -375,59 +362,83 @@ export class SngRoom extends Room {
     player.ready();
 
     // Ready success.
-    const clientSeatId = this.getPlayerSeatId(socket);
     console.log(socket.id + " is ready.");
-
     const response: Msg.ReadyResponse = {
-      seatId: clientSeatId
+      seatId: this.getPlayerSeatId(socket)
     };
     socket.emit("ReadyResponse", response);
 
-    // check if all players are ready
+    // Check if all players are ready.
     if (this.isAllPlayersReady()) {
       this.startSng();
     }
   }
 
-  unready(socket: Socket): void {
+  playerUnready(socket: Socket): void {
     if (this.currentStatus !== RoomStatus.NONE) {
-      // Response to client, "failed"
+      console.log(socket.id + " unready failed: The game is started.");
       return;
     }
 
     // if the seat is empty, the player cannot unready
     const player = this.getPlayer(socket);
-
     if (player === null) {
-      // Response to client, "failed"
+      console.log(socket.id + " unready failed: Not signed up.");
       return;
     }
 
     player.unready();
   };
 
-  playerBet(socket: Socket, amount: number): void {
-    const player = this.getPlayer(socket);
-
-    if (player === null) {
-      // Response to client, "failed"
+  playerFold(socket: Socket): void {
+    if (this.currentStatus !== RoomStatus.PLAYING) {
+      console.log(socket.id + " fold failed: The game is not started.");
       return;
     }
 
-    // TODO: check if the amount is valid, if tht action is valid
-    console.log('playerBet', amount);
+    const player = this.getPlayer(socket);
+    if (player === null || player.getSeatId() !== this.getCurrentRound().getCurrentPlayerSeatId()) {
+      console.log(socket.id + " fold failed: Not your turn.");
+      return;
+    }
 
-    // place bet
-    player.placeBet(amount);
+    player.fold();
     player.act();
+  
+    // Fold success.
+    console.log(socket.id + " fold success.");
+    const response: Msg.FoldResponse = {
+      seatId: this.getPlayerSeatId(socket)
+    };
+    socket.emit("FoldResponse", response);
+  
+    // End action.
+    this.getCurrentRound().endAction();
+  }
 
-    // update round info
-    this.getCurrentRound().updateCurrentBetSize(amount);
-  };
 
   //playerCall(index: number): void {
 
   //playerCheck(index: number): void {
+
+  // playerBet(socket: Socket, amount: number): void {
+  //   const player = this.getPlayer(socket);
+
+  //   if (player === null) {
+  //     // Response to client, "failed"
+  //     return;
+  //   }
+
+  //   // TODO: check if the amount is valid, if tht action is valid
+  //   console.log('playerBet', amount);
+
+  //   // place bet
+  //   player.placeBet(amount);
+  //   player.act();
+
+  //   // update round info
+  //   this.getCurrentRound().updateCurrentBetSize(amount);
+  // };
 
   //playerRaise(index: number, amount: number): void {
 
@@ -494,6 +505,8 @@ export class SngRoom extends Room {
   };
 
   endRound(): void {
+    console.log("[RICKDEBUG] endRound");
+
     // Reset current round.
     this.setCurrentRound(null);
 
@@ -509,6 +522,8 @@ export class SngRoom extends Room {
   }  
 
   endSng(): void {
+    console.log("[RICKDEBUG] endSng");
+
     // RICKTODO: Send email to the players
     // this.sendSngResult();
 

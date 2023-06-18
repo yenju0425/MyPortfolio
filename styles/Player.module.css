@@ -25,27 +25,3 @@
   display: flex;
   justify-content: space-between;
 }
-
-.fold {
-  display: none;
-}
-
-.check {
-  display: none;
-}
-
-.call {
-  display: none;
-}
-
-.bet {
-  display: none;
-}
-
-.raise {
-  display: none;
-}
-
-.all_in {
-  display: none;
-}

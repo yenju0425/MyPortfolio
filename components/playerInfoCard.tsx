@@ -9,8 +9,8 @@ interface PlayerInfoCardProps {
   socket: () => Socket;
   seatId: number;
   name: string;
-  currentChip: number | null;
-  currentBetSize: number | null;
+  currentChip: number;
+  currentBetSize: number;
   currentPlayerStatus: PlayerStatus | null;
   holeCards: (Card | null)[];
   clientSeatId: number;
@@ -20,44 +20,74 @@ interface PlayerInfoCardProps {
 }
 
 const PlayerInfoCard = (props: PlayerInfoCardProps) => {
-
-  // show control
   const isShowControl = props.roomCurrentStatus === RoomStatus.NONE && (props.clientSeatId === props.seatId || (props.clientSeatId === -1 && props.currentPlayerStatus === null));
-
-  // show info
   const isShowInfo = props.currentPlayerStatus !== null && props.currentPlayerStatus !== PlayerStatus.ELIMINATED && props.currentPlayerStatus !== PlayerStatus.QUIT;
-
-  // show form
-  const [isShowForm, setShowForm] = useState(false);
-  const toggleForm = () => {
-    setShowForm(!isShowForm);
-  };
-
   const isReady = props.currentPlayerStatus === PlayerStatus.READY;
   const isCurrentPlayer = props.currentPlayerSeatId === props.seatId;
+  const isCanAct = isCurrentPlayer && props.currentPlayerSeatId === props.clientSeatId;
 
-  // form fields
-  const [formName, setFormName] = useState('');
-  const [formEmail, setFormEmail] = useState('');
+  const [isShowSignupForm, setIsShowSignupForm] = useState(false);
+  const [signupFormName, setSignupFormName] = useState('');
+  const [signupFormEmail, setSignupFormEmail] = useState('');
 
-  // client events:
-  const signUp = (event: React.FormEvent<HTMLFormElement>) => {
+  const [isShowBetForm, setIsShowBetForm] = useState(false);
+  const [betFormBetSize, setBetFormBetSize] = useState(0);
+
+  const signup = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const request: Msg.SignupRequest = { seatId: props.seatId, name: formName, email: formEmail };
+    const request: Msg.SignupRequest = {
+      seatId: props.seatId,
+      name: signupFormName,
+      email: signupFormEmail
+    };
     props.socket().emit("SignupRequest", request);
 
-    toggleForm();
+    toggleSignupForm();
   };
 
   const ready = () => {
     props.socket().emit("ReadyRequest");
   };
 
-  // control button text
+  const fold = () => {
+    props.socket().emit("FoldRequest");
+  };
+
+  const check = () => {
+    props.socket().emit("CheckRequest");
+  };
+
+  const call = () => {
+    props.socket().emit("CallRequest");
+  };
+
+  const bet = () => {
+    const request: Msg.BetRequest = {
+      betSize: betFormBetSize
+    };
+    props.socket().emit("BetRequest", request);
+  };
+
+  const raise = () => {
+    props.socket().emit("RaiseRequest");
+  };
+
+  const allIn = () => {
+    props.socket().emit("AllInRequest");
+  };
+
+  const toggleSignupForm = () => {
+    setIsShowSignupForm(!isShowSignupForm);
+  };
+
+  const toggleBetForm = () => {
+    setIsShowBetForm(!isShowBetForm);
+  };
+
   const getControlButtonText = (): string => {
     if (props.currentPlayerStatus === null) {
-      return 'Sign Up';
+      return 'Signup';
     } else if (props.currentPlayerStatus === PlayerStatus.NONE) {
       return 'Ready';
     } else {
@@ -65,10 +95,9 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
     }
   };
 
-  // contorl button event
-  const controlButtonEvent = () => {
+  const control = () => {
     if (props.currentPlayerStatus === null) {
-      toggleForm();
+      toggleSignupForm();
     } else if (props.currentPlayerStatus === PlayerStatus.NONE) {
       ready();
     } else {
@@ -80,19 +109,19 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
     <div className={styles.player_info_card}>
       {isShowControl && (
         <div>
-          {!isShowForm && (
+          {!isShowSignupForm && (
             <div className={styles.controlContainer}>
-              <button onClick={controlButtonEvent}>
+              <button onClick={control}>
                 {getControlButtonText()}
               </button>
             </div>
           )}
-          {isShowForm && (
-            <form onSubmit={signUp}>
-              <input type="text" value={formName} onChange={(event) => setFormName(event.target.value)} placeholder="Name" />
-              <input type="text" value={formEmail} onChange={(event) => setFormEmail(event.target.value)} placeholder="Email" />
-              <button type="submit">Submit</button>
-              <button type="button" onClick={toggleForm}>Cancel</button>
+          {isShowSignupForm && (
+            <form onSubmit={signup}>
+              <input type="text" value={signupFormName} onChange={(event) => setSignupFormName(event.target.value)} placeholder="Name"/>
+              <input type="text" value={signupFormEmail} onChange={(event) => setSignupFormEmail(event.target.value)} placeholder="Email"/>
+              <button type="submit">Signup</button>
+              <button type="button" onClick={toggleSignupForm}>Cancel</button>
             </form>
           )}
         </div>
@@ -121,14 +150,42 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
               {JSON.stringify(props.holeCards[1])}
             </div>
           </div>
-          <div>
-            <button className={styles.fold}>Fold</button>
-            <button className={styles.check}>Check</button>
-            <button className={styles.call}>Call</button>
-            <button className={styles.bet}>Bet</button>
-            <button className={styles.raise}>Raise</button>
-            <button className={styles.all_in}>All In</button>
-          </div>
+          {isCanAct && (
+            <div>
+              {!isShowBetForm && (
+                <div>
+                  <button className={styles.fold} onClick={fold}>Fold</button>
+
+                  {props.roomCurrentBetSize == 0 && (
+                    <button className={styles.check} onClick={check}>Check</button>
+                  )}
+
+                  {props.roomCurrentBetSize > 0 && (
+                    <button className={styles.call} onClick={call}>Call</button>
+                  )}
+
+                  {props.roomCurrentBetSize == 0 && (
+                    <button className={styles.bet} onClick={toggleBetForm}>Bet</button>
+                  )}
+
+                  {props.roomCurrentBetSize > 0 && props.roomCurrentBetSize < props.currentChip && (
+                    <button className={styles.raise} onClick={raise}>Raise</button>
+                  )}
+
+                  {props.roomCurrentBetSize >= props.currentChip && (
+                    <button className={styles.allin} onClick={allIn}>All In</button>
+                  )}
+                </div>
+              )}
+              {isShowBetForm && (
+                <form onSubmit={bet}>
+                  <input type="number" value={betFormBetSize || ''} onChange={(event) => setBetFormBetSize(event.target.valueAsNumber)} placeholder="Bet Size"/>
+                  <button type="submit">Bet</button>
+                  <button type="button" onClick={toggleBetForm}>Cancel</button>
+                </form>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

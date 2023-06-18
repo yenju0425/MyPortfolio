@@ -14,7 +14,7 @@ export type StandupBroadcast = {
 };
 
 // export type LoadRoomInfoRequest = {
-// }
+// };
 
 export type LoadRoomInfoResponse = {
   clientSeatId: number;
@@ -41,9 +41,53 @@ export type SignupBroadcast = { // used to initialize a new player
 };
 
 // export type ReadyRequest = {
-// }
+// };
 
 export type ReadyResponse = {
+  seatId: number;
+};
+
+// export type FoldRequest = {
+// };
+
+export type FoldResponse = {
+  seatId: number;
+};
+
+// export type CheckRequest = {
+// };
+
+export type CheckResponse = {
+  seatId: number;
+};
+
+// export type CallRequest = {
+// };
+
+export type CallResponse = {
+  seatId: number;
+};
+
+export type BetRequest = {
+  betSize: number;
+};
+
+export type BetResponse = {
+  seatId: number;
+};
+
+export type RaiseRequest = {
+  raiseSize: number;
+};
+
+export type RaiseResponse = {
+  seatId: number;
+};
+
+// export type AllinRequest = {
+// };
+
+export type AllinResponse = {
   seatId: number;
 };
 
@@ -51,9 +95,6 @@ export type ReadyResponse = {
 export type ClientSeatIdUpdateBroadcast = {
   clientSeatId: number;
 };
-
-// const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState(-1);
-// const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
 
 export type CurrentPlayerSeatIdUpdateBroadcast = {
   currentPlayerSeatId: number;

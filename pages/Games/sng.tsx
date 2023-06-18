@@ -21,7 +21,7 @@ export default function Poker() {
   const [playersNames, setPlayersNames] = useState(Array(9).fill(''));
   const [playersCurrentChips, setPlayersCurrentChips] = useState(Array(9).fill(0));
   const [playersCurrentBetSizes, setPlayersCurrentBetSizes] = useState(Array(9).fill(0));
-  const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(PlayerStatus.NONE));
+  const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(null));
   const [playersHoleCards, setPlayersHoleCards] = useState(Array(9).fill(Array(2).fill(null)));
 
   const updatePlayerName = useCallback((seatId: number, newName: string) => {
@@ -164,6 +164,10 @@ export default function Poker() {
 
       socket.on("ReadyResponse", (response: Msg.ReadyResponse) => {
         console.log("ReadyResponse: " + JSON.stringify(response));
+      });
+
+      socket.on("FoldResponse", (response: Msg.FoldResponse) => {
+        console.log("FoldResponse: " + JSON.stringify(response));
       });
 
       // updates
