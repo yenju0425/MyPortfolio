@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
-import styles from '../styles/Player.module.css';
-import { RoomStatus, PlayerStatus } from '../games/base/terms';
 import { Socket } from "socket.io-client";
-import { Card, Deck } from '../games/sng/modules/deck';
-import * as Msg from "../types/messages";
+import { RoomStatus, PlayerStatus } from '@/games/base/terms';
+import { Card } from '@/games/sng/modules/deck';
+import styles from '@/styles/Player.module.css';
+import * as Msg from "@/types/messages";
 
 interface PlayerInfoCardProps {
   socket: () => Socket;
   seatId: number;
   name: string;
-  currentChip: number;
-  currentBetSize: number;
+  currentChip: number | null;
+  currentBetSize: number | null;
   currentPlayerStatus: PlayerStatus | null;
-  holeCards: Card[];
-  roomCurrentStatus: RoomStatus;
+  holeCards: (Card | null)[];
   clientSeatId: number;
+  currentPlayerSeatId: number;
+  roomCurrentBetSize: number;
+  roomCurrentStatus: RoomStatus;
 }
 
 const PlayerInfoCard = (props: PlayerInfoCardProps) => {
@@ -32,6 +34,7 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
   };
 
   const isReady = props.currentPlayerStatus === PlayerStatus.READY;
+  const isCurrentPlayer = props.currentPlayerSeatId === props.seatId;
 
   // form fields
   const [formName, setFormName] = useState('');
@@ -103,6 +106,9 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
             </div>
             {isReady && (
               <div>✅</div>
+            )}
+            {isCurrentPlayer && (
+              <div>🕓</div>
             )}
           </div>
           <p>Current Chip: {props.currentChip}</p>

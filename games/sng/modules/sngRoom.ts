@@ -270,7 +270,7 @@ export class SngRoom extends Room {
   };
 
   initCurrentRound(): void {
-    this.setCurrentRound(new SngRound(this.endRound, this.players, this.getCurrentBigBlindSeatId(), this.getCurrentBigBlind()));
+    this.setCurrentRound(new SngRound(this.endRound, this.players, this.getCurrentBigBlindSeatId(), this.getCurrentBigBlind(), this.getIo()));
     this.getCurrentRound().getDeck().shuffle(); // The deck needs to be shuffled before using it.
   };
 

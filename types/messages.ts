@@ -52,6 +52,17 @@ export type ClientSeatIdUpdateBroadcast = {
   clientSeatId: number;
 };
 
+// const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState(-1);
+// const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
+
+export type CurrentPlayerSeatIdUpdateBroadcast = {
+  currentPlayerSeatId: number;
+};
+
+export type RoomCurrentBetSizeUpdateBroadcast = {
+  roomCurrentBetSize: number;
+};
+
 export type RoomCurrentStatusUpdateBroadcast = {
   roomCurrentStatus: RoomStatus;
 };

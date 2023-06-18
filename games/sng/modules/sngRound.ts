@@ -1,23 +1,25 @@
+import type { Server } from 'socket.io';
 import { Round } from '@/games/base/round';
 import { Card, Deck } from './deck';
 import { Pot } from './pots';
 import { Streets } from './terms';
 import { SngPlayer } from './sngPlayer';
+import * as Msg from "@/types/messages";
 
 export class SngRound extends Round {
   private readonly endRoundCallback: () => void;
-  private readonly bigBlindSeatId: number;
+  private readonly bigBlindSeatId: number; // If there are only two players, the big blind is the dealer.
   private readonly bigBlind: number;
   private readonly players: (SngPlayer | null)[];
   private communityCards: Card[];
   private deck: Deck;
   private pots: Pot[];
   private currentStreet: Streets;
-  private currentPlayerSeatId: number;
-  private currentBetSize: number;
+  private currentPlayerSeatId: number | null; // displayed in the frontend
+  private currentBetSize: number; // displayed in the frontend
 
-  constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number) {
-    super();
+  constructor(endRoundCallback: () => void, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number, io: Server) {
+    super(io);
     this.endRoundCallback = endRoundCallback;
     this.bigBlindSeatId = bigBlindSeatId;
     this.bigBlind = bigBlind;
@@ -26,7 +28,7 @@ export class SngRound extends Round {
     this.deck = new Deck(); // The deck needs to be shuffled after created.
     this.pots = [];
     this.currentStreet = Streets.NONE;
-    this.currentPlayerSeatId = bigBlindSeatId; // Initialize the current player as the bmallBlind.
+    this.currentPlayerSeatId = null;
     this.currentBetSize = 0;
   }
 
@@ -41,8 +43,12 @@ export class SngRound extends Round {
   }
 
   // players
-  getPlayer(): SngPlayer | null {
-    return this.players[this.currentPlayerSeatId];
+  getPlayers(): (SngPlayer | null)[] {
+    return this.players;
+  }
+
+  getCurrentPlayer(): SngPlayer | null {
+    return this.players[this.getCurrentPlayerSeatId()];
   }
     
   // communityCards
@@ -92,12 +98,21 @@ export class SngRound extends Round {
   }
 
   // currentBetSize
+  broadcastCurrentBetSize(): void {
+    const broadcast: Msg.RoomCurrentBetSizeUpdateBroadcast = {
+      roomCurrentBetSize: this.getCurrentBetSize()
+    };
+    this.io.emit('CurrentBetSizeUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastCurrentBetSize: " + JSON.stringify(broadcast));
+  }
+
   getCurrentBetSize(): number {
     return this.currentBetSize;
   }
 
   setCurrentBetSize(amount: number): void {
     this.currentBetSize = amount;
+    this.broadcastCurrentBetSize();
   }
 
   updateCurrentBetSize(amount: number): void {
@@ -105,6 +120,14 @@ export class SngRound extends Round {
   }
 
   // currentPlayerSeatId
+  broadcastCurrentPlayerSeatId(): void {
+    const broadcast: Msg.CurrentPlayerSeatIdUpdateBroadcast = {
+      currentPlayerSeatId: this.getCurrentPlayerSeatId()
+    };
+    this.io.emit('CurrentPlayerSeatIdUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastCurrentPlayerSeatId: " + JSON.stringify(broadcast));
+  }
+
   getCurrentPlayerSeatId(): number {
     if (this.currentPlayerSeatId === null) {
       console.log("currentPlayerSeatId is null, update it automatically.");
@@ -117,14 +140,24 @@ export class SngRound extends Round {
 
   setCurrentPlayerSeatId(seatId: number): void {
     this.currentPlayerSeatId = seatId;
+    this.broadcastCurrentPlayerSeatId();
   }
 
   updateCurrentPlayerSeatId(): void {
-    let nextPlayerSeatId = (this.currentPlayerSeatId + 1) % this.players.length;
+    let nextPlayerSeatId = (this.getCurrentPlayerSeatId() + 1) % this.players.length;
     while(!this.players[nextPlayerSeatId]?.isStillInStreet()) {
       nextPlayerSeatId = (nextPlayerSeatId + 1) % this.players.length
     }
     this.setCurrentPlayerSeatId(nextPlayerSeatId);
+  }
+
+  initCurrentPlayerSeatId(): void {
+    const currentPlayerId = this.getPlayers().findIndex(player => player?.getCurrentPosition() === 0); // dealer
+    if (currentPlayerId !== -1) {
+      this.setCurrentPlayerSeatId(currentPlayerId);
+    } else {
+      this.setCurrentPlayerSeatId(this.getBigBlindSeatId());
+    }
   }
 
   resetCurrentPlayerSeatId(): void {
@@ -141,6 +174,9 @@ export class SngRound extends Round {
     // Initialize players in the street.
     this.initStreetPlayers();
   
+    // Initialize current player seat id.
+    this.initCurrentPlayerSeatId();
+
     // Start the first action.
     this.startAction();
   }
@@ -151,7 +187,7 @@ export class SngRound extends Round {
     this.updateCurrentPlayerSeatId();
 
     // Get current player.
-    const currentPlayer = this.getPlayer();
+    const currentPlayer = this.getCurrentPlayer();
     if (!currentPlayer) {
       console.error('currentPlayer is null');
       this.endAction();

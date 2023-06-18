@@ -1,11 +1,10 @@
-import styles from '../../styles/Sng.module.css';
-import { useEffect, useState, useCallback, use } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import io, { Socket } from 'socket.io-client';
+import { RoomStatus, PlayerStatus } from '@/games/base/terms';
+import { Card } from '@/games/sng/modules/deck';
 import PlayerInfoCard from '@/components/playerInfoCard';
-import { RoomStatus, PlayerStatus } from '../../games/base/terms';
-import { Card, Deck } from '../../games/sng/modules/deck';
-
-import * as Msg from '../../types/messages'; // RICKTODO: upgrade to protobuf
+import styles from '@/styles/Sng.module.css';
+import * as Msg from '@/types/messages'; // RICKTODO: upgrade to protobuf
 
 // The client socket must be declared outside of the component.
 let socket: Socket;
@@ -13,6 +12,8 @@ let socket: Socket;
 export default function Poker() {
   // Immutable (Room info)
   const [clientSeatId, setClientSeatId] = useState(-1);
+  const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState(-1);
+  const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
   const [roomCurrentStatus, setCurrentRoomStatus] = useState(RoomStatus.NONE);
 
   // Mutable (Players info), should avoid using them directly
@@ -20,7 +21,7 @@ export default function Poker() {
   const [playersNames, setPlayersNames] = useState(Array(9).fill(''));
   const [playersCurrentChips, setPlayersCurrentChips] = useState(Array(9).fill(0));
   const [playersCurrentBetSizes, setPlayersCurrentBetSizes] = useState(Array(9).fill(0));
-  const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(null));
+  const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(PlayerStatus.NONE));
   const [playersHoleCards, setPlayersHoleCards] = useState(Array(9).fill(Array(2).fill(null)));
 
   const updatePlayerName = useCallback((seatId: number, newName: string) => {
@@ -38,14 +39,14 @@ export default function Poker() {
     });
   }, []);
 
-  const updatePlayerCurrentChips = useCallback((seatId: number, newCurrentChip: number) => {
+  const updatePlayerCurrentChips = useCallback((seatId: number, newCurrentChip: number | null) => {
     setPlayersCurrentChips((prevCurrentChips) => {
       return prevCurrentChips.map((currentChip, index) => {
         return index === seatId ? newCurrentChip : currentChip;
       });
     });
   }, []);
-  const updatePlayersCurrentChips = useCallback((newCurrentChips: number[]) => {
+  const updatePlayersCurrentChips = useCallback((newCurrentChips: (number | null)[]) => {
     setPlayersCurrentChips((prevCurrentChips) => {
       return prevCurrentChips.map((currentChip, index) => {
         return newCurrentChips[index];
@@ -53,14 +54,14 @@ export default function Poker() {
     });
   }, []);
 
-  const updatePlayerCurrentBetSize = useCallback((seatId: number, newCurrentBetSize: number) => {
+  const updatePlayerCurrentBetSize = useCallback((seatId: number, newCurrentBetSize: number | null) => {
     setPlayersCurrentBetSizes((prevCurrentBetSizes) => {
       return prevCurrentBetSizes.map((currentBetSize, index) => {
         return index === seatId ? newCurrentBetSize : currentBetSize;
       });
     });
   }, []);
-  const updatePlayersCurrentBetSizes = useCallback((newCurrentBetSizes: number[]) => {
+  const updatePlayersCurrentBetSizes = useCallback((newCurrentBetSizes: (number | null)[]) => {
     setPlayersCurrentBetSizes((prevCurrentBetSizes) => {
       return prevCurrentBetSizes.map((currentBetSize, index) => {
         return newCurrentBetSizes[index];
@@ -83,14 +84,14 @@ export default function Poker() {
     });
   }, []);
 
-  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: Card[]) => {
+  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: (Card | null)[]) => {
     setPlayersHoleCards((prevPlayersHoleCards) => {
       return prevPlayersHoleCards.map((playersHoleCard, index) => {
         return index === seatId ? newPlayerHoleCards : playersHoleCard;
       });
     });
   }, []);
-  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: Card[][]) => {
+  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: (Card | null)[][]) => {
     setPlayersHoleCards((prevPlayersHoleCards) => {
       return prevPlayersHoleCards.map((playersHoleCard, index) => {
         return newPlayersHoleCards[index];
@@ -100,8 +101,8 @@ export default function Poker() {
 
   const resetPlayerInfo = (seatId: number) => {
     updatePlayerName(seatId, '');
-    updatePlayerCurrentChips(seatId, 0);
-    updatePlayerCurrentBetSize(seatId, 0);
+    updatePlayerCurrentChips(seatId, null);
+    updatePlayerCurrentBetSize(seatId, null);
     updatePlayerCurrentStatus(seatId, null);
   };
 
@@ -171,6 +172,16 @@ export default function Poker() {
         setClientSeatId(broadcast.clientSeatId);
       });
 
+      socket.on("CurrentPlayerSeatIdUpdateBroadcast", (broadcast: Msg.CurrentPlayerSeatIdUpdateBroadcast) => {
+        console.log("CurrentPlayerSeatIdUpdateBroadcast: " + JSON.stringify(broadcast));
+        setCurrentPlayerSeatId(broadcast.currentPlayerSeatId);
+      });
+
+      socket.on("RoomCurrentBetSizeUpdateBroadcast", (broadcast: Msg.RoomCurrentBetSizeUpdateBroadcast) => {
+        console.log("RoomCurrentBetSizeUpdateBroadcast: " + JSON.stringify(broadcast));
+        setRoomCurrentBetSize(broadcast.roomCurrentBetSize);
+      });
+
       socket.on("RoomCurrentStatusUpdateBroadcast", (broadcast: Msg.RoomCurrentStatusUpdateBroadcast) => {
         console.log("RoomCurrentStatusUpdateBroadcast: " + JSON.stringify(broadcast));
         setCurrentRoomStatus(broadcast.roomCurrentStatus);
@@ -221,8 +232,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[0]}
             currentPlayerStatus={playersCurrentStatuses[0]}
             holeCards={playersHoleCards[0]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -232,8 +245,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[1]}
             currentPlayerStatus={playersCurrentStatuses[1]}
             holeCards={playersHoleCards[1]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -243,8 +258,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[2]}
             currentPlayerStatus={playersCurrentStatuses[2]}
             holeCards={playersHoleCards[2]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -254,8 +271,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[3]}
             currentPlayerStatus={playersCurrentStatuses[3]}
             holeCards={playersHoleCards[3]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
         </div>
         <div className={styles.second_row}>
@@ -267,8 +286,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[8]}
             currentPlayerStatus={playersCurrentStatuses[8]}
             holeCards={playersHoleCards[8]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
           <button>DEALER</button>
           <PlayerInfoCard
@@ -279,8 +300,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[4]}
             currentPlayerStatus={playersCurrentStatuses[4]}
             holeCards={playersHoleCards[4]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
         </div>
         <div className={styles.third_row}>
@@ -292,8 +315,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[7]}
             currentPlayerStatus={playersCurrentStatuses[7]}
             holeCards={playersHoleCards[7]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -303,8 +328,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[6]}
             currentPlayerStatus={playersCurrentStatuses[6]}
             holeCards={playersHoleCards[6]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
             socket={getSockets}
@@ -314,8 +341,10 @@ export default function Poker() {
             currentBetSize={playersCurrentBetSizes[5]}
             currentPlayerStatus={playersCurrentStatuses[5]}
             holeCards={playersHoleCards[5]}
-            roomCurrentStatus={roomCurrentStatus}
             clientSeatId={clientSeatId}
+            currentPlayerSeatId={currentPlayerSeatId}
+            roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentStatus={roomCurrentStatus}
           />
         </div>
       </div>
