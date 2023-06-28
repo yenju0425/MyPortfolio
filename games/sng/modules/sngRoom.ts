@@ -480,6 +480,11 @@ export class SngRoom extends Room {
       return;
     }
 
+    if (player.getCurrentBetSize() + request.betAmount < this.getCurrentRound().getCurrentBetSize() + this.getCurrentRound().getCurrentMinRaise()) {
+      console.log(socket.id + " bet failed: Bet amount is not enough.");
+      return;
+    }
+
     player.placeBet(request.betAmount);
     player.act();
 
@@ -505,6 +510,11 @@ export class SngRoom extends Room {
     const player = this.getPlayer(socket);
     if (player === null || player.getSeatId() !== this.getCurrentRound().getCurrentPlayerSeatId()) {
       console.log(socket.id + " fold failed: Not your turn.");
+      return;
+    }
+
+    if (player.getCurrentBetSize() + request.raiseAmount < this.getCurrentRound().getCurrentBetSize() + this.getCurrentRound().getCurrentMinRaise()) {
+      console.log(socket.id + " raise failed: Raise amount is not enough.");
       return;
     }
 

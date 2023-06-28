@@ -81,7 +81,7 @@ export class SngRound extends Round {
   updatePots(): void {
     const newPots: Pot[] = [];
     let potContribations = this.players.map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
-    for (let i = 0; potContribations.length > 0; i++) {
+    while (potContribations.length > 0) {
       newPots.push({
         amount: potContribations[0][1] * potContribations.length,
         participants: potContribations.map(([index]) => index)
@@ -128,6 +128,10 @@ export class SngRound extends Round {
     const raise = betSize - this.getCurrentBetSize();
     this.setCurrentBetSize(Math.max(this.getCurrentBetSize(), amount));
     this.updateCurrentMinRaise(raise);
+  }
+
+  initCurrentBetSize(): void {
+    this.setCurrentBetSize(0);
   }
 
   // currentMinRaise
@@ -213,6 +217,9 @@ export class SngRound extends Round {
   
     // Initialize current player seat id.
     this.initCurrentPlayerSeatId();
+
+    // Initialize current bet size.
+    this.initCurrentBetSize();
 
     // Initialize current min raise.
     this.initCurrentMinRaise();

@@ -189,7 +189,7 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
                     <button className={styles.bet} onClick={toggleBetForm}>Bet</button>
                   )}
 
-                  {props.roomCurrentBetSize >= props.currentBetSize && props.currentChip >= props.roomCurrentMinRaise && (
+                  {props.roomCurrentBetSize > 0 && props.currentChip >= props.roomCurrentMinRaise && (
                     <button className={styles.raise} onClick={toggleRaiseForm}>Raise</button>
                   )}
 
