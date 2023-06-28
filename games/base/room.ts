@@ -5,7 +5,7 @@ import * as Msg from "@/types/messages";
 export abstract class Room {
   private readonly startTime: number;
   protected io: Server;
-  protected currentStatus: RoomStatus; // displayed in the frontend
+  protected currentStatus: RoomStatus; // displayed or used in the frontend
 
   constructor(io: Server) {
     this.startTime = Date.now();

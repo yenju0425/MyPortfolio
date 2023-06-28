@@ -6,15 +6,15 @@ import * as Msg from "@/types/messages";
 
 export class SngPlayer extends Player {
   // sng
-  private currentChips: number; // displayed in the frontend
+  private currentChips: number; // displayed or used in the frontend
   // round
   private currentPosition: number | null;
-  private holeCards: Card[]; // displayed in the frontend
+  private holeCards: Card[]; // displayed or used in the frontend
   private currentPotContribution: number;
   private folded: boolean;
   private handRanking: number; // hexadecimal, e.g. AA335 -> 0x['3' + '00E35']
   // street
-  private currentBetSize: number; // displayed in the frontend
+  private currentBetSize: number; // displayed or used in the frontend
   private acted: boolean; // whether the player has acted in the current street, small blind & big blind are not considered as acted
 
   constructor(seatId: number, name: string, email: string, socket: Socket, io: Server) {

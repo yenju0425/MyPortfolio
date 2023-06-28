@@ -14,6 +14,7 @@ export default function Poker() {
   const [clientSeatId, setClientSeatId] = useState(-1);
   const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState(-1);
   const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
+  const [roomCurrentMinRaise, setRoomCurrentMinRaise] = useState(0);
   const [roomCurrentStatus, setCurrentRoomStatus] = useState(RoomStatus.NONE);
 
   // Mutable (Players info), should avoid using them directly
@@ -178,6 +179,14 @@ export default function Poker() {
         console.log("CallResponse: " + JSON.stringify(response));
       });
 
+      socket.on("BetResponse", (response: Msg.BetResponse) => {
+        console.log("BetResponse: " + JSON.stringify(response));
+      });
+
+      socket.on("RaiseResponse", (response: Msg.RaiseResponse) => {
+        console.log("RaiseResponse: " + JSON.stringify(response));
+      });
+
       // updates
       socket.on("ClientSeatIdUpdateBroadcast", (broadcast: Msg.ClientSeatIdUpdateBroadcast) => {
         console.log("ClientSeatIdUpdateBroadcast: " + JSON.stringify(broadcast));
@@ -192,6 +201,11 @@ export default function Poker() {
       socket.on("RoomCurrentBetSizeUpdateBroadcast", (broadcast: Msg.RoomCurrentBetSizeUpdateBroadcast) => {
         console.log("RoomCurrentBetSizeUpdateBroadcast: " + JSON.stringify(broadcast));
         setRoomCurrentBetSize(broadcast.roomCurrentBetSize);
+      });
+
+      socket.on("RoomCurrentMinRaiseUpdateBroadcast", (broadcast: Msg.RoomCurrentMinRaiseUpdateBroadcast) => {
+        console.log("RoomCurrentMinRaiseUpdateBroadcast: " + JSON.stringify(broadcast));
+        setRoomCurrentMinRaise(broadcast.roomCurrentMinRaise);
       });
 
       socket.on("RoomCurrentStatusUpdateBroadcast", (broadcast: Msg.RoomCurrentStatusUpdateBroadcast) => {
@@ -247,6 +261,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
@@ -260,6 +275,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
@@ -273,6 +289,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
@@ -286,6 +303,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
         </div>
@@ -301,6 +319,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
           <button>DEALER</button>
@@ -315,6 +334,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
         </div>
@@ -330,6 +350,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
@@ -343,6 +364,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
           <PlayerInfoCard
@@ -356,6 +378,7 @@ export default function Poker() {
             clientSeatId={clientSeatId}
             currentPlayerSeatId={currentPlayerSeatId}
             roomCurrentBetSize={roomCurrentBetSize}
+            roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
         </div>

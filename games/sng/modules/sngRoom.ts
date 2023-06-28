@@ -301,7 +301,7 @@ export class SngRoom extends Room {
     socket.emit("LoadRoomInfoResponse", response);
   };
 
-  clientSignup(request: Msg.SignupRequest, socket: Socket): void {
+  clientSignup(socket: Socket, request: Msg.SignupRequest): void {
     if (this.currentStatus === RoomStatus.PLAYING) {
       console.log(socket.id + " signup failed: Cannot signup when the game is started.");
       return;
@@ -468,27 +468,61 @@ export class SngRoom extends Room {
     this.getCurrentRound().endAction();
   }
 
-  // playerBet(socket: Socket, amount: number): void {
-  //   const player = this.getPlayer(socket);
+  playerBet(socket: Socket, request: Msg.BetRequest): void {
+    if (this.currentStatus !== RoomStatus.PLAYING) {
+      console.log(socket.id + " call failed: The game is not started.");
+      return;
+    }
 
-  //   if (player === null) {
-  //     // Response to client, "failed"
-  //     return;
-  //   }
+    const player = this.getPlayer(socket);
+    if (player === null || player.getSeatId() !== this.getCurrentRound().getCurrentPlayerSeatId()) {
+      console.log(socket.id + " fold failed: Not your turn.");
+      return;
+    }
 
-  //   // TODO: check if the amount is valid, if tht action is valid
-  //   console.log('playerBet', amount);
+    player.placeBet(request.betAmount);
+    player.act();
 
-  //   // place bet
-  //   player.placeBet(amount);
-  //   player.act();
+    this.getCurrentRound().updateCurrentBetSize(player.getCurrentBetSize());
 
-  //   // update round info
-  //   this.getCurrentRound().updateCurrentBetSize(amount);
-  // };
+    // Bet success.
+    console.log(socket.id + " bet success.");
+    const response: Msg.BetResponse = {
+      seatId: this.getPlayerSeatId(socket)
+    };
+    socket.emit("BetResponse", response);
 
+    // End action.
+    this.getCurrentRound().endAction();
+  }
 
-  //playerRaise(index: number, amount: number): void {
+  playerRaise(socket: Socket, request: Msg.RaiseRequest): void {
+    if (this.currentStatus !== RoomStatus.PLAYING) {
+      console.log(socket.id + " call failed: The game is not started.");
+      return;
+    }
+
+    const player = this.getPlayer(socket);
+    if (player === null || player.getSeatId() !== this.getCurrentRound().getCurrentPlayerSeatId()) {
+      console.log(socket.id + " fold failed: Not your turn.");
+      return;
+    }
+
+    player.placeBet(request.raiseAmount);
+    player.act();
+
+    this.getCurrentRound().updateCurrentBetSize(player.getCurrentBetSize());
+
+    // Raise success.
+    console.log(socket.id + " call success.");
+    const response: Msg.CallResponse = {
+      seatId: this.getPlayerSeatId(socket)
+    };
+    socket.emit("CallResponse", response);
+
+    // End action.
+    this.getCurrentRound().endAction();
+  }
 
   //playerAllIn(index: number): void {
 

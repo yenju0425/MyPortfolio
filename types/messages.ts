@@ -69,7 +69,7 @@ export type CallResponse = {
 };
 
 export type BetRequest = {
-  betSize: number;
+  betAmount: number;
 };
 
 export type BetResponse = {
@@ -77,7 +77,7 @@ export type BetResponse = {
 };
 
 export type RaiseRequest = {
-  raiseSize: number;
+  raiseAmount: number;
 };
 
 export type RaiseResponse = {
@@ -102,6 +102,10 @@ export type CurrentPlayerSeatIdUpdateBroadcast = {
 
 export type RoomCurrentBetSizeUpdateBroadcast = {
   roomCurrentBetSize: number;
+};
+
+export type RoomCurrentMinRaiseUpdateBroadcast = {
+  roomCurrentMinRaise: number;
 };
 
 export type RoomCurrentStatusUpdateBroadcast = {

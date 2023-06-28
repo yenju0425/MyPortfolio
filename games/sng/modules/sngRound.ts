@@ -16,8 +16,9 @@ export class SngRound extends Round {
   private deck: Deck;
   private pots: Pot[];
   private currentStreet: Streets;
-  private currentPlayerSeatId: number | null; // displayed in the frontend
-  private currentBetSize: number; // displayed in the frontend
+  private currentPlayerSeatId: number | null; // displayed or used in the frontend
+  private currentBetSize: number; // displayed or used in the frontend
+  private currentMinRaise: number; // displayed or used in the frontend RICKTODO
 
   constructor(room: SngRoom, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number, io: Server) {
     super(io);
@@ -31,6 +32,7 @@ export class SngRound extends Round {
     this.currentStreet = Streets.NONE;
     this.currentPlayerSeatId = null;
     this.currentBetSize = 0;
+    this.currentMinRaise = 0;
   }
 
   // room
@@ -122,7 +124,36 @@ export class SngRound extends Round {
   }
 
   updateCurrentBetSize(amount: number): void {
+    const betSize = Math.max(this.getCurrentBetSize(), amount);
+    const raise = betSize - this.getCurrentBetSize();
     this.setCurrentBetSize(Math.max(this.getCurrentBetSize(), amount));
+    this.updateCurrentMinRaise(raise);
+  }
+
+  // currentMinRaise
+  broadcastCurrentMinRaise(): void {
+    const broadcast: Msg.RoomCurrentMinRaiseUpdateBroadcast = {
+      roomCurrentMinRaise: this.getCurrentMinRaise()
+    };
+    this.io.emit('RoomCurrentMinRaiseUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastCurrentMinRaise: " + JSON.stringify(broadcast));
+  }
+
+  getCurrentMinRaise(): number {
+    return this.currentMinRaise;
+  }
+
+  setCurrentMinRaise(amount: number): void {
+    this.currentMinRaise = amount;
+    this.broadcastCurrentMinRaise();
+  }
+
+  updateCurrentMinRaise(amount: number): void {
+    this.setCurrentMinRaise(Math.max(this.getCurrentMinRaise(), amount));
+  }
+
+  initCurrentMinRaise(): void {
+    this.setCurrentMinRaise(this.getBigBlind());
   }
 
   // currentPlayerSeatId
@@ -183,6 +214,9 @@ export class SngRound extends Round {
     // Initialize current player seat id.
     this.initCurrentPlayerSeatId();
 
+    // Initialize current min raise.
+    this.initCurrentMinRaise();
+
     // Start the first action.
     this.startAction();
   }
@@ -205,14 +239,14 @@ export class SngRound extends Round {
     if (this.getCurrentStreet() === Streets.PREFLOP) {
       if (currentPlayer?.getCurrentPosition() === 1 && !currentPlayer.getCurrentBetSize()) { // small blind
         console.log('player: ' + currentPlayer?.getName() + ' is small blind');
-        currentPlayer.placeBet(this.bigBlind / 2);
-        this.updateCurrentBetSize(this.bigBlind / 2);
+        currentPlayer.placeBet(this.getBigBlind() / 2);
+        this.updateCurrentBetSize(this.getBigBlind() / 2);
         this.endAction();
         return;
       } else if (currentPlayer?.getCurrentPosition() === 2 && !currentPlayer.getCurrentBetSize()) { // big blind
         console.log('player: ' + currentPlayer?.getName() + ' is big blind');
-        currentPlayer.placeBet(this.bigBlind);
-        this.updateCurrentBetSize(this.bigBlind);
+        currentPlayer.placeBet(this.getBigBlind());
+        this.updateCurrentBetSize(this.getBigBlind());
         this.endAction();
         return;
       }

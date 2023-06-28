@@ -17,7 +17,7 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
 
   socket.on("SignupRequest", (request: Msg.SignupRequest) => {
     console.log("socket: " + socket.id + " SignupRequest: " + JSON.stringify(request));
-    sngRoom.clientSignup(request, socket);
+    sngRoom.clientSignup(socket, request);
   });
 
   socket.on("ReadyRequest", () => {
@@ -42,12 +42,12 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
 
   socket.on("BetRequest", (request: Msg.BetRequest) => {
     console.log("socket: " + socket.id + " BetRequest: " + JSON.stringify(request));
-    //sngRoom.playerBet(request, socket);
+    sngRoom.playerBet(socket, request);
   });
 
   socket.on("RaiseRequest", (request: Msg.RaiseRequest) => {
     console.log("socket: " + socket.id + " RaiseRequest: " + JSON.stringify(request));
-    //sngRoom.playerRaise(request, socket);
+    sngRoom.playerRaise(socket, request);
   });
 
   socket.on("AllInRequest", () => {

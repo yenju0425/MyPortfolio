@@ -4,11 +4,11 @@ import * as Msg from "@/types/messages";
 
 export abstract class Player {
   private readonly seatId: number;
-  private readonly name: string; // displayed in the frontend
+  private readonly name: string; // displayed or used in the frontend
   private readonly email: string;
   protected socket: Socket;
   protected io: Server;
-  protected currentStatus: PlayerStatus; // displayed in the frontend
+  protected currentStatus: PlayerStatus; // displayed or used in the frontend
 
   constructor(seatId: number, name: string, email: string, socket: Socket, io: Server) {
     this.seatId = seatId;
