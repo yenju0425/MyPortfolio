@@ -95,6 +95,10 @@ export class SngPlayer extends Player {
     this.currentPotContribution = currentPotContribution;
   }
 
+  updateCurrentPotContribution(chips: number): void {
+    this.setCurrentPotContribution(this.getCurrentPotContribution() + chips);
+  }
+
   resetCurrentPotContribution(): void {
     this.currentPotContribution = 0;
   }
@@ -119,6 +123,7 @@ export class SngPlayer extends Player {
 
   setHandRanking(handRanking: number): void {
     this.handRanking = handRanking;
+    console.log(">" + this.getSeatId(), "handRanking: " + this.handRanking);
   }
 
   // currentBetSize, displayed in the frontend
@@ -185,7 +190,7 @@ export class SngPlayer extends Player {
   placeBet(amount: number) { // `placeBet()` is called when the player places a bet, e.g. small blind, big blind, call, raise, all-in ,etc.
     this.updateCurrentChips(-amount);   
     this.updateCurrentBetSize(amount);
-    this.setCurrentPotContribution(this.getCurrentPotContribution() + amount);
+    this.updateCurrentPotContribution(amount);
   }
 
   receivePotReward(amount: number): void {

@@ -238,6 +238,11 @@ export default function Poker() {
         updateCommunityCards(broadcast.communityCards);
       });
 
+      socket.on("PotsUpdateBroadcast", (broadcast: Msg.PotsUpdateBroadcast) => {
+        console.log("PotsUpdateBroadcast: " + JSON.stringify(broadcast));
+        updatePots(broadcast.pots);
+      });
+
       // Load room info every time the component mounts.
       socket.emit("LoadRoomInfoRequest");
     });
@@ -322,8 +327,13 @@ export default function Poker() {
             roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
-          <div className={styles.community_cards}>
-            {JSON.stringify(communityCards)}
+          <div className={styles.desktop}>
+            <div className={styles.pots}>
+              {JSON.stringify(pots)}
+            </div>
+            <div className={styles.community_cards}>
+              {JSON.stringify(communityCards)}
+            </div>
           </div>
           <PlayerInfoCard
             socket={getSockets}

@@ -10,8 +10,8 @@ export class Deck {
 
   constructor() {
     this.cards = [];
-    for (let suit = 0; suit < 4; suit++) {
-      for (let rank = 1; rank <= 13; rank++) {
+    for (let suit = Suits.SPADES; suit <= Suits.CLUBS; suit++) {
+      for (let rank = Ranks.TWO; rank <= Ranks.ACE; rank++) {
         this.cards.push({ suit, rank });
       }
     }
@@ -65,7 +65,7 @@ export class Deck {
       const filter = (straightFilter >> i) & 0b1111111111111; // Only consider the last 13 bits.
       for (let suit of suitBins) {
         if ((suit & filter) === filter) {
-          return parseInt((HandRankings.STRAIGHT_FLUSH.toString(16) + (14 - i).toString(16).padStart(5, "0")), 16); // e.g. When i = 9, this straight will be 5432A, and the PID will be set to 5 (14 - 9).
+          return parseInt((HandRankings.STRAIGHT_FLUSH.toString(16) + (Ranks.ACE - i).toString(16).padStart(5, "0")), 16); // e.g. When i = 9, this straight will be 5432A, and the PID will be set to 5 (14 - 9).
         }
       }
     }
@@ -82,7 +82,7 @@ export class Deck {
     // 5. Flush
     if (sortedSuitCounter[0][1] >= 5) {
       let PID = "";
-      for (let i = Ranks.ACE; i >= Ranks.TWO; i--) {
+      for (let i = Ranks.ACE; i >= Ranks.TWO && PID.length < 5; i--) {
         if ((suitBins[sortedSuitCounter[0][0]] & (1 << i)) !== 0) {
           PID += i.toString(16);
         }
@@ -94,7 +94,7 @@ export class Deck {
     for (let i = 0; i <= 9; i++) {
       const filter = (straightFilter >> i) & 0b1111111111111; // Only consider the last 13 bits.
       if ((bin & filter) === filter) {
-        return parseInt((HandRankings.STRAIGHT.toString(16) + (14 - i).toString(16).padStart(5, "0")), 16); // e.g. When i = 9, this straight will be 5432A, and the PID will be set to 5 (14 - 9).
+        return parseInt((HandRankings.STRAIGHT.toString(16) + (Ranks.ACE - i).toString(16).padStart(5, "0")), 16); // e.g. When i = 9, this straight will be 5432A, and the PID will be set to 5 (14 - 9).
       }
     }
     // 7. Three of a Kind

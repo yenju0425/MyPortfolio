@@ -145,3 +145,7 @@ export type PlayerHoleCardsUpdateBroadcast = {
 export type CommunityCardsUpdateBroadcast = {
   communityCards: Card[];
 };
+
+export type PotsUpdateBroadcast = {
+  pots: Pot[];
+};

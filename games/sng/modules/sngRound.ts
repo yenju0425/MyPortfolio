@@ -87,12 +87,21 @@ export class SngRound extends Round {
   }
 
   // Pots
+  broadcastPots(): void {
+    const broadcast: Msg.PotsUpdateBroadcast = {
+      pots: this.getPots()
+    };
+    this.io.emit('PotsUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastPots: " + JSON.stringify(broadcast));
+  }
+
   getPots(): Pot[] {
     return this.pots;
   }
 
   setPots(pots: Pot[]): void {
     this.pots = pots;
+    this.broadcastPots();
   }
 
   updatePots(): void {
@@ -330,8 +339,9 @@ export class SngRound extends Round {
 
   calculatePlayersHandRanking(): void {
     for (let player of this.players) {
-      let cards = player?.getHoleCards().concat(this.getCommunityCards()).filter(card => card !== null) || [];
-      player?.setHandRanking(this.getDeck().calculateHandRanking(cards));
+      if (player) {
+        player.setHandRanking(this.getDeck().calculateHandRanking(player.getHoleCards().concat(this.getCommunityCards()).filter(card => card !== null)));
+      }
     }
   }
 
