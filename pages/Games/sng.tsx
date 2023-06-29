@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { RoomStatus, PlayerStatus } from '@/games/base/terms';
 import { Card } from '@/games/sng/modules/deck';
+import { Pot } from '@/games/sng/modules/pot';
 import PlayerInfoCard from '@/components/playerInfoCard';
 import styles from '@/styles/Sng.module.css';
 import * as Msg from '@/types/messages'; // RICKTODO: upgrade to protobuf
@@ -23,7 +24,9 @@ export default function Poker() {
   const [playersCurrentChips, setPlayersCurrentChips] = useState(Array(9).fill(0));
   const [playersCurrentBetSizes, setPlayersCurrentBetSizes] = useState(Array(9).fill(0));
   const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(null));
-  const [playersHoleCards, setPlayersHoleCards] = useState(Array(9).fill(Array(2).fill(null)));
+  const [playersHoleCards, setPlayersHoleCards] = useState(Array(9).fill(Array(0)));
+  const [communityCards, setCommunityCards] = useState(Array(0));
+  const [pots, setPots] = useState(Array(0));
 
   const updatePlayerName = useCallback((seatId: number, newName: string) => {
     setPlayersNames((prevNames) => {
@@ -33,11 +36,7 @@ export default function Poker() {
     });
   }, []);
   const updatePlayersNames = useCallback((newNames: string[]) => {
-    setPlayersNames((prevNames) => {
-      return prevNames.map((name, index) => {
-        return newNames[index];
-      });
-    });
+    setPlayersNames([...newNames]);
   }, []);
 
   const updatePlayerCurrentChips = useCallback((seatId: number, newCurrentChip: number | null) => {
@@ -48,11 +47,7 @@ export default function Poker() {
     });
   }, []);
   const updatePlayersCurrentChips = useCallback((newCurrentChips: (number | null)[]) => {
-    setPlayersCurrentChips((prevCurrentChips) => {
-      return prevCurrentChips.map((currentChip, index) => {
-        return newCurrentChips[index];
-      });
-    });
+    setPlayersCurrentChips([...newCurrentChips]);
   }, []);
 
   const updatePlayerCurrentBetSize = useCallback((seatId: number, newCurrentBetSize: number | null) => {
@@ -63,11 +58,7 @@ export default function Poker() {
     });
   }, []);
   const updatePlayersCurrentBetSizes = useCallback((newCurrentBetSizes: (number | null)[]) => {
-    setPlayersCurrentBetSizes((prevCurrentBetSizes) => {
-      return prevCurrentBetSizes.map((currentBetSize, index) => {
-        return newCurrentBetSizes[index];
-      });
-    });
+    setPlayersCurrentBetSizes([...newCurrentBetSizes]);
   }, []);
 
   const updatePlayerCurrentStatus = useCallback((seatId: number, newCurrentPlayerStatus: PlayerStatus | null) => {
@@ -78,26 +69,26 @@ export default function Poker() {
     });
   }, []);
   const updatePlayersCurrentStatuses = useCallback((newCurrentPlayerStatuses: (PlayerStatus | null)[]) => {
-    setPlayersCurrentStatuses((prevCurrentPlayerStatuses) => {
-      return prevCurrentPlayerStatuses.map((currentPlayerStatus, index) => {
-        return newCurrentPlayerStatuses[index];
-      });
-    });
+    setPlayersCurrentStatuses([...newCurrentPlayerStatuses]);
   }, []);
 
-  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: (Card | null)[]) => {
+  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: Card[] | null) => {
     setPlayersHoleCards((prevPlayersHoleCards) => {
       return prevPlayersHoleCards.map((playersHoleCard, index) => {
         return index === seatId ? newPlayerHoleCards : playersHoleCard;
       });
     });
   }, []);
-  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: (Card | null)[][]) => {
-    setPlayersHoleCards((prevPlayersHoleCards) => {
-      return prevPlayersHoleCards.map((playersHoleCard, index) => {
-        return newPlayersHoleCards[index];
-      });
-    });
+  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: (Card[] | null)[]) => {
+    setPlayersHoleCards([...newPlayersHoleCards]);
+  }, []);
+
+  const updateCommunityCards = useCallback((newCommunityCards: Card[]) => {
+    setCommunityCards([...newCommunityCards]);
+  }, []);
+
+  const updatePots = useCallback((newPots: Pot[]) => {
+    setPots([...newPots]);
   }, []);
 
   const resetPlayerInfo = (seatId: number) => {
@@ -109,11 +100,15 @@ export default function Poker() {
 
   const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
     setClientSeatId(info.clientSeatId);
+    setCurrentPlayerSeatId(info.currentPlayerSeatId);
     setCurrentRoomStatus(info.roomCurrentStatus);
     updatePlayersNames(info.playersNames);
     updatePlayersCurrentChips(info.playersCurrentChips);
     updatePlayersCurrentBetSizes(info.playersCurrentBetSizes);
     updatePlayersCurrentStatuses(info.playersCurrentStatuses);
+    updatePlayersHoleCards(info.playersHoleCards);
+    updateCommunityCards(info.communityCards);
+    updatePots(info.pots);
   };
 
   // utility functions
@@ -238,6 +233,11 @@ export default function Poker() {
         updatePlayerHoleCards(broadcast.seatId, broadcast.playerHoleCards);
       });
 
+      socket.on("CommunityCardsUpdateBroadcast", (broadcast: Msg.CommunityCardsUpdateBroadcast) => {
+        console.log("CommunityCardsUpdateBroadcast: " + JSON.stringify(broadcast));
+        updateCommunityCards(broadcast.communityCards);
+      });
+
       // Load room info every time the component mounts.
       socket.emit("LoadRoomInfoRequest");
     });
@@ -322,7 +322,9 @@ export default function Poker() {
             roomCurrentMinRaise={roomCurrentMinRaise}
             roomCurrentStatus={roomCurrentStatus}
           />
-          <button>DEALER</button>
+          <div className={styles.community_cards}>
+            {JSON.stringify(communityCards)}
+          </div>
           <PlayerInfoCard
             socket={getSockets}
             seatId={4}

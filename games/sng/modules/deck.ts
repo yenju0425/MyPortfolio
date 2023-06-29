@@ -39,7 +39,7 @@ export class Deck {
   // In the current framework, a new deck is created when a new round starts.
   // reset()
 
-  calculateHandRanking(cards: Card[]): number { // RICKTODO: This should move to a Deck class.
+  calculateHandRanking(cards: Card[]): number {
     const suitBins: number[] = [0, 0, 0, 0]; // e.g. If there is a 3 of spades, then suitBin[Suits.SPADES] &= 0b0000000000100.
     const suitCounter: Map<Suits, number> = new Map();
     const rankCounter: Map<Ranks, number> = new Map();

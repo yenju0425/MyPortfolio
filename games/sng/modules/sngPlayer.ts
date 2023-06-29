@@ -170,13 +170,13 @@ export class SngPlayer extends Player {
     this.setHoleCards(cards);
     this.resetCurrentPotContribution();
     this.resetFolded();
-    this.resetActed();
 
     console.log(">" + this.getSeatId(), position);
   }
 
   startStreet(): void {
     this.setCurrentBetSize(0);
+    this.resetActed();
   }
 
   startAct(): void {

@@ -1,4 +1,5 @@
 import { Card } from '@/games/sng/modules/deck';
+import { Pot } from '@/games/sng/modules/pot';
 import { RoomStatus, PlayerStatus } from '@/games/base/terms';
 
 // Request: to ask the server to do something (e.g. signup, make a bet)
@@ -18,11 +19,15 @@ export type StandupBroadcast = {
 
 export type LoadRoomInfoResponse = {
   clientSeatId: number;
+  currentPlayerSeatId: number; // -1 if the game has not started
   roomCurrentStatus: RoomStatus;
   playersNames: string[];
   playersCurrentChips: number[];
   playersCurrentBetSizes: number[];
-  playersCurrentStatuses: (PlayerStatus | null)[];
+  playersCurrentStatuses: (PlayerStatus | null)[]; // null if the seat is empty
+  playersHoleCards: (Card[] | null)[]; // [] if the game has not started, null if the seat is empty
+  communityCards: Card[]; // [] if the game has not started
+  pots: Pot[]; // [] if the game has not started
 };
 
 export type SignupRequest = {
@@ -135,4 +140,8 @@ export type PlayerCurrentStatusUpdateBroadcast = {
 export type PlayerHoleCardsUpdateBroadcast = {
   seatId: number;
   playerHoleCards: Card[];
+};
+
+export type CommunityCardsUpdateBroadcast = {
+  communityCards: Card[];
 };

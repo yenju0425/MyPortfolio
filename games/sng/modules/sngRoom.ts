@@ -1,6 +1,7 @@
 import type { Server, Socket } from 'socket.io';
 import { Room } from "@/games/base/room";
 import { RoomStatus, PlayerStatus } from '@/games/base/terms';
+import { Card } from './deck';
 import { configs } from "./configs";
 import { SngRound } from "./sngRound";
 import { SngPlayer } from "./sngPlayer";
@@ -117,6 +118,10 @@ export class SngRoom extends Room {
   getPlayersStatuses(): (PlayerStatus | null)[] {
     // return this.players.map(player => player?.getStatus() || null); <- The `||` returns the first operand if it is truthy and the second operand otherwise.
     return this.players.map(player => player ? player.getStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
+  };
+
+  getPlayersHoleCards(): (Card[] | null)[] {
+    return this.players.map(player => player ? player.getHoleCards() : null);
   };
 
   // currentSngStartTime
@@ -292,11 +297,15 @@ export class SngRoom extends Room {
   clientLoadRoomInfo(socket: Socket): void {
     const response: Msg.LoadRoomInfoResponse = {
       clientSeatId: this.getPlayerSeatId(socket),
+      currentPlayerSeatId: this.currentRound ? this.currentRound.getCurrentPlayerSeatId() : -1,
       roomCurrentStatus: this.getStatus(),
       playersNames: this.getPlayersNames(),
       playersCurrentChips: this.getPlayersCurrentChips(),
       playersCurrentBetSizes: this.getPlayersCurrentBetSizes(),
       playersCurrentStatuses: this.getPlayersStatuses(),
+      playersHoleCards: this.getPlayersHoleCards(),
+      communityCards: this.currentRound ? this.currentRound.getCommunityCards() : [],
+      pots: this.currentRound ? this.currentRound.getPots() : [],
     };
     socket.emit("LoadRoomInfoResponse", response);
   };
@@ -556,7 +565,7 @@ export class SngRoom extends Room {
     console.log("[RICKDEBUG] startSng");
 
     // Set the current status to PLAYING.
-    this.play(); // [RICKTODO]: 通知前端
+    this.play();
 
     // Update the total number of SNGs.
     this.updateTotalNumSngs();

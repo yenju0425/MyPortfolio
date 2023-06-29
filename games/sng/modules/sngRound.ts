@@ -2,7 +2,7 @@ import type { Server } from 'socket.io';
 import { Round } from '@/games/base/round';
 import { SngRoom } from "./sngRoom";
 import { Card, Deck } from './deck';
-import { Pot } from './pots';
+import { Pot } from './pot';
 import { Streets } from './terms';
 import { SngPlayer } from './sngPlayer';
 import * as Msg from "@/types/messages";
@@ -18,7 +18,7 @@ export class SngRound extends Round {
   private currentStreet: Streets;
   private currentPlayerSeatId: number | null; // displayed or used in the frontend
   private currentBetSize: number; // displayed or used in the frontend
-  private currentMinRaise: number; // displayed or used in the frontend RICKTODO
+  private currentMinRaise: number; // displayed or used in the frontend
 
   constructor(room: SngRoom, players: (SngPlayer | null)[], bigBlindSeatId: number, bigBlind: number, io: Server) {
     super(io);
@@ -60,8 +60,25 @@ export class SngRound extends Round {
   }
     
   // communityCards
+  broadcastCommunityCards(): void {
+    const broadcast: Msg.CommunityCardsUpdateBroadcast = {
+      communityCards: this.getCommunityCards()
+    };
+    this.io.emit('CommunityCardsUpdateBroadcast', broadcast);
+    console.log("[RICKDEBUG] broadcastCommunityCards: " + JSON.stringify(broadcast));
+  }
+
   getCommunityCards(): Card[] {
     return this.communityCards;
+  }
+
+  setCommunityCards(communityCards: Card[]): void {
+    this.communityCards = communityCards;
+    this.broadcastCommunityCards();
+  }
+
+  updateCommunityCards(Cards: Card[]): void {
+    this.setCommunityCards([...this.getCommunityCards(), ...Cards]);
   }
 
   // deck
@@ -209,8 +226,11 @@ export class SngRound extends Round {
   startStreet(): void {
     console.log('[RICKDEBUG] startStreet');
 
-    // this.get [RICKTODO]: next street
+    // Update current street.
     this.updateCurrentStreet();
+
+    // Deal community cards.
+    this.dealCommunityCards();
 
     // Initialize players in the street.
     this.initStreetPlayers();
@@ -363,5 +383,13 @@ export class SngRound extends Round {
 
   initStreetPlayers(): void {
     this.players.forEach(player => player?.startStreet());
+  }
+
+  dealCommunityCards(): void {
+    if (this.getCurrentStreet() === Streets.FLOP) {
+      this.updateCommunityCards([this.getDeck().deal(), this.getDeck().deal(), this.getDeck().deal()]);
+    } else if (this.getCurrentStreet() === Streets.TURN || this.getCurrentStreet() === Streets.RIVER) {
+      this.updateCommunityCards([this.getDeck().deal()]);
+    }
   }
 }
