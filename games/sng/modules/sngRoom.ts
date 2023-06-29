@@ -120,8 +120,8 @@ export class SngRoom extends Room {
     return this.players.map(player => player ? player.getStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
   };
 
-  getPlayersHoleCards(): (Card[] | null)[] {
-    return this.players.map(player => player ? player.getHoleCards() : null);
+  getPlayersHoleCards(): (Card | null)[][] {
+    return this.players.map(player => player ? player.getHoleCards() : []);
   };
 
   // currentSngStartTime

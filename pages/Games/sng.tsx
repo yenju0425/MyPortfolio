@@ -72,14 +72,14 @@ export default function Poker() {
     setPlayersCurrentStatuses([...newCurrentPlayerStatuses]);
   }, []);
 
-  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: Card[] | null) => {
+  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: (Card | null)[]) => {
     setPlayersHoleCards((prevPlayersHoleCards) => {
       return prevPlayersHoleCards.map((playersHoleCard, index) => {
         return index === seatId ? newPlayerHoleCards : playersHoleCard;
       });
     });
   }, []);
-  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: (Card[] | null)[]) => {
+  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: (Card | null)[][]) => {
     setPlayersHoleCards([...newPlayersHoleCards]);
   }, []);
 
