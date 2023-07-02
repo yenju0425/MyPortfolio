@@ -17,12 +17,15 @@ export type StandupBroadcast = {
 // export type SngEndBroadcast = {
 // };
 
+// export type RoundEndBroadcast = {
+// };
+
 // export type LoadRoomInfoRequest = {
 // };
 
 export type LoadRoomInfoResponse = {
   clientSeatId: number;
-  currentPlayerSeatId: number; // -1 if the game has not started
+  currentPlayerSeatId: number | null; // null if the game has not started
   roomCurrentBetSize: number;
   roomCurrentMinRaise: number;
   roomCurrentStatus: RoomStatus;
@@ -107,7 +110,7 @@ export type ClientSeatIdUpdateBroadcast = {
 };
 
 export type CurrentPlayerSeatIdUpdateBroadcast = {
-  currentPlayerSeatId: number;
+  currentPlayerSeatId: number | null;
 };
 
 export type RoomCurrentBetSizeUpdateBroadcast = {

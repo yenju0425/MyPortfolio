@@ -14,7 +14,7 @@ let socket: Socket;
 export default function Poker() {
   // Immutable (Room info)
   const [clientSeatId, setClientSeatId] = useState(-1);
-  const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState(-1);
+  const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState<number | null>(null);
   const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
   const [roomCurrentMinRaise, setRoomCurrentMinRaise] = useState(0);
   const [roomCurrentStatus, setRoomCurrentStatus] = useState(RoomStatus.NONE);
@@ -147,6 +147,11 @@ export default function Poker() {
 
       socket.on("SngEndBroadcast", () => {
         console.log("SngEndBroadcast.");
+        socket.emit("LoadRoomInfoRequest");
+      });
+
+      socket.on("RoundEndBroadcast", () => {
+        console.log("RoundEndBroadcast.");
         socket.emit("LoadRoomInfoRequest");
       });
 

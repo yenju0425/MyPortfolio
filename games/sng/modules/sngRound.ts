@@ -1,4 +1,5 @@
 import type { Server } from 'socket.io';
+import { PlayerStatus } from '@/games/base/terms';
 import { Round } from '@/games/base/round';
 import { SngRoom } from "./sngRoom";
 import { Card, Deck } from './deck';
@@ -56,9 +57,10 @@ export class SngRound extends Round {
   }
 
   getCurrentPlayer(): SngPlayer | null {
-    return this.players[this.getCurrentPlayerSeatId()];
+    const currentPlayerSeatId = this.getCurrentPlayerSeatId();
+    return currentPlayerSeatId === null ? null : this.players[currentPlayerSeatId];
   }
-    
+
   // communityCards
   broadcastCommunityCards(): void {
     const broadcast: Msg.CommunityCardsUpdateBroadcast = {
@@ -195,24 +197,25 @@ export class SngRound extends Round {
     console.log("[RICKDEBUG] broadcastCurrentPlayerSeatId: " + JSON.stringify(broadcast));
   }
 
-  getCurrentPlayerSeatId(): number {
-    if (this.currentPlayerSeatId === null) {
-      console.log("currentPlayerSeatId is null, update it automatically.");
-      this.updateCurrentPlayerSeatId();
-      return this.getCurrentPlayerSeatId();
-    } else {
-      return this.currentPlayerSeatId;
-    }
+  getCurrentPlayerSeatId(): number | null {
+    return this.currentPlayerSeatId;
   }
 
-  setCurrentPlayerSeatId(seatId: number): void {
+  setCurrentPlayerSeatId(seatId: number | null): void {
     this.currentPlayerSeatId = seatId;
     this.broadcastCurrentPlayerSeatId();
   }
 
   updateCurrentPlayerSeatId(): void {
-    let nextPlayerSeatId = (this.getCurrentPlayerSeatId() + 1) % this.players.length;
+    const currentPlayerSeatId = this.getCurrentPlayerSeatId();
+    if (currentPlayerSeatId === null) {
+      console.log("CurrentPlayerSeatId is null, unable to update.");
+      return;
+    }
+
+    let nextPlayerSeatId = (currentPlayerSeatId + 1) % this.players.length;
     while(!this.players[nextPlayerSeatId]?.isStillInStreet()) {
+      console.log("[RICKDEBUG] player " + nextPlayerSeatId + " is not still in street, skip.");
       nextPlayerSeatId = (nextPlayerSeatId + 1) % this.players.length
     }
     this.setCurrentPlayerSeatId(nextPlayerSeatId);
@@ -228,7 +231,7 @@ export class SngRound extends Round {
   }
 
   resetCurrentPlayerSeatId(): void {
-    this.setCurrentPlayerSeatId(this.getBigBlindSeatId());
+    this.setCurrentPlayerSeatId(null);
   }
 
   // round functions
@@ -307,6 +310,7 @@ export class SngRound extends Round {
     console.log('[RICKDEBUG] endStreet');
 
     this.updatePots();
+    this.resetCurrentPlayerSeatId();
 
     // TODO: return the overbet chips to the player
 
@@ -314,13 +318,13 @@ export class SngRound extends Round {
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 5000);
+      }, 8000);
     } else if (this.getCurrentStreet() === Streets.RIVER) {
       this.calculatePlayersHandRanking();
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 5000);
+      }, 8000);
     } else {
       this.startStreet();
     }
@@ -328,7 +332,7 @@ export class SngRound extends Round {
 
   // utility functions
   isAllPlayersActed(): boolean {
-    return this.players.filter(player => player !== null).every(player => player?.isActed());
+    return this.players.filter(player => player?.isStillInStreet()).every(player => player?.isActed());
   }
 
   isBetConsensusReached(): boolean {
@@ -390,8 +394,9 @@ export class SngRound extends Round {
       let index = (this.bigBlindSeatId - i + this.players.length) % this.players.length;
 
       console.log(index, position);
-      this.players[index]?.startRound(position, [this.getDeck().deal(), this.getDeck().deal()]);
-      if (this.players[index]) {
+      const player = this.players[index];
+      if (player?.getStatus() === PlayerStatus.PLAYING) {
+        player.startRound(position, [this.getDeck().deal(), this.getDeck().deal()]);
         position = (position - 1 + this.players.length) % this.players.length; // If there are 2 players, small blind will be the dealer.
       }
     }

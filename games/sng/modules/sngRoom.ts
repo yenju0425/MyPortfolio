@@ -163,6 +163,7 @@ export class SngRoom extends Room {
 
   setCurrentBigBlindSeatId(seatId: number | null): void {
     this.currentBigBlindSeatId = seatId;
+    console.log(`currentBigBlindSeatId is set to ${seatId}.`);
   };
 
   updateCurrentBigBlindSeatId(): void {
@@ -170,11 +171,9 @@ export class SngRoom extends Room {
       const nonNullIds = this.players.map((player, seatId) => player !== null ? seatId : -1).filter(seatId => seatId !== -1);
       this.setCurrentBigBlindSeatId(nonNullIds[Math.floor(Math.random() * nonNullIds.length)]);
     } else {
-      let nextBmallBlind = (this.currentBigBlindSeatId + 1) % this.numPlayers;
-      while (this.players[nextBmallBlind] === null) {
-        nextBmallBlind = (nextBmallBlind + 1) % this.numPlayers;
-      }
-      this.setCurrentBigBlindSeatId(nextBmallBlind);
+      do {
+        this.setCurrentBigBlindSeatId((this.getCurrentBigBlindSeatId() + 1) % this.numPlayers);
+      } while (this.players[this.getCurrentBigBlindSeatId()] === null);
     }
   };
 
@@ -297,7 +296,7 @@ export class SngRoom extends Room {
   clientLoadRoomInfo(socket: Socket): void {
     const response: Msg.LoadRoomInfoResponse = {
       clientSeatId: this.getPlayerSeatId(socket),
-      currentPlayerSeatId: this.currentRound ? this.currentRound.getCurrentPlayerSeatId() : -1,
+      currentPlayerSeatId: this.currentRound ? this.currentRound.getCurrentPlayerSeatId() : null,
       roomCurrentBetSize: this.currentRound ? this.currentRound.getCurrentBetSize() : 0,
       roomCurrentMinRaise: this.currentRound ? this.currentRound.getCurrentMinRaise() : 0,
       roomCurrentStatus: this.getStatus(),
@@ -652,6 +651,9 @@ export class SngRoom extends Room {
     // Eliminate players who have no chips.
     this.roundElimination();
 
+    // Notify the clients to refresh the room.
+    this.getIo().emit("RoundEndBroadcast");
+
     // Check if the SNG is ended.
     if (this.getNumOfPlayersStillInSng() < 2) {
       this.endSng();
@@ -695,7 +697,7 @@ export class SngRoom extends Room {
 
   roundElimination(): void {
     this.players.forEach(player => {
-      if (!player?.getCurrentChips()) {
+      if (player?.getCurrentChips() === undefined || player?.getCurrentChips() <= 0) {
         player?.eliminate();
       }
     });

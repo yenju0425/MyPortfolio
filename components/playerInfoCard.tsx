@@ -15,7 +15,7 @@ interface PlayerInfoCardProps {
   currentPlayerStatus: PlayerStatus | null;
   holeCards: Card[];
   clientSeatId: number;
-  currentPlayerSeatId: number;
+  currentPlayerSeatId: number | null;
   roomCurrentBetSize: number;
   roomCurrentMinRaise: number;
   roomCurrentStatus: RoomStatus;

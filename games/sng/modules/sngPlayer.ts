@@ -64,6 +64,10 @@ export class SngPlayer extends Player {
     this.currentPosition = currentPosition;
   }
 
+  resetCurrentPosition(): void {
+    this.currentPosition = null;
+  }
+
   // holeCards, displayed in the frontend
   broadcastHoleCards(): void {
     const broadcast: Msg.PlayerHoleCardsUpdateBroadcast = {
