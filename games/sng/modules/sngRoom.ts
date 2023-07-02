@@ -167,7 +167,7 @@ export class SngRoom extends Room {
   };
 
   updateCurrentBigBlindSeatId(): void {
-    if (!this.currentBigBlindSeatId) {
+    if (this.currentBigBlindSeatId === null) {
       const nonNullIds = this.players.map((player, seatId) => player !== null ? seatId : -1).filter(seatId => seatId !== -1);
       this.setCurrentBigBlindSeatId(nonNullIds[Math.floor(Math.random() * nonNullIds.length)]);
     } else {

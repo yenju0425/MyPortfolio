@@ -395,7 +395,7 @@ export class SngRound extends Round {
 
       console.log(index, position);
       const player = this.players[index];
-      if (player?.getStatus() === PlayerStatus.PLAYING) {
+      if (player?.isStillInRound()) {
         player.startRound(position, [this.getDeck().deal(), this.getDeck().deal()]);
         position = (position - 1 + this.players.length) % this.players.length; // If there are 2 players, small blind will be the dealer.
       }
