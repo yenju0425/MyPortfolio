@@ -145,6 +145,11 @@ export default function Poker() {
         resetPlayerInfo(broadcast.seatId);
       });
 
+      socket.on("SngEndBroadcast", () => {
+        console.log("SngEndBroadcast.");
+        socket.emit("LoadRoomInfoRequest");
+      });
+
       socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {
         console.log("LoadRoomInfoResponse: " + JSON.stringify(response));
         loadRoomInfo(response);

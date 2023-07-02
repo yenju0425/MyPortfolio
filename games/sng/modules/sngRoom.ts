@@ -652,15 +652,12 @@ export class SngRoom extends Room {
     // Eliminate players who have no chips.
     this.roundElimination();
 
-    // Pause for 5 seconds.
-    setTimeout(() => {
-      // Check if the SNG is ended.
-      if (this.getNumOfPlayersStillInSng() < 2) {
-        this.endSng();
-      } else {
-        this.startRound();
-      }
-    }, 5000); // 5000 milliseconds = 5 seconds
+    // Check if the SNG is ended.
+    if (this.getNumOfPlayersStillInSng() < 2) {
+      this.endSng();
+    } else {
+      this.startRound();
+    }
   }  
 
   endSng(): void {
@@ -687,7 +684,8 @@ export class SngRoom extends Room {
     // Set currentStatus to NONE.
     this.reset();
 
-    // RICKTODO: 通知前端
+    // Notify the clients to refresh the room.
+    this.getIo().emit("SngEndBroadcast");
   }
 
   // utility functions

@@ -14,6 +14,9 @@ export type StandupBroadcast = {
   seatId: number;
 };
 
+// export type SngEndBroadcast = {
+// };
+
 // export type LoadRoomInfoRequest = {
 // };
 

@@ -312,11 +312,15 @@ export class SngRound extends Round {
 
     if (this.getNumOfPlayersStillInRound() < 2) {
       this.rewardPotsToWinners();
-      this.getRoom().endRound();
+      setTimeout(() => {
+        this.getRoom().endRound();
+      }, 5000);
     } else if (this.getCurrentStreet() === Streets.RIVER) {
       this.calculatePlayersHandRanking();
       this.rewardPotsToWinners();
-      this.getRoom().endRound();
+      setTimeout(() => {
+        this.getRoom().endRound();
+      }, 5000);
     } else {
       this.startStreet();
     }
