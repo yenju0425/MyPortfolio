@@ -20,12 +20,14 @@ export type StandupBroadcast = {
 export type LoadRoomInfoResponse = {
   clientSeatId: number;
   currentPlayerSeatId: number; // -1 if the game has not started
+  roomCurrentBetSize: number;
+  roomCurrentMinRaise: number;
   roomCurrentStatus: RoomStatus;
   playersNames: string[];
   playersCurrentChips: number[];
   playersCurrentBetSizes: number[];
   playersCurrentStatuses: (PlayerStatus | null)[]; // null if the seat is empty
-  playersHoleCards: (Card | null)[][]; // [] if the game has not started, null if the seat is empty
+  playersHoleCards: Card[][]; // [] if the game has not started, null if the seat is empty
   communityCards: Card[]; // [] if the game has not started
   pots: Pot[]; // [] if the game has not started
 };

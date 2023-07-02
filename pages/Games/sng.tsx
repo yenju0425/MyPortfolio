@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { RoomStatus, PlayerStatus } from '@/games/base/terms';
@@ -16,7 +17,7 @@ export default function Poker() {
   const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState(-1);
   const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
   const [roomCurrentMinRaise, setRoomCurrentMinRaise] = useState(0);
-  const [roomCurrentStatus, setCurrentRoomStatus] = useState(RoomStatus.NONE);
+  const [roomCurrentStatus, setRoomCurrentStatus] = useState(RoomStatus.NONE);
 
   // Mutable (Players info), should avoid using them directly
   // For more details on how to use useState with arrays, see: https://react.dev/learn/updating-arrays-in-state
@@ -24,9 +25,9 @@ export default function Poker() {
   const [playersCurrentChips, setPlayersCurrentChips] = useState(Array(9).fill(0));
   const [playersCurrentBetSizes, setPlayersCurrentBetSizes] = useState(Array(9).fill(0));
   const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(null));
-  const [playersHoleCards, setPlayersHoleCards] = useState(Array(9).fill(Array(0)));
-  const [communityCards, setCommunityCards] = useState(Array(0));
-  const [pots, setPots] = useState(Array(0));
+  const [playersHoleCards, setPlayersHoleCards] = useState<Array<Array<Card>>>(Array(9).fill([]));
+  const [communityCards, setCommunityCards] = useState<Array<Card>>(Array(0).fill([]));
+  const [pots, setPots] = useState<Array<Pot>>(Array(0).fill([]));
 
   const updatePlayerName = useCallback((seatId: number, newName: string) => {
     setPlayersNames((prevNames) => {
@@ -72,14 +73,14 @@ export default function Poker() {
     setPlayersCurrentStatuses([...newCurrentPlayerStatuses]);
   }, []);
 
-  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: (Card | null)[]) => {
+  const updatePlayerHoleCards = useCallback((seatId: number, newPlayerHoleCards: Card[]) => {
     setPlayersHoleCards((prevPlayersHoleCards) => {
       return prevPlayersHoleCards.map((playersHoleCard, index) => {
         return index === seatId ? newPlayerHoleCards : playersHoleCard;
       });
     });
   }, []);
-  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: (Card | null)[][]) => {
+  const updatePlayersHoleCards = useCallback((newPlayersHoleCards: Card[][]) => {
     setPlayersHoleCards([...newPlayersHoleCards]);
   }, []);
 
@@ -101,7 +102,9 @@ export default function Poker() {
   const loadRoomInfo = (info: Msg.LoadRoomInfoResponse) => {
     setClientSeatId(info.clientSeatId);
     setCurrentPlayerSeatId(info.currentPlayerSeatId);
-    setCurrentRoomStatus(info.roomCurrentStatus);
+    setRoomCurrentBetSize(info.roomCurrentBetSize);
+    setRoomCurrentMinRaise(info.roomCurrentMinRaise);
+    setRoomCurrentStatus(info.roomCurrentStatus);
     updatePlayersNames(info.playersNames);
     updatePlayersCurrentChips(info.playersCurrentChips);
     updatePlayersCurrentBetSizes(info.playersCurrentBetSizes);
@@ -205,7 +208,7 @@ export default function Poker() {
 
       socket.on("RoomCurrentStatusUpdateBroadcast", (broadcast: Msg.RoomCurrentStatusUpdateBroadcast) => {
         console.log("RoomCurrentStatusUpdateBroadcast: " + JSON.stringify(broadcast));
-        setCurrentRoomStatus(broadcast.roomCurrentStatus);
+        setRoomCurrentStatus(broadcast.roomCurrentStatus);
       });
 
       socket.on("PlayerNameUpdateBroadcast", (broadcast: Msg.PlayerNameUpdateBroadcast) => {
@@ -332,7 +335,16 @@ export default function Poker() {
               {JSON.stringify(pots)}
             </div>
             <div className={styles.community_cards}>
-              {JSON.stringify(communityCards)}
+              {communityCards.map((card, index) => (
+                <Image
+                  key={index}
+                  src={`/pokers/${Card.toHumanReadableString(card)}.png`}
+                  alt={Card.toHumanReadableString(card)}
+                  width={60}
+                  height={80}
+                  style={{ objectFit: "contain" }}
+                />
+              ))}
             </div>
           </div>
           <PlayerInfoCard

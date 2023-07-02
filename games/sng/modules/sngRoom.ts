@@ -120,7 +120,7 @@ export class SngRoom extends Room {
     return this.players.map(player => player ? player.getStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
   };
 
-  getPlayersHoleCards(): (Card | null)[][] {
+  getPlayersHoleCards(): Card[][] {
     return this.players.map(player => player ? player.getHoleCards() : []);
   };
 
@@ -298,6 +298,8 @@ export class SngRoom extends Room {
     const response: Msg.LoadRoomInfoResponse = {
       clientSeatId: this.getPlayerSeatId(socket),
       currentPlayerSeatId: this.currentRound ? this.currentRound.getCurrentPlayerSeatId() : -1,
+      roomCurrentBetSize: this.currentRound ? this.currentRound.getCurrentBetSize() : 0,
+      roomCurrentMinRaise: this.currentRound ? this.currentRound.getCurrentMinRaise() : 0,
       roomCurrentStatus: this.getStatus(),
       playersNames: this.getPlayersNames(),
       playersCurrentChips: this.getPlayersCurrentChips(),

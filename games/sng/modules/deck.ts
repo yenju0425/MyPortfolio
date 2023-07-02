@@ -1,18 +1,36 @@
 import { Suits, Ranks, HandRankings } from './terms';
 
-export type Card = {
-  suit: Suits;
-  rank: Ranks;
+export class Card {
+  private readonly rank: Ranks;
+  private readonly suit: Suits;
+
+  constructor(suit: Suits, rank: Ranks) {
+    this.suit = suit;
+    this.rank = rank;
+  }
+
+  getSuit(): Suits {
+    return this.suit;
+  }
+
+  getRank(): Ranks {
+    return this.rank;
+  }
+
+  // You MUST define this function as static, since the instance functions are not available after the instance is serialized.
+  static toHumanReadableString(card: Card): string {
+    return `${Ranks[card.rank]}_${Suits[card.suit]}`;
+  }
 }
 
 export class Deck {
-  cards: Card[];
+  private cards: Card[];
 
   constructor() {
     this.cards = [];
     for (let suit = Suits.SPADES; suit <= Suits.CLUBS; suit++) {
       for (let rank = Ranks.TWO; rank <= Ranks.ACE; rank++) {
-        this.cards.push({ suit, rank });
+        this.cards.push(new Card(suit, rank));
       }
     }
   }
@@ -29,7 +47,7 @@ export class Deck {
   deal(): Card {
     if (this.cards.length === 0) {
       console.error('No more cards in the deck.');
-      return { suit: -1, rank: -1 };
+      return new Card(Suits.NONE, Ranks.NONE);
     } else {
       return this.cards.pop() as Card;
     }
@@ -44,9 +62,9 @@ export class Deck {
     const suitCounter: Map<Suits, number> = new Map();
     const rankCounter: Map<Ranks, number> = new Map();
     for (const card of cards) {
-      suitBins[card.suit] |= (1 << card.rank);
-      suitCounter.set(card.suit, (suitCounter.get(card.suit) || 0) + 1);
-      rankCounter.set(card.rank, (rankCounter.get(card.rank) || 0) + 1);
+      suitBins[card.getSuit()] |= (1 << card.getRank());
+      suitCounter.set(card.getSuit(), (suitCounter.get(card.getSuit()) || 0) + 1);
+      rankCounter.set(card.getRank(), (rankCounter.get(card.getRank()) || 0) + 1);
     }
     //                     A        5432
     //                     v        vvvv

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React, { useState } from 'react';
 import { Socket } from "socket.io-client";
 import { RoomStatus, PlayerStatus } from '@/games/base/terms';
@@ -12,7 +13,7 @@ interface PlayerInfoCardProps {
   currentChip: number;
   currentBetSize: number;
   currentPlayerStatus: PlayerStatus | null;
-  holeCards: (Card | null)[];
+  holeCards: Card[];
   clientSeatId: number;
   currentPlayerSeatId: number;
   roomCurrentBetSize: number;
@@ -128,25 +129,23 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
 
   return (
     <div className={styles.player_info_card}>
-      {isShowControl && (
-        <div>
-          {!isShowSignupForm && (
-            <div className={styles.controlContainer}>
-              <button onClick={control}>
-                {getControlButtonText()}
-              </button>
-            </div>
-          )}
-          {isShowSignupForm && (
-            <form onSubmit={signup}>
-              <input type="text" value={signupFormName} onChange={(event) => setSignupFormName(event.target.value)} placeholder="Name"/>
-              <input type="text" value={signupFormEmail} onChange={(event) => setSignupFormEmail(event.target.value)} placeholder="Email"/>
-              <button type="submit">Signup</button>
-              <button type="button" onClick={toggleSignupForm}>Cancel</button>
-            </form>
-          )}
-        </div>
-      )}
+      <div style={{ visibility: isShowControl ? 'visible' : 'hidden' }}>
+        {!isShowSignupForm && (
+          <div className={styles.controlContainer}>
+            <button onClick={control}>
+              {getControlButtonText()}
+            </button>
+          </div>
+        )}
+        {isShowSignupForm && (
+          <form onSubmit={signup}>
+            <input type="text" value={signupFormName} onChange={(event) => setSignupFormName(event.target.value)} placeholder="Name"/>
+            <input type="text" value={signupFormEmail} onChange={(event) => setSignupFormEmail(event.target.value)} placeholder="Email"/>
+            <button type="submit">Signup</button>
+            <button type="button" onClick={toggleSignupForm}>Cancel</button>
+          </form>
+        )}
+      </div>
 
       {isShowInfo && (
         <div>
@@ -161,15 +160,25 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
               <div>🕓</div>
             )}
           </div>
-          <p>Current Chip: {props.currentChip}</p>
-          <p>Bet Size: {props.currentBetSize}</p>
-          <div className={styles.holeCards}>
+          <div className={styles.chip}>
             <div>
-              {JSON.stringify(props.holeCards[0])}
+              💰: {props.currentChip}
             </div>
-            <div>
-              {JSON.stringify(props.holeCards[1])}
+            <div style={{ visibility: props.currentBetSize > 0 ? 'visible' : 'hidden' }}>
+              🔺: {props.currentBetSize}
             </div>
+          </div>
+          <div className={styles.hole_cards}>
+            {props.holeCards.map((card, index) => (
+              <Image
+                key={index}
+                src={`/pokers/${Card.toHumanReadableString(card)}.png`}
+                alt={Card.toHumanReadableString(card)}
+                width={60}
+                height={80}
+                style={{ objectFit: "contain" }}
+              />
+            ))}
           </div>
           {isCanAct && (
             <div>

@@ -7,6 +7,7 @@ export enum Streets {
 }
 
 export enum Suits {
+  NONE = -1,
   SPADES,
   HEARTS,
   DIAMONDS,
@@ -14,6 +15,7 @@ export enum Suits {
 }
 
 export enum Ranks {
+  NONE = -1,
   TWO,
   THREE,
   FOUR,
