@@ -30,6 +30,13 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
 
   const minBetAmount = props.roomCurrentBetSize + props.roomCurrentMinRaise - props.currentBetSize;
 
+  // const isShowFoldButton = true;
+  const isShowCheckButton = props.roomCurrentBetSize == props.currentBetSize;
+  const isShowCallButton = props.roomCurrentBetSize > props.currentBetSize && props.currentChip > props.roomCurrentBetSize - props.currentBetSize;
+  const isShowBetButton = props.roomCurrentBetSize == 0 && props.currentChip >= minBetAmount;
+  const isShowRaiseButton = props.roomCurrentBetSize > 0 && props.currentChip >= minBetAmount;
+  const isShowAllInButton = props.currentChip < minBetAmount;
+
   const [isShowSignupForm, setIsShowSignupForm] = useState(false);
   const [signupFormName, setSignupFormName] = useState('');
   const [signupFormEmail, setSignupFormEmail] = useState('');
@@ -161,10 +168,10 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
             )}
           </div>
           <div className={styles.chip}>
-            <div>
+            <div style={{ visibility: props.roomCurrentStatus == RoomStatus.PLAYING ? 'visible' : 'hidden' }}>
               💰: {props.currentChip}
             </div>
-            <div style={{ visibility: props.currentBetSize > 0 ? 'visible' : 'hidden' }}>
+            <div style={{ visibility: props.roomCurrentStatus == RoomStatus.PLAYING && props.currentBetSize > 0 ? 'visible' : 'hidden' }}>
               🔺: {props.currentBetSize}
             </div>
           </div>
@@ -182,41 +189,41 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
           </div>
           {isCanAct && (
             <div>
-              {!isShowBetForm && (
+              {!isShowBetForm && !isShowRaiseForm && (
                 <div>
                   <button className={styles.fold} onClick={fold}>Fold</button>
 
-                  {props.roomCurrentBetSize == props.currentBetSize && (
+                  {isShowCheckButton && (
                     <button className={styles.check} onClick={check}>Check</button>
                   )}
 
-                  {props.roomCurrentBetSize > props.currentBetSize && props.currentChip >= props.roomCurrentBetSize - props.currentBetSize && (
+                  {isShowCallButton && (
                     <button className={styles.call} onClick={call}>Call</button>
                   )}
 
-                  {props.roomCurrentBetSize == 0 && props.currentChip >= props.roomCurrentMinRaise && (
+                  {isShowBetButton && (
                     <button className={styles.bet} onClick={toggleBetForm}>Bet</button>
                   )}
 
-                  {props.roomCurrentBetSize > 0 && props.currentChip >= props.roomCurrentMinRaise && (
+                  {isShowRaiseButton && (
                     <button className={styles.raise} onClick={toggleRaiseForm}>Raise</button>
                   )}
 
-                  {props.currentChip < props.roomCurrentMinRaise && (
+                  {isShowAllInButton && (
                     <button className={styles.allin} onClick={allIn}>All In</button>
                   )}
                 </div>
               )}
               {isShowBetForm && (
                 <form onSubmit={bet}>
-                  <input type="number" value={betFormBetAmount || ''} onChange={(event) => setBetFormBetAmount(event.target.valueAsNumber)} placeholder={`> ${minBetAmount}`}/>
+                  <input type="number" value={betFormBetAmount || ''} onChange={(event) => setBetFormBetAmount(event.target.valueAsNumber)} placeholder={`>= ${minBetAmount}`}/>
                   <button type="submit">Bet</button>
                   <button type="button" onClick={toggleBetForm}>Cancel</button>
                 </form>
               )}
               {isShowRaiseForm && (
                 <form onSubmit={raise}>
-                  <input type="number" value={raiseFormRaiseAmount || ''} onChange={(event) => setRaiseFormRaiseAmount(event.target.valueAsNumber)} placeholder={`> ${minBetAmount}`}/>
+                  <input type="number" value={raiseFormRaiseAmount || ''} onChange={(event) => setRaiseFormRaiseAmount(event.target.valueAsNumber)} placeholder={`>= ${minBetAmount}`}/>
                   <button type="submit">Raise</button>
                   <button type="button" onClick={toggleRaiseForm}>Cancel</button>
                 </form>

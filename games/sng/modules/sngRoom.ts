@@ -203,7 +203,7 @@ export class SngRoom extends Room {
   };
 
   resetCurrentBlindLevel(): void {
-    this.resetCurrentBlindLevel();
+    this.setCurrentBlindLevel(0);
     this.resetLastBlindUpdateTime();
   };
 
@@ -496,6 +496,11 @@ export class SngRoom extends Room {
       return;
     }
 
+    if (player.getCurrentChips() < request.betAmount) {
+      console.log(socket.id + " raise failed: Not enough chips.");
+      return;
+    }
+
     player.placeBet(request.betAmount);
     player.act();
 
@@ -529,6 +534,11 @@ export class SngRoom extends Room {
       return;
     }
 
+    if (player.getCurrentChips() < request.raiseAmount) {
+      console.log(socket.id + " raise failed: Not enough chips.");
+      return;
+    }
+
     player.placeBet(request.raiseAmount);
     player.act();
 
@@ -545,7 +555,33 @@ export class SngRoom extends Room {
     this.getCurrentRound().endAction();
   }
 
-  //playerAllIn(index: number): void {
+  playerAllIn(socket: Socket): void {
+    if (this.currentStatus !== RoomStatus.PLAYING) {
+      console.log(socket.id + " call failed: The game is not started.");
+      return;
+    }
+
+    const player = this.getPlayer(socket);
+    if (player === null || player.getSeatId() !== this.getCurrentRound().getCurrentPlayerSeatId()) {
+      console.log(socket.id + " fold failed: Not your turn.");
+      return;
+    }
+
+    player.placeBet(player.getCurrentChips());
+    player.act();
+
+    this.getCurrentRound().updateCurrentBetSize(player.getCurrentBetSize());
+
+    // All-in success.
+    console.log(socket.id + " all-in success.");
+    const response: Msg.AllInResponse = {
+      seatId: this.getPlayerSeatId(socket)
+    };
+    socket.emit("AllInResponse", response);
+
+    // End action.
+    this.getCurrentRound().endAction();
+  }
 
   playerQuit(socket: Socket): void {
     if (this.currentStatus === RoomStatus.NONE) {
@@ -615,13 +651,16 @@ export class SngRoom extends Room {
 
     // Eliminate players who have no chips.
     this.roundElimination();
-    
-    // Check if the SNG is ended.
-    if (this.getNumOfPlayersStillInSng() < 2) {
-      this.endSng();
-    } else {
-      this.startRound();
-    }
+
+    // Pause for 5 seconds.
+    setTimeout(() => {
+      // Check if the SNG is ended.
+      if (this.getNumOfPlayersStillInSng() < 2) {
+        this.endSng();
+      } else {
+        this.startRound();
+      }
+    }, 5000); // 5000 milliseconds = 5 seconds
   }  
 
   endSng(): void {

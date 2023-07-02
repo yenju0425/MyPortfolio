@@ -185,6 +185,10 @@ export default function Poker() {
         console.log("RaiseResponse: " + JSON.stringify(response));
       });
 
+      socket.on("AllInResponse", (response: Msg.AllInResponse) => {
+        console.log("AllInResponse: " + JSON.stringify(response));
+      });
+
       // updates
       socket.on("ClientSeatIdUpdateBroadcast", (broadcast: Msg.ClientSeatIdUpdateBroadcast) => {
         console.log("ClientSeatIdUpdateBroadcast: " + JSON.stringify(broadcast));

@@ -91,10 +91,10 @@ export type RaiseResponse = {
   seatId: number;
 };
 
-// export type AllinRequest = {
+// export type AllInRequest = {
 // };
 
-export type AllinResponse = {
+export type AllInResponse = {
   seatId: number;
 };
 

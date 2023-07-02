@@ -52,6 +52,6 @@ export default function registerSngSocketEvents(socket: Socket, sngRoom: SngRoom
 
   socket.on("AllInRequest", () => {
     console.log("socket: " + socket.id + " AllInRequest.");
-    //sngRoom.playerAllIn(socket);
+    sngRoom.playerAllIn(socket);
   });
 };

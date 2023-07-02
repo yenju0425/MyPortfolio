@@ -253,8 +253,12 @@ export class SngRound extends Round {
     // Initialize current min raise.
     this.initCurrentMinRaise();
 
-    // Start the first action.
-    this.startAction();
+    // Start action.
+    if (this.getNumOfPlayersStillInStreet() < 2) {
+      this.endStreet();
+    } else {
+      this.startAction();
+    }
   }
 
   startAction(): void {
@@ -292,9 +296,7 @@ export class SngRound extends Round {
   endAction(): void {
     console.log('[RICKDEBUG] endAction');
 
-    if (this.getNumOfPlayersStillInStreet() < 2) {
-      this.endStreet();
-    } else if (this.isAllPlayersActed() && this.isBetConsensusReached()) {
+    if (this.isAllPlayersActed() && this.isBetConsensusReached()) {
       this.endStreet();
     } else {
       this.startAction();
@@ -326,7 +328,7 @@ export class SngRound extends Round {
   }
 
   isBetConsensusReached(): boolean {
-    return this.players.filter(player => player !== null && player?.isStillInStreet()).every(player => player?.getCurrentBetSize() === this.getCurrentBetSize() || player?.isAllIn());
+    return this.players.filter(player => player?.isStillInRound()).every(player => player?.getCurrentBetSize() === this.getCurrentBetSize() || player?.isAllIn());
   }
 
   getNumOfPlayersStillInRound(): number {
