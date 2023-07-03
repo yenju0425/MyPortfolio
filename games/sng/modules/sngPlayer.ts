@@ -55,13 +55,21 @@ export class SngPlayer extends Player {
     this.setCurrentChips(this.getCurrentChips() + chips); // Must use `set` to trigger broadcast
   }
 
+  resetCurrentChips(): void {
+    this.setCurrentBetSize(0);
+  }
+
   // currentPosition
   getCurrentPosition(): number | null {
     return this.currentPosition;
   }
 
-  setCurrentPosition(currentPosition: number): void {
+  setCurrentPosition(currentPosition: number | null): void {
     this.currentPosition = currentPosition;
+  }
+
+  resetCurrentPosition(): void {
+    this.setCurrentPosition(null);
   }
 
   // holeCards, displayed in the frontend
@@ -86,6 +94,10 @@ export class SngPlayer extends Player {
     this.broadcastHoleCards();
   }
 
+  resetHoleCards(): void {
+    this.setHoleCards([]);
+  }
+
   // currentPotContribution
   getCurrentPotContribution(): number {
     return this.currentPotContribution;
@@ -108,12 +120,12 @@ export class SngPlayer extends Player {
     this.folded = true;
   }
 
-  resetFolded() {
-    this.folded = false;
-  }
-
   isFold(): boolean {
     return this.folded;
+  }
+
+  resetFolded() {
+    this.folded = false;
   }
 
   // handRanking
@@ -124,6 +136,10 @@ export class SngPlayer extends Player {
   setHandRanking(handRanking: number): void {
     this.handRanking = handRanking;
     console.log(">" + this.getSeatId(), "handRanking: " + this.handRanking);
+  }
+
+  resetHandRanking(): void {
+    this.setHandRanking(0);
   }
 
   // currentBetSize, displayed in the frontend
@@ -149,17 +165,21 @@ export class SngPlayer extends Player {
     this.setCurrentBetSize(this.getCurrentBetSize() + chips);
   }
 
+  resetCurrentBetSize(): void {
+    this.setCurrentBetSize(0);
+  }
+
   // acted
   act(): void { // act() is called when the player acts in the current street, e.g. call, raise, all-in, etc.
     this.acted = true;
   }
 
-  resetActed(): void {
-    this.acted = false;
-  }
-
   isActed(): boolean {
     return this.acted;
+  }
+
+  resetActed(): void {
+    this.acted = false;
   }
 
   // player functions
@@ -214,10 +234,22 @@ export class SngPlayer extends Player {
   }
 
   isStillInStreet(): boolean {
-    return this.isStillInRound() && this.currentChips > 0;
+    return this.isStillInRound() && (this.currentChips > 0 || this.currentBetSize > 0); // Newly all-in players are still in the street.
   }
 
   isAllIn(): boolean {
     return this.isStillInRound() && this.currentChips === 0;
+  }
+
+  eliminateFromSng(): void {
+    this.eliminate();
+    this.resetCurrentChips();
+    this.resetCurrentPosition();
+    this.resetHoleCards();
+    this.resetCurrentPotContribution();
+    this.resetFolded();
+    this.resetHandRanking();
+    this.resetCurrentBetSize();
+    this.resetActed();
   }
 }

@@ -152,7 +152,10 @@ export default function Poker() {
 
       socket.on("RoundEndBroadcast", () => {
         console.log("RoundEndBroadcast.");
-        socket.emit("LoadRoomInfoRequest");
+        setRoomCurrentBetSize(0);
+        setRoomCurrentMinRaise(0);
+        updateCommunityCards([]);
+        updatePots([]);
       });
 
       socket.on("LoadRoomInfoResponse", (response: Msg.LoadRoomInfoResponse) => {

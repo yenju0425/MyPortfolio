@@ -53,12 +53,16 @@ export class SngRound extends Round {
 
   // players
   getPlayers(): (SngPlayer | null)[] {
-    return this.players;
+    return this.players.filter(player => player !== null);
+  }
+
+  getPlayer(seatId: number): SngPlayer | null {
+    return this.players[seatId];
   }
 
   getCurrentPlayer(): SngPlayer | null {
     const currentPlayerSeatId = this.getCurrentPlayerSeatId();
-    return currentPlayerSeatId === null ? null : this.players[currentPlayerSeatId];
+    return currentPlayerSeatId ? this.getPlayer(currentPlayerSeatId) : null;
   }
 
   // communityCards
@@ -108,13 +112,20 @@ export class SngRound extends Round {
 
   updatePots(): void {
     const newPots: Pot[] = [];
-    let potContribations = this.players.map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
-    while (potContribations.length > 0) {
+    let potContribations = this.getPlayersStillInRound().map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
+    while (potContribations.length > 1) {
       newPots.push({
         amount: potContribations[0][1] * potContribations.length,
         participants: potContribations.map(([index]) => index)
       });
       potContribations = potContribations.map(([index, contribution]) => [index, contribution - potContribations[0][1]]).filter(([, contribution]) => contribution > 0);
+    }
+
+    // Return the excess bet to the remaining player
+    if (potContribations.length === 1) {
+      console.log("[RICKDEBUG] updatePots: " + JSON.stringify(potContribations));
+      this.getPlayer(potContribations[0][0])?.updateCurrentChips(potContribations[0][1]);
+      this.getPlayer(potContribations[0][0])?.updateCurrentPotContribution(-potContribations[0][1]);
     }
 
     this.setPots(newPots);
@@ -222,11 +233,15 @@ export class SngRound extends Round {
   }
 
   initCurrentPlayerSeatId(): void {
-    const currentPlayerId = this.getPlayers().findIndex(player => player?.getCurrentPosition() === 0); // dealer
+    const currentPlayerId = this.getPlayersStillInRound().findIndex(player => player?.getCurrentPosition() === 0); // dealer
     if (currentPlayerId !== -1) {
       this.setCurrentPlayerSeatId(currentPlayerId);
     } else {
-      this.setCurrentPlayerSeatId(this.getBigBlindSeatId());
+      if (this.getCurrentStreet() === Streets.PREFLOP) {
+        this.setCurrentPlayerSeatId(this.getBigBlindSeatId());
+      } else {
+        this.setCurrentPlayerSeatId(this.getPlayersStillInRound().findIndex(player => player?.getCurrentPosition() === 1)); // small blind
+      }
     }
   }
 
@@ -299,7 +314,10 @@ export class SngRound extends Round {
   endAction(): void {
     console.log('[RICKDEBUG] endAction');
 
-    if (this.isAllPlayersActed() && this.isBetConsensusReached()) {
+    // RICKBUG[FIXED]: 3 player, ALLIN, ALLIN => should not trigger endStreet
+    if (this.getNumOfPlayersStillInStreet() < 2) { // When a player folds and causes the num of players still in the street < 2, end the street.
+      this.endStreet();
+    } else if (this.isAllPlayersActed() && this.isBetConsensusReached()) {
       this.endStreet();
     } else {
       this.startAction();
@@ -312,19 +330,17 @@ export class SngRound extends Round {
     this.updatePots();
     this.resetCurrentPlayerSeatId();
 
-    // TODO: return the overbet chips to the player
-
     if (this.getNumOfPlayersStillInRound() < 2) {
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 8000);
+      }, 10000);
     } else if (this.getCurrentStreet() === Streets.RIVER) {
       this.calculatePlayersHandRanking();
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 8000);
+      }, 10000);
     } else {
       this.startStreet();
     }
@@ -332,19 +348,27 @@ export class SngRound extends Round {
 
   // utility functions
   isAllPlayersActed(): boolean {
-    return this.players.filter(player => player?.isStillInStreet()).every(player => player?.isActed());
+    return this.getPlayersStillInStreet().every(player => player?.isActed());
   }
 
   isBetConsensusReached(): boolean {
-    return this.players.filter(player => player?.isStillInRound()).every(player => player?.getCurrentBetSize() === this.getCurrentBetSize() || player?.isAllIn());
+    return this.getPlayersStillInRound().every(player => player?.getCurrentBetSize() === this.getCurrentBetSize() || player?.isAllIn());
+  }
+
+  getPlayersStillInRound(): (SngPlayer | null)[] {
+    return this.players.filter(player => player?.isStillInRound());
   }
 
   getNumOfPlayersStillInRound(): number {
-    return this.players.filter(player => player?.isStillInRound()).length;
+    return this.getPlayersStillInRound().length;
+  }
+
+  getPlayersStillInStreet(): (SngPlayer | null)[] {
+    return this.players.filter(player => player?.isStillInStreet());
   }
 
   getNumOfPlayersStillInStreet(): number {
-    return this.players.filter(player => player?.isStillInStreet()).length;
+    return this.getPlayersStillInStreet().length;
   }
 
   calculatePlayersHandRanking(): void {
@@ -363,7 +387,10 @@ export class SngRound extends Round {
     let winners: number[] = [];
     let maxHandRanking = 0;
     for (let participantId of this.getActivePotParticipants(pot)) {
-      const handRanking = this.players[participantId]?.getHandRanking() || -1;
+      const handRanking = this.players[participantId]?.getHandRanking();
+      if (handRanking === undefined) {
+        continue;
+      }
       if (handRanking > maxHandRanking) {
         maxHandRanking = handRanking;
         winners = [participantId];
@@ -388,14 +415,14 @@ export class SngRound extends Round {
     } 
   }
 
-  initRoundPlayers(): void {
+  initRoundPlayers(): void { // RICKTODO: 用下面的寫法
     let position = 2; // 0: dealer, 1: small blind, 2: big blind
     for (let i = 0; i < this.players.length; i++) {
       let index = (this.bigBlindSeatId - i + this.players.length) % this.players.length;
 
       console.log(index, position);
       const player = this.players[index];
-      if (player?.isStillInRound()) {
+      if (player?.isStillInSng()) { // Cannot use isStillInRound() because the player might have folded in the previous round.
         player.startRound(position, [this.getDeck().deal(), this.getDeck().deal()]);
         position = (position - 1 + this.players.length) % this.players.length; // If there are 2 players, small blind will be the dealer.
       }
@@ -403,7 +430,7 @@ export class SngRound extends Round {
   }
 
   initStreetPlayers(): void {
-    this.players.forEach(player => player?.startStreet());
+    this.getPlayersStillInRound().forEach(player => player?.startStreet());
   }
 
   dealCommunityCards(): void {
