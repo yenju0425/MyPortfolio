@@ -56,7 +56,7 @@ export class SngPlayer extends Player {
   }
 
   resetCurrentChips(): void {
-    this.setCurrentBetSize(0);
+    this.setCurrentChips(0);
   }
 
   // currentPosition
@@ -112,7 +112,7 @@ export class SngPlayer extends Player {
   }
 
   resetCurrentPotContribution(): void {
-    this.currentPotContribution = 0;
+    this.setCurrentPotContribution(0);
   }
 
   // folded

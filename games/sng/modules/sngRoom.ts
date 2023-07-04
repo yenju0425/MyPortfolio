@@ -69,7 +69,7 @@ export class SngRoom extends Room {
 
   // players
   getPlayers(): (SngPlayer | null)[] {
-    return this.players.filter(player => player !== null);
+    return this.players;
   };
 
   setPlayers(players: (SngPlayer | null)[]): void {
@@ -692,7 +692,7 @@ export class SngRoom extends Room {
 
   // utility functions
   isAllPlayersReady(): boolean {
-    return this.getNumOfPlayers() >= 2 && this.getPlayers().every(player => player?.getStatus() === PlayerStatus.READY);
+    return this.getNumOfPlayers() >= 2 && this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
   };
 
   roundElimination(): void {

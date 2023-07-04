@@ -53,7 +53,7 @@ export class SngRound extends Round {
 
   // players
   getPlayers(): (SngPlayer | null)[] {
-    return this.players.filter(player => player !== null);
+    return this.players;
   }
 
   getPlayer(seatId: number): SngPlayer | null {
@@ -62,7 +62,7 @@ export class SngRound extends Round {
 
   getCurrentPlayer(): SngPlayer | null {
     const currentPlayerSeatId = this.getCurrentPlayerSeatId();
-    return currentPlayerSeatId ? this.getPlayer(currentPlayerSeatId) : null;
+    return currentPlayerSeatId === null ? null : this.players[currentPlayerSeatId];
   }
 
   // communityCards
@@ -112,7 +112,7 @@ export class SngRound extends Round {
 
   updatePots(): void {
     const newPots: Pot[] = [];
-    let potContribations = this.getPlayersStillInRound().map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
+    let potContribations = this.players.map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
     while (potContribations.length > 1) {
       newPots.push({
         amount: potContribations[0][1] * potContribations.length,
@@ -233,14 +233,15 @@ export class SngRound extends Round {
   }
 
   initCurrentPlayerSeatId(): void {
-    const currentPlayerId = this.getPlayersStillInRound().findIndex(player => player?.getCurrentPosition() === 0); // dealer
+    // You should use getPlayers() instead of getPlayersStillInRound() here, or you will get a wrong index.
+    const currentPlayerId = this.getPlayers().findIndex(player => player?.getCurrentPosition() === 0); // dealer
     if (currentPlayerId !== -1) {
       this.setCurrentPlayerSeatId(currentPlayerId);
     } else {
       if (this.getCurrentStreet() === Streets.PREFLOP) {
         this.setCurrentPlayerSeatId(this.getBigBlindSeatId());
       } else {
-        this.setCurrentPlayerSeatId(this.getPlayersStillInRound().findIndex(player => player?.getCurrentPosition() === 1)); // small blind
+        this.setCurrentPlayerSeatId(this.getPlayers().findIndex(player => player?.getCurrentPosition() === 1)); // small blind
       }
     }
   }
@@ -438,6 +439,6 @@ export class SngRound extends Round {
       this.updateCommunityCards([this.getDeck().deal(), this.getDeck().deal(), this.getDeck().deal()]);
     } else if (this.getCurrentStreet() === Streets.TURN || this.getCurrentStreet() === Streets.RIVER) {
       this.updateCommunityCards([this.getDeck().deal()]);
-    }
+  }
   }
 }
