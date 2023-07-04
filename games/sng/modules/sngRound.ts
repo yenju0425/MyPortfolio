@@ -7,6 +7,7 @@ import { Pot } from './pot';
 import { Streets } from './terms';
 import { SngPlayer } from './sngPlayer';
 import * as Msg from "@/types/messages";
+import { get } from 'http';
 
 export class SngRound extends Round {
   private readonly room: SngRoom;
@@ -330,6 +331,7 @@ export class SngRound extends Round {
 
     this.updatePots();
     this.resetCurrentPlayerSeatId();
+    this.resetStreetPlayers();
 
     if (this.getNumOfPlayersStillInRound() < 2) {
       this.rewardPotsToWinners();
@@ -370,6 +372,14 @@ export class SngRound extends Round {
 
   getNumOfPlayersStillInStreet(): number {
     return this.getPlayersStillInStreet().length;
+  }
+
+  getPlayersStillInSng(): (SngPlayer | null)[] {
+    return this.players.filter(player => player?.isStillInSng());
+  }
+
+  getNumOfPlayersStillInSng(): number {
+    return this.getPlayersStillInSng().length;
   }
 
   calculatePlayersHandRanking(): void {
@@ -430,8 +440,16 @@ export class SngRound extends Round {
     }
   }
 
+  resetRoundPlayers(): void {
+    this.getPlayersStillInSng().forEach(player => player?.endRound()); // You should use getPlayersStillInSng() since the player might have been out of round in the previous round.
+  }
+
   initStreetPlayers(): void {
     this.getPlayersStillInRound().forEach(player => player?.startStreet());
+  }
+
+  resetStreetPlayers(): void {
+    this.getPlayersStillInSng().forEach(player => player?.endStreet()); // You should use getPlayersStillInSng() since the player might have been out of street in the previous street.
   }
 
   dealCommunityCards(): void {

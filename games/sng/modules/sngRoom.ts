@@ -645,6 +645,9 @@ export class SngRoom extends Room {
   endRound(): void {
     console.log("[RICKDEBUG] endRound");
 
+    // Initialize players in the round.
+    this.getCurrentRound().resetRoundPlayers();
+
     // Reset current round.
     this.setCurrentRound(null);
 
