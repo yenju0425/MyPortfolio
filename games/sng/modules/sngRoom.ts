@@ -701,7 +701,7 @@ export class SngRoom extends Room {
   };
 
   roundElimination(): void {
-    this.getPlayersStillInSng().forEach(player => (player?.getCurrentChips() || 0) <= 0 ? player?.eliminateFromSng() : null);
+    this.getPlayersStillInSng().forEach(player => (player?.getCurrentChips() || 0) <= 0 ? player?.endSng() : null);
   };
 
   getPlayersStillInSng(): (SngPlayer | null)[]{

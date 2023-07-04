@@ -213,12 +213,18 @@ export class SngPlayer extends Player {
   }
 
   endRound(): void {
+    this.resetCurrentPosition();
+    this.resetHoleCards();
     this.resetCurrentPotContribution();
     this.resetFolded();
+    this.resetHandRanking();
     console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " ended the round, potContribution: " + this.getCurrentPotContribution() + ", folded: " + this.isFold());
   }
 
   endSng(): void {
+    this.resetCurrentChips();
+    this.eliminate();
+    console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " ended the Sng, status: " + this.getCurrentStatus() + ", chips: " + this.getCurrentChips());
   }
 
   placeBet(amount: number) { // `placeBet()` is called when the player places a bet, e.g. small blind, big blind, call, raise, all-in ,etc.
@@ -260,17 +266,5 @@ export class SngPlayer extends Player {
 
   isAllIn(): boolean {
     return this.isStillInRound() && this.currentChips === 0;
-  }
-
-  eliminateFromSng(): void {
-    this.eliminate();
-    this.resetCurrentChips();
-    this.resetCurrentPosition();
-    this.resetHoleCards();
-    this.resetCurrentPotContribution(); // End Round
-    this.resetFolded(); // End Round
-    this.resetHandRanking();
-    this.resetCurrentBetSize(); // End Street
-    this.resetActed(); // End street
   }
 }
