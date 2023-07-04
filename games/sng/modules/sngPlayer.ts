@@ -255,7 +255,7 @@ export class SngPlayer extends Player {
   }
 
   isStillInStreet(): boolean {
-    return this.isStillInRound() && (this.currentChips > 0 || this.currentBetSize > 0); // Newly all-in players are still in the street.
+    return this.isStillInRound() && this.currentChips > 0;
   }
 
   isAllIn(): boolean {
