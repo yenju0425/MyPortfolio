@@ -171,9 +171,11 @@ export class SngRoom extends Room {
       const nonNullIds = this.players.map((player, seatId) => player !== null ? seatId : -1).filter(seatId => seatId !== -1);
       this.setCurrentBigBlindSeatId(nonNullIds[Math.floor(Math.random() * nonNullIds.length)]);
     } else {
-      do {
-        this.setCurrentBigBlindSeatId((this.getCurrentBigBlindSeatId() + 1) % this.numPlayers);
-      } while (this.players[this.getCurrentBigBlindSeatId()] === null);
+      let nextBigBlindSeatId = (this.getCurrentBigBlindSeatId() + 1) % this.numPlayers;
+      while (this.players[nextBigBlindSeatId] === null) {
+        nextBigBlindSeatId = (nextBigBlindSeatId + 1) % this.numPlayers;
+      }
+      this.setCurrentBigBlindSeatId(nextBigBlindSeatId);
     }
   };
 

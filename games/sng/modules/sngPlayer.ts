@@ -222,6 +222,16 @@ export class SngPlayer extends Player {
   }
 
   placeBet(amount: number) { // `placeBet()` is called when the player places a bet, e.g. small blind, big blind, call, raise, all-in ,etc.
+    if (amount <= 0) {    
+      console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " placed a bet of amount: " + amount + ", which is invalid.");
+      return;
+    }
+
+    if (amount > this.getCurrentChips()) {
+      console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " placed a bet of amount: " + amount + ", which is more than the current chips: " + this.getCurrentChips() + ". Betting all-in.");
+      amount = this.getCurrentChips();
+    }
+
     this.updateCurrentChips(-amount);   
     this.updateCurrentBetSize(amount);
     this.updateCurrentPotContribution(amount);
