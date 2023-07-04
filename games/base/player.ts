@@ -48,43 +48,42 @@ export abstract class Player {
   broadcastCurrentStatus(): void {
     const broadcast: Msg.PlayerCurrentStatusUpdateBroadcast = {
       seatId: this.getSeatId(),
-      playerCurrentStatus: this.getStatus()
+      playerCurrentStatus: this.getCurrentStatus()
     };
     this.io.emit('PlayerCurrentStatusUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastCurrentStatus: " + JSON.stringify(broadcast));
   }
 
-  getStatus(): PlayerStatus {
+  getCurrentStatus(): PlayerStatus {
     return this.currentStatus;
   }
 
-  setStatus(status: PlayerStatus): void {
+  setCurrentStatus(status: PlayerStatus): void {
     this.currentStatus = status;
     this.broadcastCurrentStatus();
   }
 
   // utility functions
   ready(): void {
-    this.setStatus(PlayerStatus.READY);
+    this.setCurrentStatus(PlayerStatus.READY);
   }
 
   unready(): void {
-    this.setStatus(PlayerStatus.NONE);
+    this.setCurrentStatus(PlayerStatus.NONE);
   }
 
   play(): void {
-    this.setStatus(PlayerStatus.PLAYING);
+    this.setCurrentStatus(PlayerStatus.PLAYING);
   }
 
   reset(): void {
-    this.setStatus(PlayerStatus.NONE);
+    this.setCurrentStatus(PlayerStatus.NONE);
   }
 
   eliminate(): void {
-    this.setStatus(PlayerStatus.ELIMINATED);
+    this.setCurrentStatus(PlayerStatus.ELIMINATED);
   }
 
   quit(): void {
-    this.setStatus(PlayerStatus.QUIT);
+    this.setCurrentStatus(PlayerStatus.QUIT);
   }
 };

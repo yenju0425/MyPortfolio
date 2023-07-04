@@ -7,7 +7,6 @@ import { Pot } from './pot';
 import { Streets } from './terms';
 import { SngPlayer } from './sngPlayer';
 import * as Msg from "@/types/messages";
-import { get } from 'http';
 
 export class SngRound extends Round {
   private readonly room: SngRoom;
@@ -72,7 +71,6 @@ export class SngRound extends Round {
       communityCards: this.getCommunityCards()
     };
     this.io.emit('CommunityCardsUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastCommunityCards: " + JSON.stringify(broadcast));
   }
 
   getCommunityCards(): Card[] {
@@ -99,7 +97,6 @@ export class SngRound extends Round {
       pots: this.getPots()
     };
     this.io.emit('PotsUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastPots: " + JSON.stringify(broadcast));
   }
 
   getPots(): Pot[] {
@@ -124,7 +121,6 @@ export class SngRound extends Round {
 
     // Return the excess bet to the remaining player
     if (potContribations.length === 1) {
-      console.log("[RICKDEBUG] updatePots: " + JSON.stringify(potContribations));
       this.getPlayer(potContribations[0][0])?.updateCurrentChips(potContribations[0][1]);
       this.getPlayer(potContribations[0][0])?.updateCurrentPotContribution(-potContribations[0][1]);
     }
@@ -151,7 +147,6 @@ export class SngRound extends Round {
       roomCurrentBetSize: this.getCurrentBetSize()
     };
     this.io.emit('RoomCurrentBetSizeUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastCurrentBetSize: " + JSON.stringify(broadcast));
   }
 
   getCurrentBetSize(): number {
@@ -180,7 +175,6 @@ export class SngRound extends Round {
       roomCurrentMinRaise: this.getCurrentMinRaise()
     };
     this.io.emit('RoomCurrentMinRaiseUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastCurrentMinRaise: " + JSON.stringify(broadcast));
   }
 
   getCurrentMinRaise(): number {
@@ -206,7 +200,6 @@ export class SngRound extends Round {
       currentPlayerSeatId: this.getCurrentPlayerSeatId()
     };
     this.io.emit('CurrentPlayerSeatIdUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastCurrentPlayerSeatId: " + JSON.stringify(broadcast));
   }
 
   getCurrentPlayerSeatId(): number | null {
@@ -227,7 +220,6 @@ export class SngRound extends Round {
 
     let nextPlayerSeatId = (currentPlayerSeatId + 1) % this.players.length;
     while(!this.players[nextPlayerSeatId]?.isStillInStreet()) {
-      console.log("[RICKDEBUG] player " + nextPlayerSeatId + " is not still in street, skip.");
       nextPlayerSeatId = (nextPlayerSeatId + 1) % this.players.length
     }
     this.setCurrentPlayerSeatId(nextPlayerSeatId);
@@ -253,7 +245,7 @@ export class SngRound extends Round {
 
   // round functions
   startStreet(): void {
-    console.log('[RICKDEBUG] startStreet');
+    console.log("Current round: " + this.getStartTime() + " start street.");
 
     // Update current street.
     this.updateCurrentStreet();
@@ -282,6 +274,8 @@ export class SngRound extends Round {
   }
 
   startAction(): void {
+    console.log("Current round: " + this.getStartTime() + " start action.");
+
     // Update current player seat id, the client will figure out if it is its turn.
     this.updateCurrentPlayerSeatId();
 
@@ -292,8 +286,6 @@ export class SngRound extends Round {
       this.endAction();
       return;
     }
-
-    console.log('[RICKDEBUG] startAction', this.getCurrentPlayerSeatId(), currentPlayer.getCurrentPosition());
     
     // Automatically place bet for small blind and big blind.
     if (this.getCurrentStreet() === Streets.PREFLOP) {
@@ -314,10 +306,12 @@ export class SngRound extends Round {
   }
 
   endAction(): void {
-    console.log('[RICKDEBUG] endAction');
+    console.log("Current round: " + this.getStartTime() + " end action.");
 
-    // RICKBUG[FIXED]: 3 player, ALLIN, ALLIN => should not trigger endStreet
-    if (this.getNumOfPlayersStillInStreet() < 2) { // When a player folds and causes the num of players still in the street < 2, end the street.
+    // Special cases:
+    // - 3 players, 1 -> ALLIN, 2 -> ALLIN => 3 should be able to act.
+    // - When a player folds causing the num of players still in the street < 2, end the street.
+    if (this.getNumOfPlayersStillInStreet() < 2) { 
       this.endStreet();
     } else if (this.isAllPlayersActed() && this.isBetConsensusReached()) {
       this.endStreet();
@@ -327,7 +321,7 @@ export class SngRound extends Round {
   }
 
   endStreet(): void {
-    console.log('[RICKDEBUG] endStreet');
+    console.log("Current round: " + this.getStartTime() + " end street.");
 
     this.updatePots();
     this.resetCurrentPlayerSeatId();
@@ -337,13 +331,13 @@ export class SngRound extends Round {
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 10000);
+      }, 3000);
     } else if (this.getCurrentStreet() === Streets.RIVER) {
       this.calculatePlayersHandRanking();
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 10000);
+      }, 8000);
     } else {
       this.startStreet();
     }
@@ -426,12 +420,10 @@ export class SngRound extends Round {
     } 
   }
 
-  initRoundPlayers(): void { // RICKTODO: 用下面的寫法
+  initRoundPlayers(): void {
     let position = 2; // 0: dealer, 1: small blind, 2: big blind
     for (let i = 0; i < this.players.length; i++) {
       let index = (this.bigBlindSeatId - i + this.players.length) % this.players.length;
-
-      console.log(index, position);
       const player = this.players[index];
       if (player?.isStillInSng()) { // Cannot use isStillInRound() because the player might have folded in the previous round.
         player.startRound(position, [this.getDeck().deal(), this.getDeck().deal()]);

@@ -117,7 +117,7 @@ export class SngRoom extends Room {
 
   getPlayersStatuses(): (PlayerStatus | null)[] {
     // return this.players.map(player => player?.getStatus() || null); <- The `||` returns the first operand if it is truthy and the second operand otherwise.
-    return this.players.map(player => player ? player.getStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
+    return this.players.map(player => player ? player.getCurrentStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
   };
 
   getPlayersHoleCards(): Card[][] {
@@ -599,7 +599,7 @@ export class SngRoom extends Room {
 
   // room functions
   startSng(): void {
-    console.log("[RICKDEBUG] startSng");
+    console.log("Current Room: " + this.getStartTime() + " start SNG.");
 
     // Set the current status to PLAYING.
     this.play();
@@ -624,7 +624,7 @@ export class SngRoom extends Room {
   };
 
   startRound(): void {
-    console.log("[RICKDEBUG] startRound");
+    console.log("Current Room: " + this.getStartTime() + " start Round.");
 
     // Update totalNumRounds.
     this.udateTotalNumRounds();
@@ -643,7 +643,7 @@ export class SngRoom extends Room {
   };
 
   endRound(): void {
-    console.log("[RICKDEBUG] endRound");
+    console.log("Current Room: " + this.getStartTime() + " end Round.");
 
     // Initialize players in the round.
     this.getCurrentRound().resetRoundPlayers();
@@ -666,7 +666,7 @@ export class SngRoom extends Room {
   }  
 
   endSng(): void {
-    console.log("[RICKDEBUG] endSng");
+    console.log("Current Room: " + this.getStartTime() + " end SNG.");
 
     // RICKTODO: Send email to the players
     // this.sendSngResult();
@@ -695,7 +695,7 @@ export class SngRoom extends Room {
 
   // utility functions
   isAllPlayersReady(): boolean {
-    return this.getNumOfPlayers() >= 2 && this.players.filter(player => player !== null).every(player => player?.getStatus() === PlayerStatus.READY);
+    return this.getNumOfPlayers() >= 2 && this.players.filter(player => player !== null).every(player => player?.getCurrentStatus() === PlayerStatus.READY);
   };
 
   roundElimination(): void {

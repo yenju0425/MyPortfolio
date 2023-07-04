@@ -39,7 +39,6 @@ export class SngPlayer extends Player {
       playerCurrentChips: this.getCurrentChips()
     };
     this.io.emit('PlayerCurrentChipsUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastCurrentChips: " + JSON.stringify(broadcast));
   }
 
   getCurrentChips(): number {
@@ -82,7 +81,6 @@ export class SngPlayer extends Player {
     // console.log("[RICKDEBUG] broadcastHoleCards: " + JSON.stringify(broadcast));
     this.socket.to("spectators").emit("PlayerHoleCardsUpdateBroadcast", broadcast); // Broadcast to spectators and the player himself
     this.socket.emit("PlayerHoleCardsUpdateBroadcast", broadcast);
-    console.log("[RICKDEBUG] broadcastHoleCards: " + JSON.stringify(broadcast));
   }
 
   getHoleCards(): Card[] {
@@ -135,7 +133,7 @@ export class SngPlayer extends Player {
 
   setHandRanking(handRanking: number): void {
     this.handRanking = handRanking;
-    console.log(">" + this.getSeatId(), "handRanking: " + this.handRanking);
+    console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " has handRanking: " + this.getHandRanking());
   }
 
   resetHandRanking(): void {
@@ -149,7 +147,6 @@ export class SngPlayer extends Player {
       playerCurrentBetSize: this.getCurrentBetSize()
     };
     this.io.emit('PlayerCurrentBetSizeUpdateBroadcast', broadcast);
-    console.log("[RICKDEBUG] broadcastCurrentBetSize: " + JSON.stringify(broadcast));
   }
 
   getCurrentBetSize(): number {
@@ -186,8 +183,7 @@ export class SngPlayer extends Player {
   startSng(initialChips: number): void {
     this.play();
     this.setCurrentChips(initialChips);
-
-    console.log(this.socket.id + ' started the game, status: ' + this.currentStatus + ', chips: ' + this.currentChips);
+    console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " started the game, status: " + this.getCurrentStatus() + ", chips: " + this.getCurrentChips());
   }
 
   startRound(position: number, cards: Card[]): void {
@@ -195,29 +191,31 @@ export class SngPlayer extends Player {
     this.setHoleCards(cards);
     // this.resetCurrentPotContribution();
     // this.resetFolded();
-
-    console.log(">" + this.getSeatId(), position);
+    console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " started the round, position: " + this.getCurrentPosition() + ", holeCards: " + this.getHoleCards());
   }
 
   startStreet(): void {
     // this.resetCurrentBetSize();
     // this.resetActed();
+    console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " started the street.");
   }
 
-  startAct(): void {
-  }
+  // startAct(): void {
+  // }
 
-  endAct(): void {
-  }
+  // endAct(): void {
+  // }
 
   endStreet(): void {
     this.resetCurrentBetSize();
     this.resetActed();
+    console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " ended the street, betSize: " + this.getCurrentBetSize() + ", acted: " + this.isActed());
   }
 
   endRound(): void {
     this.resetCurrentPotContribution();
     this.resetFolded();
+    console.log("The player: " + this.getName() + " of SeatId: " + this.getSeatId() + " ended the round, potContribution: " + this.getCurrentPotContribution() + ", folded: " + this.isFold());
   }
 
   endSng(): void {
@@ -230,10 +228,7 @@ export class SngPlayer extends Player {
   }
 
   receivePotReward(amount: number): void {
-    console.log(this.socket.id + ' received pot reward: ' + amount);
     this.updateCurrentChips(amount);
-
-    // RICKTODO: notify the player that he/she has received the pot reward
   }
 
   showCards(): void {
@@ -242,7 +237,7 @@ export class SngPlayer extends Player {
 
   // utility functions
   isStillInSng(): boolean {
-    return this.getStatus() === PlayerStatus.PLAYING;
+    return this.getCurrentStatus() === PlayerStatus.PLAYING;
   }
 
   isStillInRound(): boolean {
