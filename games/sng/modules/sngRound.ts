@@ -350,7 +350,7 @@ export class SngRound extends Round {
   }
 
   isStreetEnded(): boolean {
-    return (this.getNumOfPlayersStillInStreet() < 2 || this.isAllPlayersActed()) && this.isBetConsensusReached();
+    return this.getNumOfPlayersStillInRound() < 2 || ((this.getNumOfPlayersStillInStreet() < 2 || this.isAllPlayersActed()) && this.isBetConsensusReached());
   }
 
   getPlayersStillInRound(): (SngPlayer | null)[] {
