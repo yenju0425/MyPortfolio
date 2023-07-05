@@ -291,7 +291,6 @@ export class SngRoom extends Room {
       this.playerQuit(socket);
     } else {
       console.error("Unexpected room status: " + this.currentStatus);
-      // RICKTODO: Shut down the room...
     }
   }
 
@@ -585,18 +584,26 @@ export class SngRoom extends Room {
   }
 
   playerQuit(socket: Socket): void {
-    if (this.currentStatus === RoomStatus.NONE) {
-      // Response to client, "The game is not started, you cannot quit"
+    if (this.currentStatus !== RoomStatus.PLAYING) {
+      console.log(socket.id + " quit failed: The game is not started.");
       return;
     }
 
     const player = this.getPlayer(socket);
     if (player === null) {
-      // Response to client, "failed"
+      console.log(socket.id + " quit failed: Not in the room.");
       return;
     }
 
     player.quit();
+  
+    // Quit success. (The client can only quit by close the connection. No need to send response.)
+    console.log(socket.id + " quit success.");
+
+    // End action.
+    if (this.getCurrentRound().isStreetEnded()) {
+      this.getCurrentRound().endStreet();
+    }
   };
 
   // room functions

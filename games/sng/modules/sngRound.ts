@@ -311,7 +311,7 @@ export class SngRound extends Round {
     // - When there are 3 players and player 1 goes ALL-IN while player 2 also goes ALL-IN, player 3 should still be able to act.
     // - When there are only 2 players left and one player folds, causing the number of players remaining in the current round to be less than 2, the current round should end.
     // - When there are 3 players and player 1 is supposed to be the small blind but doesn't have enough chips to place a bet (Auto ALL-IN), player 2 becomes the big blind (Auto ALL-IN), and player 3 calls, the current round should end.
-    if ((this.getNumOfPlayersStillInStreet() < 2 || this.isAllPlayersActed()) && this.isBetConsensusReached()) {
+    if (this.isStreetEnded()) {
       this.endStreet();
     } else {
       this.startAction();
@@ -348,6 +348,10 @@ export class SngRound extends Round {
 
   isBetConsensusReached(): boolean {
     return this.getPlayersStillInRound().every(player => player?.getCurrentBetSize() === this.getCurrentBetSize() || player?.isAllIn());
+  }
+
+  isStreetEnded(): boolean {
+    return (this.getNumOfPlayersStillInStreet() < 2 || this.isAllPlayersActed()) && this.isBetConsensusReached();
   }
 
   getPlayersStillInRound(): (SngPlayer | null)[] {
@@ -447,6 +451,6 @@ export class SngRound extends Round {
       this.updateCommunityCards([this.getDeck().deal(), this.getDeck().deal(), this.getDeck().deal()]);
     } else if (this.getCurrentStreet() === Streets.TURN || this.getCurrentStreet() === Streets.RIVER) {
       this.updateCommunityCards([this.getDeck().deal()]);
-  }
+    }
   }
 }
