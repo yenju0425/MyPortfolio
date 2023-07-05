@@ -1,5 +1,4 @@
 import type { Server } from 'socket.io';
-import { PlayerStatus } from '@/games/base/terms';
 import { Round } from '@/games/base/round';
 import { SngRoom } from "./sngRoom";
 import { Card, Deck } from './deck';

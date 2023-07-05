@@ -177,14 +177,16 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
           </div>
           <div className={styles.hole_cards}>
             {props.holeCards.map((card, index) => (
-              <Image
-                key={index}
-                src={`/pokers/${Card.toHumanReadableString(card)}.png`}
-                alt={Card.toHumanReadableString(card)}
-                width={60}
-                height={80}
-                style={{ objectFit: "contain" }}
-              />
+              <div>
+                <Image
+                  key={index}
+                  src={`/pokers/${Card.toHumanReadableString(card)}.png`}
+                  alt={Card.toHumanReadableString(card)}
+                  width={60}
+                  height={60}
+                  className={styles.hole_card}
+                />
+              </div>
             ))}
           </div>
           {isCanAct && (

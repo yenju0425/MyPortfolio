@@ -1,9 +1,9 @@
 .player_info_card {
   display: flex;
-  width: 15vw;
+  width: 18vw;
   height: 25vh;
-  max-width: 150px;
-  max-height: 180px;
+  max-width: 180px;
+  max-height: 250px;
   flex-direction: column;
 }
 
@@ -16,13 +16,20 @@
   display: flex;
   text-align: center;
   justify-content: space-between;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
 .hole_cards {
   display: flex;
   justify-content: space-evenly;
+}
+
+.hole_card {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  /* object-fit: contain; */
 }
 
 .chip {

@@ -120,8 +120,8 @@ export class SngRoom extends Room {
     return this.players.map(player => player ? player.getCurrentStatus() : null); // Since the status of a player can be `0`, we cannot use `||` here.
   };
 
-  getPlayersHoleCards(): Card[][] {
-    return this.players.map(player => player ? player.getHoleCards() : []);
+  getPlayersHoleCards(socket: Socket): Card[][] {
+    return this.players.map(player => player?.getSocket() === socket ? player.getHoleCards() : player?.getInvisibleHoleCards() || []);
   };
 
   // currentSngStartTime
@@ -305,7 +305,7 @@ export class SngRoom extends Room {
       playersCurrentChips: this.getPlayersCurrentChips(),
       playersCurrentBetSizes: this.getPlayersCurrentBetSizes(),
       playersCurrentStatuses: this.getPlayersStatuses(),
-      playersHoleCards: this.getPlayersHoleCards(),
+      playersHoleCards: this.getPlayersHoleCards(socket),
       communityCards: this.currentRound ? this.currentRound.getCommunityCards() : [],
       pots: this.currentRound ? this.currentRound.getPots() : [],
     };

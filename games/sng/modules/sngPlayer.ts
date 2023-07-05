@@ -1,6 +1,7 @@
 import type { Server, Socket } from 'socket.io';
 import { Player } from '@/games/base/player';
 import { PlayerStatus } from '@/games/base/terms';
+import { Suits, Ranks } from './terms';
 import { Card } from './deck';
 import * as Msg from "@/types/messages";
 
@@ -77,14 +78,18 @@ export class SngPlayer extends Player {
       seatId: this.getSeatId(),
       playerHoleCards: this.getHoleCards()
     };
-    // this.io.emit('PlayerHoleCardsUpdateBroadcast', broadcast); <- The hold cards are private to the player, do not broadcast to other players.
-    // console.log("[RICKDEBUG] broadcastHoleCards: " + JSON.stringify(broadcast));
-    this.socket.to("spectators").emit("PlayerHoleCardsUpdateBroadcast", broadcast); // Broadcast to spectators and the player himself
     this.socket.emit("PlayerHoleCardsUpdateBroadcast", broadcast);
+
+    broadcast.playerHoleCards = this.getInvisibleHoleCards();
+    this.socket.broadcast.emit("PlayerHoleCardsUpdateBroadcast", broadcast); // Broadcast to spectators and the player himself
   }
 
   getHoleCards(): Card[] {
     return this.holeCards;
+  }
+
+  getInvisibleHoleCards(): Card[] {
+    return this.getHoleCards().map(() => new Card(Suits.NONE, Ranks.NONE));
   }
 
   setHoleCards(holeCards: Card[]): void {
