@@ -291,13 +291,13 @@ export class SngRound extends Round {
       if (currentPlayer?.getCurrentPosition() === 1 && currentPlayer.getCurrentBetSize() <= 0) { // small blind
         console.log("player: " + currentPlayer?.getName() + " is small blind");
         currentPlayer.placeBet(this.getBigBlind() / 2);
-        this.updateCurrentBetSize(currentPlayer.getCurrentBetSize());
+        this.updateCurrentBetSize(this.getBigBlind() / 2);
         this.endAction();
         return;
       } else if (currentPlayer?.getCurrentPosition() === 2 && currentPlayer.getCurrentBetSize() <= 0) { // big blind
         console.log("player: " + currentPlayer?.getName() + " is big blind");
         currentPlayer.placeBet(this.getBigBlind());
-        this.updateCurrentBetSize(currentPlayer.getCurrentBetSize());
+        this.updateCurrentBetSize(this.getBigBlind()); // You should not use currentPlayer.getCurrentBetSize() since the player may have not emough chips to place a blind bet.
         this.endAction();
         return;
       }
