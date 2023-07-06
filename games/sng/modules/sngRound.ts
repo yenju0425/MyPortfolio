@@ -328,13 +328,13 @@ export class SngRound extends Round {
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 3000);
+      }, 5000);
     } else if (this.getCurrentStreet() === Streets.RIVER) {
       this.calculatePlayersHandRanking();
       this.rewardPotsToWinners();
       setTimeout(() => {
         this.getRoom().endRound();
-      }, 8000);
+      }, 10000);
     } else {
       this.startStreet();
     }
@@ -377,6 +377,14 @@ export class SngRound extends Round {
     return this.getPlayersStillInSng().length;
   }
 
+  getPlayersAllIn(): (SngPlayer | null)[] {
+    return this.players.filter(player => player?.isAllIn());
+  }
+
+  getNumOfPlayersAllIn(): number {
+    return this.getPlayersAllIn().length;
+  }
+
   calculatePlayersHandRanking(): void {
     for (let player of this.players) {
       if (player) {
@@ -408,17 +416,26 @@ export class SngRound extends Round {
   }
 
   rewardPotsToWinners(): void {
+    const isAnyPlayerAllIn = this.getNumOfPlayersAllIn() > 0;
+    const showDownPlayerIds = new Set<number>();
     for (let i = 0; i < this.pots.length; i++) {
-      const numOfActivePotParticipants = this.getActivePotParticipants(this.pots[i]).length;
+      const activePotParticipantIds = this.getActivePotParticipants(this.pots[i]);
+      const numOfActivePotParticipants = activePotParticipantIds.length;
       const getPotWinnerIds = this.getPotWinnerIds(this.pots[i]);
       const rewardAmount = Math.floor(this.pots[i].amount / getPotWinnerIds.length); // Math.floor is used to ensure the reward amount is an integer.
       for (let winnerId of getPotWinnerIds) {
         this.players[winnerId]?.receivePotReward(rewardAmount);
         if (numOfActivePotParticipants > 1) { // The winner needs to show the cards if there are more than one active participants in the pot.
-          this.players[winnerId]?.showDown();
+          showDownPlayerIds.add(winnerId);
         }
       }
-    } 
+      if (isAnyPlayerAllIn) {
+        activePotParticipantIds.forEach(participantId => showDownPlayerIds.add(participantId));
+      }
+    }
+
+    // show down
+    showDownPlayerIds.forEach(playerId => this.getPlayer(playerId)?.showDown());
   }
 
   initRoundPlayers(): void {

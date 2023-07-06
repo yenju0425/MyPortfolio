@@ -288,7 +288,11 @@ export class SngRoom extends Room {
     if (this.currentStatus === RoomStatus.NONE) {
       this.clientCancelSignUp(socket);
     } else if (this.currentStatus === RoomStatus.PLAYING) {
-      this.playerQuit(socket);
+      if (this.getNumOfPlayersStillInSng() > 1) {
+        this.playerQuit(socket);
+      } else {
+        console.log("Only one player left, the game is currently ending, no need to handle player quit.");
+      }
     } else {
       console.error("Unexpected room status: " + this.currentStatus);
     }
@@ -603,7 +607,9 @@ export class SngRoom extends Room {
     console.log(socket.id + " quit success.");
 
     // End action.
-    if (this.getCurrentRound().isStreetEnded()) {
+    if (player.getSeatId() === this.getCurrentRound().getCurrentPlayerSeatId()) {
+      this.getCurrentRound().endAction();
+    } else if (this.getCurrentRound().isStreetEnded()) {
       this.getCurrentRound().endStreet();
     }
   };
