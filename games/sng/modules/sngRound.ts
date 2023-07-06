@@ -415,7 +415,7 @@ export class SngRound extends Round {
       for (let winnerId of getPotWinnerIds) {
         this.players[winnerId]?.receivePotReward(rewardAmount);
         if (numOfActivePotParticipants > 1) { // The winner needs to show the cards if there are more than one active participants in the pot.
-          this.players[winnerId]?.showCards();
+          this.players[winnerId]?.showDown();
         }
       }
     } 

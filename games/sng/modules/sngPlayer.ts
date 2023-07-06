@@ -81,7 +81,7 @@ export class SngPlayer extends Player {
     this.socket.emit("PlayerHoleCardsUpdateBroadcast", broadcast);
 
     broadcast.playerHoleCards = this.getInvisibleHoleCards();
-    this.socket.broadcast.emit("PlayerHoleCardsUpdateBroadcast", broadcast); // Broadcast to spectators and the player himself
+    this.socket.broadcast.emit("PlayerHoleCardsUpdateBroadcast", broadcast);
   }
 
   getHoleCards(): Card[] {
@@ -252,8 +252,12 @@ export class SngPlayer extends Player {
     this.updateCurrentChips(amount);
   }
 
-  showCards(): void {
-    // RICKTODO: notify the player that he/she has shown the cards
+  showDown(): void {
+    const broadcast: Msg.PlayerHoleCardsUpdateBroadcast = {
+      seatId: this.getSeatId(),
+      playerHoleCards: this.getHoleCards()
+    };
+    this.socket.broadcast.emit("PlayerHoleCardsUpdateBroadcast", broadcast);
   }
 
   // utility functions

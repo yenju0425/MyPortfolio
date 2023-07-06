@@ -416,6 +416,8 @@ export class SngRoom extends Room {
     player.fold();
     player.act();
   
+    player.resetHoleCards();
+
     // Fold success.
     console.log(socket.id + " fold success.");
     const response: Msg.FoldResponse = {
