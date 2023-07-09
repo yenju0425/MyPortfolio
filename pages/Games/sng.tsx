@@ -122,7 +122,7 @@ export default function Poker() {
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
   useEffect(() => {
-    fetch("../api/sockets/sngSocket").finally(() => {
+    fetch("/api/sockets/sngSocket").finally(() => {
       if (socket) {
         console.log("Socket exists. Socket id: " + socket.id);
       } else {
