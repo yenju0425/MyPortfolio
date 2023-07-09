@@ -11,7 +11,6 @@ export default function Header() {
       <nav className={layoutStyles.navbarContainer}>
         <div className={layoutStyles.iconContainer}>
           <Image
-            priority // Set to true to load the image immediately
             src="/R.svg"
             height={32}
             width={32}
