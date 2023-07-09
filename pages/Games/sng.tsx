@@ -8,9 +8,10 @@ import styles from '@/styles/Sng.module.css';
 import * as Msg from '@/types/messages'; // RICKTODO: upgrade to protobuf
 
 // The client socket must be declared outside of the component.
-let socket: Socket = io();
+let socket: Socket;
 
 export default function Poker() {
+  // Immutable (Room info)
   const [clientSeatId, setClientSeatId] = useState(-1);
   const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState<number | null>(null);
   const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
@@ -120,7 +121,6 @@ export default function Poker() {
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
-  console.log("Environment: " + process.env.NODE_ENV);
   useEffect(() => {
     const url = process.env.NODE_ENV === 'development' ? "http://localhost:3000/api/sockets/sngSocket" : "https://main.d2moj1r59zt014.amplifyapp.com/api/sockets/sngSocket";
     fetch(url).finally(() => {
@@ -128,9 +128,7 @@ export default function Poker() {
         console.log("Socket exists. Socket id: " + socket.id);
       } else {
         socket = io();
-        socket.on('connect', () => {
-          console.log("Socket created. Socket id: " + socket.id);
-        });
+        console.log("Socket created. Socket id: " + socket.id);
       }
 
       // Add event listeners before attempting to connect, no matter whether the socket is new or not.
