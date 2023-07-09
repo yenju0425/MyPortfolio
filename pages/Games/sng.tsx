@@ -8,10 +8,9 @@ import styles from '@/styles/Sng.module.css';
 import * as Msg from '@/types/messages'; // RICKTODO: upgrade to protobuf
 
 // The client socket must be declared outside of the component.
-let socket: Socket;
+let socket: Socket = io();
 
 export default function Poker() {
-  // Immutable (Room info)
   const [clientSeatId, setClientSeatId] = useState(-1);
   const [currentPlayerSeatId, setCurrentPlayerSeatId] = useState<number | null>(null);
   const [roomCurrentBetSize, setRoomCurrentBetSize] = useState(0);
@@ -129,7 +128,9 @@ export default function Poker() {
         console.log("Socket exists. Socket id: " + socket.id);
       } else {
         socket = io();
-        console.log("Socket created. Socket id: " + socket.id);
+        socket.on('connect', () => {
+          console.log("Socket created. Socket id: " + socket.id);
+        });
       }
 
       // Add event listeners before attempting to connect, no matter whether the socket is new or not.
