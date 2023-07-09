@@ -2,7 +2,6 @@ import type { Server } from 'socket.io';
 import { Round } from '@/games/base/round';
 import { SngRoom } from "./sngRoom";
 import { Card, Deck } from './deck';
-import { Pot } from './pot';
 import { Streets } from './terms';
 import { SngPlayer } from './sngPlayer';
 import * as Msg from "@/types/messages";
@@ -14,7 +13,7 @@ export class SngRound extends Round {
   private readonly players: (SngPlayer | null)[];
   private communityCards: Card[];
   private deck: Deck;
-  private pots: Pot[];
+  private pots: Map<string, number>; // key: seatIds, value: chips
   private currentStreet: Streets;
   private currentPlayerSeatId: number | null; // displayed or used in the frontend
   private currentBetSize: number; // displayed or used in the frontend
@@ -28,7 +27,7 @@ export class SngRound extends Round {
     this.players = players;
     this.communityCards = [];
     this.deck = new Deck(); // The deck needs to be shuffled after created.
-    this.pots = [];
+    this.pots = new Map();
     this.currentStreet = Streets.NONE;
     this.currentPlayerSeatId = null;
     this.currentBetSize = 0;
@@ -93,35 +92,44 @@ export class SngRound extends Round {
   // Pots
   broadcastPots(): void {
     const broadcast: Msg.PotsUpdateBroadcast = {
-      pots: this.getPots()
+      pots: Array.from(this.getPots().values())
     };
     this.io.emit('PotsUpdateBroadcast', broadcast);
   }
 
-  getPots(): Pot[] {
+  getPots(): Map<string, number> {
     return this.pots;
   }
 
-  setPots(pots: Pot[]): void {
+  setPots(pots: Map<string, number>): void {
     this.pots = pots;
+    console.log("[RICKDEBUG]: pots: ", this.pots);
     this.broadcastPots();
   }
 
   updatePots(): void {
-    const newPots: Pot[] = [];
-    let potContribations = this.players.map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
-    while (potContribations.length > 1) {
-      newPots.push({
-        amount: potContribations[0][1] * potContribations.length,
-        participants: potContribations.map(([index]) => index)
-      });
-      potContribations = potContribations.map(([index, contribution]) => [index, contribution - potContribations[0][1]]).filter(([, contribution]) => contribution > 0);
-    }
+    const newPots: Map<string, number> = new Map();
+    let activeParticipantIds: number[] = [];
+    let potContributions = this.players.map((player, index) => [index, player?.getCurrentPotContribution() || 0]).filter(([, contribution]) => contribution > 0).sort((a, b) => a[1] - b[1]);
+    console.log("[RICKDEBUG]: potContributions: ", potContributions);
+    while (potContributions.length > 0) {
+      // If the current pot doesn't have any active participants, the previous pot's active participants will take over.
+      let newActiveParticipantIds = potContributions.map(([index]) => index).filter(index => this.getPlayer(index)?.isStillInRound());
+      console.log("[RICKDEBUG]: newActiveParticipantIds: ", newActiveParticipantIds);
 
-    // Return the excess bet to the remaining player
-    if (potContribations.length === 1) {
-      this.getPlayer(potContribations[0][0])?.updateCurrentChips(potContribations[0][1]);
-      this.getPlayer(potContribations[0][0])?.updateCurrentPotContribution(-potContribations[0][1]);
+      // Return the excess bet to the remaining player
+      if (potContributions.length === 1 && newActiveParticipantIds.length === 1) {
+        console.log("Return the excess bet: ", potContributions[0][1], " to the remaining player: ", potContributions[0][0]);
+        this.getPlayer(potContributions[0][0])?.updateCurrentChips(potContributions[0][1]);
+        this.getPlayer(potContributions[0][0])?.updateCurrentPotContribution(-potContributions[0][1]);
+      } else {
+        activeParticipantIds = newActiveParticipantIds.length > 0 ? newActiveParticipantIds : activeParticipantIds;
+        const activeParticipantIdsString = JSON.stringify(activeParticipantIds);
+        newPots.set(activeParticipantIdsString, potContributions[0][1] * potContributions.length + (newPots.get(activeParticipantIdsString) || 0));  
+      }
+
+      // Update the pot contributions
+      potContributions = potContributions.map(([index, contribution]) => [index, contribution - potContributions[0][1]]).filter(([, contribution]) => contribution > 0);
     }
 
     this.setPots(newPots);
@@ -393,17 +401,13 @@ export class SngRound extends Round {
     }
   }
 
-  getActivePotParticipants(pot: Pot): number[] { // Filter out the participants who already folded or quit.
-    return pot.participants.filter(participantId => this.players[participantId]?.isStillInRound());
-  }
-
-  getPotWinnerIds(pot: Pot): number[] {
+  getPotWinnerIds(activeParticipantIds: number[]): number[] {
     let winners: number[] = [];
     let maxHandRanking = 0;
-    for (let participantId of this.getActivePotParticipants(pot)) {
+    activeParticipantIds.forEach(participantId => {
       const handRanking = this.players[participantId]?.getHandRanking();
       if (handRanking === undefined) {
-        continue;
+        return;
       }
       if (handRanking > maxHandRanking) {
         maxHandRanking = handRanking;
@@ -411,28 +415,32 @@ export class SngRound extends Round {
       } else if (handRanking === maxHandRanking) {
         winners.push(participantId);
       }
-    }
+    });
     return winners;
   }
 
   rewardPotsToWinners(): void {
     const isAnyPlayerAllIn = this.getNumOfPlayersAllIn() > 0;
     const showDownPlayerIds = new Set<number>();
-    for (let i = 0; i < this.pots.length; i++) {
-      const activePotParticipantIds = this.getActivePotParticipants(this.pots[i]);
-      const numOfActivePotParticipants = activePotParticipantIds.length;
-      const getPotWinnerIds = this.getPotWinnerIds(this.pots[i]);
-      const rewardAmount = Math.floor(this.pots[i].amount / getPotWinnerIds.length); // Math.floor is used to ensure the reward amount is an integer.
-      for (let winnerId of getPotWinnerIds) {
+    this.pots.forEach((amount, activeParticipantIdsString) => {
+      let activeParticipantIds = JSON.parse(activeParticipantIdsString);
+      console.log("Pot: " + amount + " activeParticipantIds: " + activeParticipantIds);
+      if (activeParticipantIds.length === 0) {
+        activeParticipantIds = this.getPlayersStillInRound().map(player => player?.getSeatId());
+        console.log("The pot doesn't have any active participants. The players still in the round will take the pot: " + activeParticipantIds);
+      }
+      const potWinnerIds = this.getPotWinnerIds(activeParticipantIds);
+      const rewardAmount = Math.floor(amount / potWinnerIds.length); // Math.floor is used to ensure the reward amount is an integer.
+      for (let winnerId of potWinnerIds) {
         this.players[winnerId]?.receivePotReward(rewardAmount);
-        if (numOfActivePotParticipants > 1) { // The winner needs to show the cards if there are more than one active participants in the pot.
+        if (activeParticipantIds.length > 1) { // The winner needs to show the cards if there are more than one active participants in the pot.
           showDownPlayerIds.add(winnerId);
         }
       }
       if (isAnyPlayerAllIn) {
-        activePotParticipantIds.forEach(participantId => showDownPlayerIds.add(participantId));
+        activeParticipantIds.forEach((participantId: number) => showDownPlayerIds.add(participantId as number));
       }
-    }
+    });
 
     // show down
     showDownPlayerIds.forEach(playerId => this.getPlayer(playerId)?.showDown());
@@ -451,7 +459,7 @@ export class SngRound extends Round {
   }
 
   resetRoundPlayers(): void {
-    this.getPlayersStillInSng().forEach(player => player?.endRound()); // You should use getPlayersStillInSng() since the player might have been out of round in the previous round.
+    this.getPlayers().forEach(player => player?.endRound()); // You should use getPlayersStillInSng() since the player might have been out of round in the previous round.
   }
 
   initStreetPlayers(): void {
@@ -459,7 +467,7 @@ export class SngRound extends Round {
   }
 
   resetStreetPlayers(): void {
-    this.getPlayersStillInSng().forEach(player => player?.endStreet()); // You should use getPlayersStillInSng() since the player might have been out of street in the previous street.
+    this.getPlayers().forEach(player => player?.endStreet()); // You should use getPlayersStillInSng() since the player might have been out of street in the previous street.
   }
 
   dealCommunityCards(): void {

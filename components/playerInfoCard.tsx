@@ -177,9 +177,8 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
           </div>
           <div className={styles.hole_cards}>
             {props.holeCards.map((card, index) => (
-              <div>
+              <div key={index}>
                 <Image
-                  key={index}
                   src={`/pokers/${Card.toHumanReadableString(card)}.png`}
                   alt={Card.toHumanReadableString(card)}
                   width={60}
@@ -218,14 +217,25 @@ const PlayerInfoCard = (props: PlayerInfoCardProps) => {
               )}
               {isShowBetForm && (
                 <form onSubmit={bet}>
-                  <input type="number" value={betFormBetAmount || ''} onChange={(event) => setBetFormBetAmount(event.target.valueAsNumber)} placeholder={`>= ${minBetAmount}`}/>
-                  <button type="submit">Bet</button>
+                  <input
+                    type="number"
+                    value={betFormBetAmount || ''}
+                    onChange={(event) => setBetFormBetAmount(event.target.valueAsNumber)}
+                    placeholder={`>= ${minBetAmount}`}
+                    style={{ width: '80px' }}
+                  />                  <button type="submit">Bet</button>
                   <button type="button" onClick={toggleBetForm}>Cancel</button>
                 </form>
               )}
               {isShowRaiseForm && (
                 <form onSubmit={raise}>
-                  <input type="number" value={raiseFormRaiseAmount || ''} onChange={(event) => setRaiseFormRaiseAmount(event.target.valueAsNumber)} placeholder={`>= ${minBetAmount}`}/>
+                  <input
+                    type="number"
+                    value={raiseFormRaiseAmount || ''}
+                    onChange={(event) => setRaiseFormRaiseAmount(event.target.valueAsNumber)}
+                    placeholder={`>= ${minBetAmount}`}
+                    style={{ width: '80px' }}
+                  />
                   <button type="submit">Raise</button>
                   <button type="button" onClick={toggleRaiseForm}>Cancel</button>
                 </form>

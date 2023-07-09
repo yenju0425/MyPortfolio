@@ -168,11 +168,11 @@ export class SngRoom extends Room {
 
   updateCurrentBigBlindSeatId(): void {
     if (this.currentBigBlindSeatId === null) {
-      const nonNullIds = this.players.map((player, seatId) => player !== null ? seatId : -1).filter(seatId => seatId !== -1);
+      const nonNullIds = this.getPlayersStillInSng().map((player, seatId) => player !== null ? seatId : -1).filter(seatId => seatId !== -1);
       this.setCurrentBigBlindSeatId(nonNullIds[Math.floor(Math.random() * nonNullIds.length)]);
     } else {
       let nextBigBlindSeatId = (this.getCurrentBigBlindSeatId() + 1) % this.numPlayers;
-      while (this.players[nextBigBlindSeatId] === null) {
+      while (this.players[nextBigBlindSeatId] === null || this.players[nextBigBlindSeatId]?.isStillInSng() === false) {
         nextBigBlindSeatId = (nextBigBlindSeatId + 1) % this.numPlayers;
       }
       this.setCurrentBigBlindSeatId(nextBigBlindSeatId);
@@ -311,7 +311,7 @@ export class SngRoom extends Room {
       playersCurrentStatuses: this.getPlayersStatuses(),
       playersHoleCards: this.getPlayersHoleCards(socket),
       communityCards: this.currentRound ? this.currentRound.getCommunityCards() : [],
-      pots: this.currentRound ? this.currentRound.getPots() : [],
+      pots: this.currentRound ? Array.from(this.currentRound.getPots().values()) : []
     };
     socket.emit("LoadRoomInfoResponse", response);
   };
@@ -607,9 +607,14 @@ export class SngRoom extends Room {
     console.log(socket.id + " quit success.");
 
     // End action.
-    if (player.getSeatId() === this.getCurrentRound().getCurrentPlayerSeatId()) {
+    if (this.getCurrentRound().getCurrentPlayerSeatId() === null) {
+      console.log("Player quit when no one is playing. This round is currently ending.");
+      return;
+    } else if (player.getSeatId() === this.getCurrentRound().getCurrentPlayerSeatId()) {
+      console.log("Player quit when it's his turn. Skip his turn.");
       this.getCurrentRound().endAction();
     } else if (this.getCurrentRound().isStreetEnded()) {
+      console.log("Player quit when not his turn, but the street is ended. End the street.");
       this.getCurrentRound().endStreet();
     }
   };

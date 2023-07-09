@@ -19,7 +19,7 @@ export default function Home() {
 
         <div className={styles.contents}>
           <h1 className={styles.title}>
-            Hi, I'm<Link href="/about" className={styles.rick}>R!ck Ye110w.</Link>
+            {"Hi, I'm"}<Link href="/about" className={styles.rick}>R!ck Ye110w.</Link>
           </h1>
           <p className={styles.description}>
             Software Developer & Engineer/ Poker Lover

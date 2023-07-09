@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { RoomStatus, PlayerStatus } from '@/games/base/terms';
 import { Card } from '@/games/sng/modules/deck';
-import { Pot } from '@/games/sng/modules/pot';
 import PlayerInfoCard from '@/components/playerInfoCard';
 import styles from '@/styles/Sng.module.css';
 import * as Msg from '@/types/messages'; // RICKTODO: upgrade to protobuf
@@ -27,7 +26,7 @@ export default function Poker() {
   const [playersCurrentStatuses, setPlayersCurrentStatuses] = useState(Array(9).fill(null));
   const [playersHoleCards, setPlayersHoleCards] = useState<Array<Array<Card>>>(Array(9).fill([]));
   const [communityCards, setCommunityCards] = useState<Array<Card>>(Array(0).fill([]));
-  const [pots, setPots] = useState<Array<Pot>>(Array(0).fill([]));
+  const [pots, setPots] = useState<Array<number>>(Array(0).fill(0));
 
   const updatePlayerName = useCallback((seatId: number, newName: string) => {
     setPlayersNames((prevNames) => {
@@ -88,7 +87,7 @@ export default function Poker() {
     setCommunityCards([...newCommunityCards]);
   }, []);
 
-  const updatePots = useCallback((newPots: Pot[]) => {
+  const updatePots = useCallback((newPots: number[]) => {
     setPots([...newPots]);
   }, []);
 
