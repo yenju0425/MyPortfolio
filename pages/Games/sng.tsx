@@ -121,8 +121,10 @@ export default function Poker() {
   // let socket = io(); <- Not good practice to create socket in render, since every render will create a new socket
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
+  console.log("Environment: " + process.env.NODE_ENV);
   useEffect(() => {
-    fetch("/api/sockets/sngSocket").finally(() => {
+    const url = process.env.NODE_ENV === 'development' ? "http://localhost:3000/api/sockets/sngSocket" : "https://my-portfolio-ten-liard.vercel.app/api/sockets/sngSocket";
+    fetch(url).finally(() => {
       if (socket) {
         console.log("Socket exists. Socket id: " + socket.id);
       } else {
