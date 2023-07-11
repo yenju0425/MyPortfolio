@@ -122,7 +122,8 @@ export default function Poker() {
   // socket.emit(socketEvent.XXX, 0); <- This will cause infinite loop.
 
   useEffect(() => {
-    const url = process.env.NODE_ENV === 'development' ? "http://localhost:3000/api/sockets/sngSocket" : "https://main.d2moj1r59zt014.amplifyapp.com/api/sockets/sngSocket";
+    // const url = process.env.NODE_ENV === 'development' ? "http://localhost:3000/api/sockets/sngSocket" : "https://main.d2moj1r59zt014.amplifyapp.com/api/sockets/sngSocket";
+    const url = '/api/sockets/sngSocket';
     fetch(url).finally(() => {
       if (socket) {
         console.log("Socket exists. Socket id: " + socket.id);
