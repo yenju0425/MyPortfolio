@@ -15,20 +15,11 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-left: 2rem;
-}
-
-.interactions  {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .title {
   margin: 0 0 1rem;
   line-height: 1.2;
-  padding: 0 0 0 2rem;
   font-size: 3rem;
   font-family: var(--font-mono);
 }
@@ -38,46 +29,17 @@
   font-family: var(--font-mono);
 }
 
-.hireMe {
-  width: 16rem;
-  text-align: center;
-  font-family: var(--font-mono);
-}
-
-.rick,
-.hireMe {
+.pokerLink {
   padding: 1rem 2rem;
   border-radius: var(--border-radius);
+  font-family: var(--font-mono);
   /* transition: background 2s ease; This won't work on gradient colors. */
-}
-
-.leftPointer,
-.rightPointer {
-  display: inline-block;
-  width: 2rem;
-  transition: transform 0.2s ease;
-}
-
-.leftPointer {
-  text-align: left;
-}
-
-.rightPointer {
-  text-align: right;
 }
 
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
-  .hireMe:hover,
-  .rick:hover{
+  .pokerLink:hover{
     background: var(--card-rgba);
-  }
-
-  .hireMe:hover .leftPointer {
-    transform: translateX(5px);
-  }
-  .hireMe:hover .rightPointer {
-    transform: translateX(-5px);
   }
 }
 
