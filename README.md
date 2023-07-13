@@ -18,7 +18,7 @@ This portfolio is built using Next.js and Socket.io, creating an immersive gamin
         - TypeScript
         - Socket.io
 
-- [x] Mar. Designing my portfolio: [Design](https://www.figma.com/file/9usTFZapvmAlZDlqWjWqkz/Taxes-Hold'em-(State)?type=whiteboard&node-id=0%3A1&t=g0gFFLPsrJ8NQiXV-1)
+- [x] Mar. Designing my portfolio:
     - Creating the visual layout of my portfolio.
     - Developing the logic diagram for the poker game (the most crucial part of the project, which presented interesting challenges).
         - Studying poker rules, including determining winners and handling ties.
@@ -29,11 +29,13 @@ This portfolio is built using Next.js and Socket.io, creating an immersive gamin
     - Learning Next.js.
     - Learning TypeScript.
     - Establishing the foundational structure of the portfolio.
+    - [Design](https://www.figma.com/file/9usTFZapvmAlZDlqWjWqkz/Taxes-Hold'em-(State)?type=whiteboard&node-id=0%3A1&t=g0gFFLPsrJ8NQiXV-1)
 
 - [x] May. Backend coding for the poker game:
     - Exploring Socket.io.
     - Implementing the poker game's framework, including the game cycle.
-    - Implementing key algorithms for the poker game, such as determining winners and handling ties. [Hand Ranking Algorithm](https://github.com/yenju0425/MyPortfolio/blob/main/games/sng/modules/sngRound.ts#L50)
+    - Implementing key algorithms for the poker game, such as determining winners and handling ties.
+    - [Hand Ranking Algorithm](https://github.com/yenju0425/MyPortfolio/blob/main/games/sng/modules/deck.ts#L60C3-L60C23)
 
 - [x] Jun. Frontend coding for the poker game:
     - Creating 9 seats on the frontend, each displaying player information and providing buttons and forms for player interaction.
@@ -81,6 +83,7 @@ Here are some video demonstrations of my portfolio:
 
 - [Overview](https://drive.google.com/file/d/1EKI7pFWxGnEXF5HApOq_5y5GNHzaw1Ti/view?usp=sharing)
 - [Demo](https://drive.google.com/file/d/1yFudj6SczE8lS4g6uH8elyVnzWP0Si_k/view?usp=sharing)
+- [Play now!](http://13.211.167.3:3000/Games/sng)
 
 I hope you find my portfolio interesting and engaging. Feel free to explore and reach out to me with any feedback or inquiries. Thank you!
 
