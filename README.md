@@ -81,8 +81,8 @@ This portfolio is built using Next.js and Socket.io, creating an immersive gamin
 
 Here are some video demonstrations of my portfolio:
 
-- [Overview](https://drive.google.com/file/d/1EKI7pFWxGnEXF5HApOq_5y5GNHzaw1Ti/view?usp=sharing)
-- [Demo](https://drive.google.com/file/d/1yFudj6SczE8lS4g6uH8elyVnzWP0Si_k/view?usp=sharing)
+- [Overview](https://drive.google.com/file/d/1IhTcY-XxS72_lqjQuRIMe_-lcuZmrdNu/view?usp=share_link)
+- [Demo](https://drive.google.com/file/d/1zjsPuKil9fPZCSl3_3OtOSei67nJgxcA/view?usp=share_link)
 - [Play now!](http://13.211.167.3:3000/Games/sng)
 
 I hope you find my portfolio interesting and engaging. Feel free to explore and reach out to me with any feedback or inquiries. Thank you!
