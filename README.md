@@ -1,4 +1,4 @@
-# [My "Poker" Portfolio ♠️ ♥️ ♦️ ♣️](http://13.211.167.3:3000)
+# [My "Poker" Portfolio ♠️ ♥️ ♦️ ♣️](http://52.62.5.41:3000/)
 
 I'm excited to share my portfolio with you! I've put a lot of effort into this project and I'm proud of the results. I hope you enjoy exploring it as much as I do!
 
