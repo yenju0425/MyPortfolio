@@ -83,7 +83,7 @@ Here are some video demonstrations of my portfolio:
 
 - [Overview](https://drive.google.com/file/d/1IhTcY-XxS72_lqjQuRIMe_-lcuZmrdNu/view?usp=share_link)
 - [Demo](https://drive.google.com/file/d/1zjsPuKil9fPZCSl3_3OtOSei67nJgxcA/view?usp=share_link)
-- [Play now!](http://13.211.167.3:3000/Games/sng)
+- [Play now!](http://52.62.5.41:3000/Games/sng)
 
 I hope you find my portfolio interesting and engaging. Feel free to explore and reach out to me with any feedback or inquiries. Thank you!
 
